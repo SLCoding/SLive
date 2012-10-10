@@ -11,4 +11,15 @@
 
 #include <iostream>
 
+class CThread
+{
+private:
+    
+protected:
+    
+public:
+    void start(); // parameter not finished
+    virtual void* run() = 0; // parameter not finished
+};
+
 #endif /* defined(__SLive__CThread__) */

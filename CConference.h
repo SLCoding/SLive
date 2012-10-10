@@ -11,4 +11,14 @@
 
 #include <iostream>
 
+class CConference
+{
+private:
+    
+protected:
+    
+public:
+    
+};
+
 #endif /* defined(__SLive__CConference__) */

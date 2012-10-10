@@ -11,4 +11,14 @@
 
 #include <iostream>
 
+class CDatabase_Connection
+{
+private:
+    
+protected:
+    
+public:
+    
+};
+
 #endif /* defined(__SLive__CDatabase_Connection__) */

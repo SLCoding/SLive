@@ -10,5 +10,16 @@
 #define __SLive__CServer__
 
 #include <iostream>
+#include "CThread.h"
+
+class CServer : public CThread
+{
+private:
+    
+protected:
+    
+public:
+    
+};
 
 #endif /* defined(__SLive__CServer__) */

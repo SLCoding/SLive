@@ -10,5 +10,17 @@
 #define __SLive__CChat_Server__
 
 #include <iostream>
+#include "CServer.h"
+#include "CConference.h"
+
+class CChat_Server : public CServer
+{
+private:
+    
+protected:
+    
+public:
+    
+};
 
 #endif /* defined(__SLive__CChat_Server__) */

@@ -11,4 +11,14 @@
 
 #include <iostream>
 
+class CLogger
+{
+private:
+    
+protected:
+    
+public:
+    
+};
+
 #endif /* defined(__SLive__CLogger__) */

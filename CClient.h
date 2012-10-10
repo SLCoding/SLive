@@ -11,4 +11,14 @@
 
 #include <iostream>
 
+class CClient
+{
+private:
+    
+protected:
+    
+public:
+    
+};
+
 #endif /* defined(__SLive__CClient__) */

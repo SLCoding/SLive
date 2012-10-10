@@ -10,5 +10,16 @@
 #define __SLive__CMusic_Server__
 
 #include <iostream>
+#include "CServer.h"
+
+class CMusic_Server : public CServer
+{
+private:
+    
+protected:
+    
+public:
+    
+};
 
 #endif /* defined(__SLive__CMusic_Server__) */
