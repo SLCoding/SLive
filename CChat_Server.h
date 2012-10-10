@@ -20,7 +20,8 @@ private:
 protected:
     
 public:
-    
+    CChat_Server() {;}
+    void* run(void *param);
 };
 
 #endif /* defined(__SLive__CChat_Server__) */
