@@ -7,12 +7,21 @@
 //
 
 #include <iostream>
+using namespace std;
+
 #include "CServer_Manager.h"
 #include "CChat_Server.h"
+
+void* cchat_server_run(void* param)
+{
+    cout << "Test" << endl;
+}
 
 int main()
 {
     CChat_Server chat;
-    chat.start(NULL);
+    
+    int ret = chat.start(NULL, cchat_server_run);
+    cout << "ret: " << ret << endl;
     return 0;
 }
