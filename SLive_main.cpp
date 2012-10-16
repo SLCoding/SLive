@@ -6,22 +6,16 @@
 //  Copyright (c) 2012 CLMM. All rights reserved.
 //
 
-#include <iostream>
-using namespace std;
-
 #include "CServer_Manager.h"
 #include "CChat_Server.h"
-
-void* cchat_server_run(void* param)
-{
-    cout << "Test" << endl;
-}
+#include <iostream>
+using namespace std;
 
 int main()
 {
     CChat_Server chat;
     
-    int ret = chat.start(NULL, cchat_server_run);
+    int ret = chat.start(NULL, test);
     cout << "ret: " << ret << endl;
     return 0;
 }

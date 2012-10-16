@@ -13,6 +13,8 @@
 #include "CServer.h"
 #include "CConference.h"
 
+void* test(void* param);
+
 class CChat_Server : public CServer
 {
 private:
@@ -21,7 +23,12 @@ protected:
     
 public:
     CChat_Server() {;}
-
+    friend void* test(void* param);
 };
+
+void* test(void* param)
+{
+    std::cout << "test\n" << std::endl;
+}
 
 #endif /* defined(__SLive__CChat_Server__) */
