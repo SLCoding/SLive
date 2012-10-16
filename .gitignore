@@ -12,7 +12,10 @@
 *.a
 
 *.DS_Store
+<<<<<<< HEAD
 
 SLive.1
 
 SLive/SLive/main.cpp
+=======
+>>>>>>> master
