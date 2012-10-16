@@ -10,6 +10,11 @@
 
 void* CChat_Server_run(void* param)
 {
-    for(int i = 0; i < 100; i++)
-        std::cout << i << std::endl;
+    while(1)
+    {
+        int i = 0;
+        for(i = 0; i < 100; i++)
+            printf("CChat_Server_run: %d\n", i);
+        i = 0;
+    }
 }

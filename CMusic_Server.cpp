@@ -10,5 +10,11 @@
 
 void *CMusik_Server_run(void *param)
 {
-    std::cout << "CMusic_Server_thread" << std::endl;
+    while(1)
+    {
+        int i = 0;
+        for(i = 0; i < 100; i++)
+             printf("CMusic_Server_run: %d\n", i);
+        i=0;
+    }
 }
