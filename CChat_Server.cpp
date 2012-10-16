@@ -7,8 +7,3 @@
 //
 
 #include "CChat_Server.h"
-
-void * CChat_Server::run(void* param)
-{
-    ;
-}
