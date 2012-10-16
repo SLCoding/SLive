@@ -13,9 +13,9 @@ CThread::CThread()
     ret = 0;
 }
 
-int CThread::start(void *param, void * (*start_routine)(void *))
+int CThread::start(void *param)
 {
-    return ret = pthread_create( &this->thread, NULL, start_routine, (void*) param);
+    return ret = pthread_create( &this->thread, NULL, CThread_run, (void*) param);
 }
 
 int CThread::join(void **thread_return)
