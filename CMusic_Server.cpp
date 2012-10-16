@@ -7,3 +7,8 @@
 //
 
 #include "CMusic_Server.h"
+
+void *CMusik_Server_run(void *param)
+{
+    std::cout << "CMusic_Server_thread" << std::endl;
+}

@@ -7,3 +7,9 @@
 //
 
 #include "CClient.h"
+
+void* CClient_run(void *param)
+{
+    std::cout << "CClient_run_thread" << std::endl;
+}
+

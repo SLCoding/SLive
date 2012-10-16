@@ -13,7 +13,7 @@
 #include "CServer.h"
 #include "CConference.h"
 
-void* test(void* param);
+void* CChat_Server_run(void* param);
 
 class CChat_Server : public CServer
 {
@@ -23,12 +23,7 @@ protected:
     
 public:
     CChat_Server() {;}
-    friend void* test(void* param);
+    friend void* CChat_Server_run(void* param);
 };
-
-void* test(void* param)
-{
-    std::cout << "test\n" << std::endl;
-}
 
 #endif /* defined(__SLive__CChat_Server__) */

@@ -10,15 +10,19 @@
 #define __SLive__CClient__
 
 #include <iostream>
+#include "CServer.h"
 
-class CClient
+void* CClient_run(void *param);
+
+class CClient : public CServer
 {
 private:
     
 protected:
     
 public:
-    
+    CClient() {;}
+    friend void* CClient_run(void *param);
 };
 
 #endif /* defined(__SLive__CClient__) */

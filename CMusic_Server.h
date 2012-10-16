@@ -12,6 +12,8 @@
 #include <iostream>
 #include "CServer.h"
 
+void *CMusik_Server_run(void *param);
+
 class CMusic_Server : public CServer
 {
 private:
@@ -19,7 +21,8 @@ private:
 protected:
     
 public:
-    
+    CMusic_Server() {;}
+    friend void *CMusik_Server_run(void *param);
 };
 
 #endif /* defined(__SLive__CMusic_Server__) */

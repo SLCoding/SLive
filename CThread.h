@@ -24,6 +24,7 @@ public:
     int start(void*, void * (*start_routine)(void *));
     int join(void **thread_return);
     void exit(void *ret);
+    
 };
 
 #endif /* defined(__SLive__CThread__) */

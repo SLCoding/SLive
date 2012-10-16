@@ -15,7 +15,9 @@ int main()
 {
     CChat_Server chat;
     
-    int ret = chat.start(NULL, test);
-    cout << "ret: " << ret << endl;
+    int ret1 = chat.start(NULL, CChat_Server_run);
+
+    cout << "ret: " << ret1 << endl;
+    chat.join(NULL);
     return 0;
 }
