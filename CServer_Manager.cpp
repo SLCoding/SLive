@@ -7,3 +7,13 @@
 //
 
 #include "CServer_Manager.h"
+#include "CChat_Server.h"
+#include "CMusic_Server.h"
+#include "CDatabase_Connection.h"
+
+CServer_Manager::CServer_Manager()
+{
+    chat = new CChat_Server;
+    music = new CMusic_Server;
+    dbconn = new CDatabase_Connection;
+}

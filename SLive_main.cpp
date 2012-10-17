@@ -24,8 +24,8 @@ int main()
     int ret3 = client.start(NULL, CClient_run);
     
     cout << "ret: " << ret1 << endl;
-    chat.join(NULL);
-    music.join(NULL);
-    client.join(NULL);
+    chat.join(ret1, NULL);
+    music.join(ret2, NULL);
+    client.join(ret3, NULL);
     return 0;
 }

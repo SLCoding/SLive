@@ -11,19 +11,27 @@
 
 #include <iostream>
 #include <pthread.h>
+#include <list>
+
+struct Thread
+{
+    pthread_t *thread;
+    int thread_handle;
+};
+
+using namespace std;
 
 class CThread
 {
 private:
-    pthread_t thread;
-    int ret;
+    list<Thread> threads;
 protected:
     
 public:
     CThread();
     int start(void*, void * (*start_routine)(void *));
-    int join(void **thread_return);
-    void exit(void *ret);
+    int join(int id, void **thread_return);
+    // void exit(void *ret);
     
 };
 

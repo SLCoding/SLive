@@ -14,13 +14,21 @@
 #include "CServer.h"
 #include "CLogger.h"
 
-class CServer_Manager
+void* CServer_Manager_run(void* param);
+
+class CServer_Manager : public CThread
 {
 private:
-    
+    CServer *chat;
+    CServer *music;
+    CDatabase_Connection *dbconn;
+    int chat_thread_id;
+    int music_thread_id;
+    int db_thread_id;
 protected:
     
 public:
+    CServer_Manager();
     
 };
 
