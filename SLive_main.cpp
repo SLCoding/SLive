@@ -10,11 +10,17 @@
 #include "CChat_Server.h"
 #include "CMusic_Server.h"
 #include "CClient.h"
+#include "CServer.h"
+#include "CSocket.h"
 #include <iostream>
 using namespace std;
 
 int main()
 {
+    CSocket sock("localhost", 8376);
+    sock.bindServer();
+    getchar();
+    
     CChat_Server chat;
     CMusic_Server music;
     CClient client;
