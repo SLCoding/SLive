@@ -42,10 +42,9 @@ int main()
 
     
     /* hole die Messagetypnummer aus dem ersten Parameter */
-    CQueue msg_queue(8300);
+    CQueue queue(8300);
     
-    msg_queue.send_msg("Main-Fehler!", 3);
-    
+    queue.send_msg("testnachricht", 3);
     
     
    // chat.join(ret1, NULL);

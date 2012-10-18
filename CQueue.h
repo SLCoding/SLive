@@ -53,6 +53,6 @@ public:
     bool send_msg(string msg, long type = 1);   //send message    
     t_msg receive_msg(long type = 0);           //get message (with block)
     t_msg get_msg(long type = 0);               //get message (no block)
-    bool destroy();                             //Destro Queue
+    bool destroy();                             //Destroy Queue
 };
 #endif

@@ -37,19 +37,16 @@ bool CQueue::send_msg(string msg, long type)
     srand(time(NULL));
     int cont_type = rand() %8000 +1;
     
-    //are multiple parts required?
+    
     msg_part message;
     message.type = type;
-    /*if(length>=MSGSIZE)
-        message.cont_num = cont_type;
-    else
-        message.cont_num = 0;
-    */
+    
+    
     //send all parts of the message
     for(int pos = 0;pos < length; pos+=MSGSIZE-1)
     {
         const char *message_cstr = msg.substr(pos, 130).c_str();
-        //if its not the last part, send identifikationnumber for following parts
+        //if its not the last part, send identificationnumber for following parts
         //else 0
         if(strlen(message_cstr)>=MSGSIZE)
             message.cont_num = cont_type;
