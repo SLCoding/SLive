@@ -39,9 +39,9 @@ bool CSocket::createSocket()
 bool CSocket::bind(int port)
 {
     memset( &host, 0, sizeof (host));
-    // IPv4-Adresse
+    // IPv4-adress
     host.sin_family = AF_INET;
-    // Jede IP-Adresse ist gültig
+    // any ip-address is ok
     host.sin_addr.s_addr = htonl( INADDR_ANY );
     host.sin_port = htons( port );
     if ( ::bind( socket_handle, (struct sockaddr*)&host, sizeof(host)) < 0)
@@ -56,28 +56,27 @@ bool CSocket::connect(string address, int port)
     struct hostent *host_info;
     unsigned long addr;
     
-    /* Erzeuge die Socketadresse des Servers.
-     * Sie besteht aus Typ, IP-Adresse und Portnummer. */
-    memset( &host, 0, sizeof (host));
+    // Create the socket address of the server
+    // It consists of type, IP-address and port number.
+    memset( &host, 0, sizeof (host)); // clear memory of structure
     if ((addr = inet_addr( address.c_str() )) != INADDR_NONE)
     {
-        /* argv[1] ist eine numerische IP-Adresse. */
+        // address is a numeric ip-address
         memcpy( (char *)&host.sin_addr, &addr, sizeof(addr));
     }
     else
     {
-        /* Für den Fall der Fälle: Wandle den
-         * Servernamen bspw. "localhost" in eine IP-Adresse um. */
+        // if address is not a numeric ip-address change servername into ip-address
         host_info = gethostbyname(address.c_str());
         if (NULL == host_info)
             throw "Unknown Server";
-        /* Server-IP-Adresse */
+        // save server-ip-address in structure
         memcpy( (char *)&host.sin_addr, host_info->h_addr, host_info->h_length );
     }
-    host.sin_family = AF_INET;
-    host.sin_port = htons(port);
+    host.sin_family = AF_INET;      // use IPv4
+    host.sin_port = htons(port);    // change port number in host-to-network-syntax
     
-    // Baue die Verbindung zum Server auf.
+    // connect to server
     if ( ::connect( socket_handle, (struct sockaddr*)&host, sizeof(host) ) < 0)
     {
         throw "Cant connect to target!";
@@ -92,6 +91,7 @@ bool CSocket::closeSocket()
 
 bool CSocket::listen(int queue_size)
 {
+    // the function is listening for a new incoming client and add it to the queue, maximum number of clients = queue_size
     if( ::listen( socket_handle, queue_size ) == -1 )
     {
         throw "Unkown error: CSocket::listen";
@@ -106,6 +106,7 @@ CSocket CSocket::accept()
     socklen_t len;
     
     len = sizeof( client );
+    // accept a specific client connectinginquire and returns a socket for the communication 
     sock2 = ::accept( socket_handle, (struct sockaddr*)&client, &len);
     if (sock2 < 0)
     {
@@ -118,8 +119,9 @@ bool CSocket::send(string message)
 {
     char *char_message = new char[message.length()];
     strncpy(char_message, message.c_str(), message.length());
-    int transmitted_data = 0;
-    int send_return = 0;
+    long transmitted_data = 0;
+    long send_return = 0;
+    // send the data, if something goes wrong and some data could not be send, send the remainder until all of data are transmitted
     while(transmitted_data != message.length())
     {
         send_return = ::send(socket_handle, char_message, message.length() - transmitted_data, 0);
@@ -137,7 +139,7 @@ bool CSocket::send(string message)
 string CSocket::recv()
 {
     char char_buffer[buffer];
-    int recv_size;
+    long recv_size;
     
     if((recv_size = ::recv(socket_handle, char_buffer, buffer,0)) < 0)
         throw "An error occured while receiving the message";
