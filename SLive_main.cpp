@@ -17,15 +17,24 @@ using namespace std;
 
 int main()
 {
-    CSocket sock("localhost", 8376);
-    sock.bindServer();
-    getchar();
-    
     CChat_Server chat;
     CMusic_Server music;
     CClient client;
     
     int ret1 = chat.start(NULL, CChat_Server_run);
+    
+    CSocket sock;
+    sock.createSocket();
+    sock.bind(8376);
+    sock.listen();
+    CSocket client_socket = sock.accept();
+    
+    string rec = client_socket.recv();
+    cout << "vom client empfangen " << rec << endl;
+    client_socket.send("nachricht erhalten:" + rec);
+    
+    getchar();
+    
     int ret2 = music.start(NULL, CMusik_Server_run);
     int ret3 = client.start(NULL, CClient_run);
     

@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include "CServer.h"
+#include "CSocket.h"
 #include "CConference.h"
 
 void* CChat_Server_run(void* param);

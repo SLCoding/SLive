@@ -10,11 +10,11 @@
 
 void* CChat_Server_run(void* param)
 {
-    while(1)
-    {
-        int i = 0;
-        for(i = 0; i < 100; i++)
-            printf("CChat_Server_run: %d\n", i);
-        i = 0;
-    }
+    sleep(4);
+    CSocket sock;
+    sock.createSocket();
+    sock.connect("localhost", 8376);
+    sock.send("Hallo ich bin Client 1");
+    string rec = sock.recv();
+    cout << "vom server empfangen " << rec << endl;
 }
