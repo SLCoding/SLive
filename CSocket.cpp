@@ -164,9 +164,9 @@ string CSocket::recv()
     long recv_size;
     recv_size = ::recv(socket_handle, char_buffer, buffer, 0);
     if(recv_size == 0)
-        throw "Client terminate connection!";
+        throw string("Client terminate connection!");
     else if(recv_size < 0)
-        throw "An error occured while receiving the message";
+        throw string("An error occured while receiving the message");
     char_buffer[recv_size] = '\0';
     string message = char_buffer;
     return message;
