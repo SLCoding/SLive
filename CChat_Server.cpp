@@ -10,11 +10,23 @@
 
 void* CChat_Server_run(void* param)
 {
-    sleep(4);
+    string rec;
     CSocket sock;
-    sock.createSocket();
-    sock.connect("localhost", 8376);
-    sock.send("Hallo ich bin Client 1");
-    string rec = sock.recv();
-    cout << "vom server empfangen " << rec << endl;
+    sock.bind(8376);
+    sock.listen();
+    cout << "Server gestartet...warte auf Client..." << endl;
+    CSocket client_socket = sock.accept();
+    client_socket.setBuffer(8192);
+    cout << "client connected" << endl << endl;
+    while(1)
+    {
+        cout << "aktueller socket: " << client_socket.getSocket() << endl;
+        client_socket << rec;
+        cout << "vom client empfangen: " << rec;
+        cout << "sende nachricht..." << rec << endl;
+        cout.flush();
+        rec = string("nachricht erhalten: ") + rec + string("\n");
+        client_socket >> rec;
+    }
+    return (void*)0;
 }

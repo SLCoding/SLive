@@ -10,8 +10,9 @@
 
 CSocket::CSocket()
 {
-    socket_handle = 0;
+    socket_handle = -1;
     setBuffer();
+    createSocket();
 }
 
 CSocket::CSocket(int socket)
@@ -23,6 +24,13 @@ CSocket::CSocket(int socket)
 CSocket::~CSocket()
 {
     closeSocket();
+}
+
+bool CSocket::is_valid() const
+{
+    if(socket_handle == -1)
+        return false;
+    return true;
 }
 
 bool CSocket::createSocket()
@@ -38,6 +46,8 @@ bool CSocket::createSocket()
 
 bool CSocket::bind(int port)
 {
+    if( !is_valid() )
+        return false;
     memset( &host, 0, sizeof (host));
     // IPv4-adress
     host.sin_family = AF_INET;
@@ -53,6 +63,8 @@ bool CSocket::bind(int port)
 
 bool CSocket::connect(string address, int port)
 {
+    if( !is_valid() )
+        return false;
     struct hostent *host_info;
     unsigned long addr;
     
@@ -86,11 +98,15 @@ bool CSocket::connect(string address, int port)
 
 bool CSocket::closeSocket()
 {
-    return close(socket_handle);
+    if( !is_valid() )
+        return false;
+    return ::close(socket_handle);
 }
 
 bool CSocket::listen(int queue_size)
 {
+    if( !is_valid() )
+        return false;
     // the function is listening for a new incoming client and add it to the queue, maximum number of clients = queue_size
     if( ::listen( socket_handle, queue_size ) == -1 )
     {
@@ -101,6 +117,8 @@ bool CSocket::listen(int queue_size)
 
 CSocket CSocket::accept()
 {
+    if( !is_valid() )
+        return false;
     struct sockaddr_in client;
     int sock2;
     socklen_t len;
@@ -115,33 +133,39 @@ CSocket CSocket::accept()
     return CSocket(sock2);
 }
 
-bool CSocket::send(string message)
+bool CSocket::send(string message) const
 {
+    if( !is_valid() )
+        return false;
     char *char_message = new char[message.length()];
     strncpy(char_message, message.c_str(), message.length());
-    long transmitted_data = 0;
+        // long transmitted_data = 0;
     long send_return = 0;
     // send the data, if something goes wrong and some data could not be send, send the remainder until all of data are transmitted
-    while(transmitted_data != message.length())
-    {
-        send_return = ::send(socket_handle, char_message, message.length() - transmitted_data, 0);
+        // while(transmitted_data != message.length())
+        //  {
+        send_return = ::send(socket_handle, char_message, message.length()/* - transmitted_data*/, 0);
         if(send_return == -1)
         {
             delete [] char_message;
             throw "An error occured while sending the message";
         }
-        transmitted_data = transmitted_data + send_return;
-    }
+        //  transmitted_data = transmitted_data + send_return;
+        //    }
     delete [] char_message;
     return true;
 }
 
 string CSocket::recv()
 {
+    if( !is_valid() )
+        throw "Socket not ready!";
     char char_buffer[buffer];
     long recv_size;
-    
-    if((recv_size = ::recv(socket_handle, char_buffer, buffer,0)) < 0)
+    recv_size = ::recv(socket_handle, char_buffer, buffer, 0);
+    if(recv_size == 0)
+        throw "Client terminate connection!";
+    else if(recv_size < 0)
         throw "An error occured while receiving the message";
     char_buffer[recv_size] = '\0';
     string message = char_buffer;
@@ -162,3 +186,14 @@ int CSocket::getBuffer()
     return buffer;
 }
 
+const CSocket& CSocket::operator>>(const string& s) const
+{
+    this->send(s);
+    return *this;
+}
+
+const CSocket& CSocket::operator<<(string &s)
+{
+    s = this->recv();
+    return *this;
+}

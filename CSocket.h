@@ -31,6 +31,8 @@ class CSocket
         int socket_handle;
         struct sockaddr_in host; // store address-information about target computer
         int buffer;
+        bool is_valid() const;
+        bool createSocket();                        // Create a specific socket
     
     public:
         CSocket();
@@ -38,12 +40,15 @@ class CSocket
         virtual ~CSocket();
     
         // Client/Server
-        bool createSocket();                        // Create a specific socket
-        bool send(string message);                  // send a message to target computer
-        string recv();                              // receive message
-        bool closeSocket();                         // close the socket and terminate communication
-        void setBuffer(int buffer_size = 1024);     // Set the maximum buffer for receiving data / Minimum buffer size is 1024 / Maximum buffer size is 16384
+        
+        bool send(string message) const;                        // send a message to target computer
+        string recv();                                          // receive message
+        bool closeSocket();                                     // close the socket and terminate communication
+        void setBuffer(int buffer_size = 1024);                 // Set the maximum buffer for receiving data / Minimum buffer size is 1024 / Maximum buffer size is 16384
         int getBuffer();
+        int getSocket() { return socket_handle;}
+        const CSocket& operator >> (const string& s) const;     // send the string
+        const CSocket& operator << (string& s);                 // receive data and store them in the string
     
         // Client-functions
         bool connect(string address, int port);     // connect to the target computer
