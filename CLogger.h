@@ -10,14 +10,23 @@
 #define __SLive__CLogger__
 
 #include <iostream>
+#include "CThread.h"
 
-class CLogger
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+
+void* CLogger_run(void *param);
+
+class CLogger: public CThread
 {
 private:
     
 protected:
     
 public:
+    CLogger(){;}
+    friend void* CLogger_run(void *param);
     
 };
 

@@ -13,6 +13,14 @@
 #include "CServer.h"
 #include "CSocket.h"
 #include <iostream>
+
+#include <string>
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+
+#include "CQueue.h"
+
 using namespace std;
 
 int main()
@@ -20,7 +28,27 @@ int main()
     CChat_Server chat;
     CMusic_Server music;
     CClient client;
+    CLogger logger;
     
+    //int ret1 = chat.start(NULL, CChat_Server_run);
+    //int ret2 = music.start(NULL, CMusik_Server_run);
+    //int ret3 = client.start(NULL, CClient_run);
+    int ret4 = logger.start(NULL, CLogger_run);
+    
+    //gcout << "ret: " << ret1 << endl;
+    
+    
+    
+
+    
+
+    
+    /* hole die Messagetypnummer aus dem ersten Parameter */
+    CQueue queue(8300);
+    
+    queue.send_msg("testnachricht", 3);
+    
+<<<<<<< HEAD
     int ret1 = chat.start(NULL, CChat_Server_run);
     
         //int ret2 = music.start(NULL, CMusik_Server_run);
@@ -30,5 +58,12 @@ int main()
     chat.join(ret1, NULL);
         //music.join(ret2, NULL);
         //client.join(ret3, NULL);
+=======
+    
+   // chat.join(ret1, NULL);
+    //music.join(ret2, NULL);
+    //client.join(ret3, NULL);
+    logger.join(ret4, NULL);
+>>>>>>> master
     return 0;
 }
