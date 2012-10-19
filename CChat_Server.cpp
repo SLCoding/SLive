@@ -20,11 +20,11 @@ void* CChat_Server_run(void* param)
     cout << "client connected" << endl << endl;
     while(1)
     {
-        cout << "aktueller socket: " << client_socket.getSocket() << endl;
+            //cout << "aktueller socket: " << client_socket.getSocket() << endl;
         client_socket << rec;
-        cout << "vom client empfangen: " << rec;
-        cout << "sende nachricht..." << rec << endl;
-        cout.flush();
+            // cout << "vom client empfangen: " << rec;
+            // cout << "sende nachricht..." << rec << endl;
+            // cout.flush();
         rec = string("nachricht erhalten: ") + rec + string("\n");
         client_socket >> rec;
     }
