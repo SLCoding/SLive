@@ -21,10 +21,12 @@ void* CLogger_run(void *param)
     cout<<"Logging enabled!"<<std::endl;
     
     CQueue msg_queue(8300);
+    msg_queue.set_type(logging_level);
     
     while(true)
     {
-        t_msg message = msg_queue.receive_msg(logging_level);
+        t_msg message;
+        msg_queue >> message;
         
         switch(message.type)
         {
