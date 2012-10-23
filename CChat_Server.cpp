@@ -12,39 +12,41 @@
 void* CChat_Server_run(void* param)
 {
     CQueue queue(8300);
+    queue.set_type(3);
+    
     string rec;
     CSocket sock;
-    queue.send_msg("Socket erstellt...", 3);
+    queue << "Socket erstellt...";
     sock.bind(8376);
-    queue.send_msg("Port auf Adresse gebunden...", 3);
+    queue << "Port auf Adresse gebunden...";
     sock.listen();
-    queue.send_msg("warte auf Client-Anfrage...", 3);
+    queue << "warte auf Client-Anfrage...";
     CSocket client_socket = sock.accept();
-    queue.send_msg("Client-Anfrage angenommen", 3);
+    queue << "Client-Anfrage angenommen";
     client_socket.setBuffer(8192);
-    queue.send_msg("Setze Lese-Buffer auf 8192", 3);
+    queue << "Setze Lese-Buffer auf 8192";
     cout << "client connected" << endl << endl;
     try
     {
     while(1)
     {
             //cout << "aktueller socket: " << client_socket.getSocket() << endl;
-        queue.send_msg("Warte auf Nachricht vom Client...", 3);
+        queue << "Warte auf Nachricht vom Client...";
         client_socket >> rec;
-        queue.send_msg("Nachricht empfangen", 3);
-        queue.send_msg(rec, 3);
+        queue << "Nachricht empfangen";
+        queue << rec;
             // cout << "vom client empfangen: " << rec;
             // cout << "sende nachricht..." << rec << endl;
             // cout.flush();
-        rec = string("nachricht erhalten: ") + rec + string("\n");
-        queue.send_msg("Sende Antwortnachricht...", 3);
-        client_socket << rec;
-        queue.send_msg("Antwort gesendet!", 3);
+        queue << "Sende Antwortnachricht...";
+        client_socket << string("nachricht erhalten: ") + rec + string("\n");
+        queue << "Antwort gesendet!";
     }
     }
     catch(string e)
     {
-        queue.send_msg( e, 1);
+        queue.set_type(1);
+        queue << e;
             //queue.send_msg("Der Client hat die Verbindung beendet!", 1);
     }
     return (void*)0;

@@ -33,11 +33,6 @@ int main()
     int ret4 = logger.start(NULL, CLogger_run);
     
     /* hole die Messagetypnummer aus dem ersten Parameter */
-    CQueue queue(8300);
-    
-    queue.set_type(3);
-    
-    queue<<"TEST";
     
     int ret1 = chat.start(NULL, CChat_Server_run);
     
