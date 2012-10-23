@@ -47,8 +47,9 @@ class CSocket
         void setBuffer(int buffer_size = 1024);                 // Set the maximum buffer for receiving data / Minimum buffer size is 1024 / Maximum buffer size is 16384
         int getBuffer();
         int getSocket() { return socket_handle;}
-        const CSocket& operator >> (const string& s) const;     // send the string
-        const CSocket& operator << (string& s);                 // receive data and store them in the string
+        const CSocket& operator << (const string& s) const;     // send the string
+        const CSocket& operator << (const char* s) const;     // send the string
+        const CSocket& operator >> (string& s);                 // receive data and store them in the string
     
         // Client-functions
         bool connect(string address, int port);     // connect to the target computer

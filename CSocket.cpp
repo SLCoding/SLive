@@ -39,7 +39,7 @@ bool CSocket::createSocket()
     socket_handle = socket( AF_INET, SOCK_STREAM, 0 );
     if (socket_handle < 0)
     {
-        throw "Can't create a socket!";
+        throw string("Can't create a socket!");
     }
     return true;
 }
@@ -56,7 +56,7 @@ bool CSocket::bind(int port)
     host.sin_port = htons( port );
     if ( ::bind( socket_handle, (struct sockaddr*)&host, sizeof(host)) < 0)
     {
-        throw "Can't bind address to socket!";
+        throw string("Can't bind address to socket!");
     }
     return true;
 }
@@ -81,7 +81,7 @@ bool CSocket::connect(string address, int port)
         // if address is not a numeric ip-address change servername into ip-address
         host_info = gethostbyname(address.c_str());
         if (NULL == host_info)
-            throw "Unknown Server";
+            throw string("Unknown Server");
         // save server-ip-address in structure
         memcpy( (char *)&host.sin_addr, host_info->h_addr, host_info->h_length );
     }
@@ -91,7 +91,7 @@ bool CSocket::connect(string address, int port)
     // connect to server
     if ( ::connect( socket_handle, (struct sockaddr*)&host, sizeof(host) ) < 0)
     {
-        throw "Cant connect to target!";
+        throw string("Cant connect to target!");
     }
     return true;
 }
@@ -110,7 +110,7 @@ bool CSocket::listen(int queue_size)
     // the function is listening for a new incoming client and add it to the queue, maximum number of clients = queue_size
     if( ::listen( socket_handle, queue_size ) == -1 )
     {
-        throw "Unkown error: CSocket::listen";
+        throw string("Unkown error: CSocket::listen");
     }
     return true;
 }
@@ -128,7 +128,7 @@ CSocket CSocket::accept()
     sock2 = ::accept( socket_handle, (struct sockaddr*)&client, &len);
     if (sock2 < 0)
     {
-        throw "Can't accept connectioninquire";
+        throw string("Can't accept connectioninquire");
     }
     return CSocket(sock2);
 }
@@ -148,7 +148,7 @@ bool CSocket::send(string message) const
         if(send_return == -1)
         {
             delete [] char_message;
-            throw "An error occured while sending the message";
+            throw string("An error occured while sending the message");
         }
         //  transmitted_data = transmitted_data + send_return;
         //    }
@@ -186,13 +186,19 @@ int CSocket::getBuffer()
     return buffer;
 }
 
-const CSocket& CSocket::operator>>(const string& s) const
+const CSocket& CSocket::operator<<(const string& s) const
 {
     this->send(s);
     return *this;
 }
 
-const CSocket& CSocket::operator<<(string &s)
+const CSocket& CSocket::operator<<(const char* s) const
+{
+    this->send(s);
+    return *this;
+}
+
+const CSocket& CSocket::operator>>(string &s)
 {
     s = this->recv();
     return *this;

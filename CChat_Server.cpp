@@ -30,7 +30,7 @@ void* CChat_Server_run(void* param)
     {
             //cout << "aktueller socket: " << client_socket.getSocket() << endl;
         queue.send_msg("Warte auf Nachricht vom Client...", 3);
-        client_socket << rec;
+        client_socket >> rec;
         queue.send_msg("Nachricht empfangen", 3);
         queue.send_msg(rec, 3);
             // cout << "vom client empfangen: " << rec;
@@ -38,7 +38,7 @@ void* CChat_Server_run(void* param)
             // cout.flush();
         rec = string("nachricht erhalten: ") + rec + string("\n");
         queue.send_msg("Sende Antwortnachricht...", 3);
-        client_socket >> rec;
+        client_socket << rec;
         queue.send_msg("Antwort gesendet!", 3);
     }
     }
