@@ -203,9 +203,6 @@ void CDatabase_Connection::LoadDefaults()
 	password = "";
 	host = "localhost";
 	db = "";
-	port = 0;
-	socket_name = "";
-	flag = 0;
 }
 
 bool CDatabase_Connection::UseDB(string db_name)
