@@ -35,8 +35,10 @@ int main()
     /* hole die Messagetypnummer aus dem ersten Parameter */
     CQueue queue(8300);
     
-    queue.send_msg("testnachricht", 3);
-
+    queue.set_type(3);
+    
+    queue<<"TEST";
+    
     int ret1 = chat.start(NULL, CChat_Server_run);
     
         // cout << "ret: " << ret1 << endl;

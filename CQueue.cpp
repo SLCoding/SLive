@@ -23,10 +23,19 @@ CQueue::CQueue(int queue_id)
     //this is required for maintaining order of the messages
     queue_ref = msgget(queue_id, IPC_CREAT | 0666);
     queue_cont_ref = msgget(1111, IPC_CREAT | 0666);
+    default_type = 1;
     
 }
 
-bool CQueue::send_msg(string msg, long type)
+
+bool CQueue::set_type(int type)
+{
+    default_type = type; 
+    return true;
+}  
+
+
+bool CQueue::send_msg(string msg, long type) const
 {
     int length = msg.length();
     int struct_size = sizeof(msg_part) - sizeof(long);
@@ -70,7 +79,7 @@ bool CQueue::send_msg(string msg, long type)
 }
 
 
-t_msg CQueue::receive_msg(long type)
+t_msg CQueue::receive_msg(long type) const
 {
     string msg_str;
     
@@ -98,7 +107,7 @@ t_msg CQueue::receive_msg(long type)
 }
 
 
-t_msg CQueue::get_msg(long type)
+t_msg CQueue::get_msg(long type) const
 {
     string msg_str;
     
@@ -135,4 +144,34 @@ bool CQueue::destroy()
     return msgctl(queue_ref, IPC_RMID, NULL) + 1;
     
     
+}
+
+
+
+const CQueue& CQueue::operator<<(const string& s) const
+{
+    this->send_msg(s, default_type);
+    return *this;
+}
+
+const CQueue& CQueue::operator>>(string &s)
+{
+    s = receive_msg(default_type).text;
+    return *this;
+}
+
+
+
+const CQueue& CQueue::operator<<(const char* s) const
+{
+    
+    this->send_msg(string(s), default_type);
+    return *this;
+}
+
+
+const CQueue& CQueue::operator>>(t_msg &s)
+{
+    s = this->receive_msg(default_type);
+    return *this;
 }
