@@ -13,6 +13,7 @@ CDatabase_Connection::CDatabase_Connection()
 {
 	try
 	{
+		my = mysql_init(NULL);
 		LoadDefaults();
 		this->connected = false;
 		this->initialised = false;
@@ -29,10 +30,7 @@ CDatabase_Connection::~CDatabase_Connection()
 	try
 	{
 		if(this->initialised == true)
-        {
-                //PQclear(res);
-                //PQfinish(conn);
-        }
+			mysql_free_result(mysql_res);
 	}
 	catch(...)
 	{
@@ -59,6 +57,21 @@ void CDatabase_Connection::setHost(string host_addr)
 void CDatabase_Connection::setDB(string db_name)
 {
 	db = db_name;
+}
+
+void CDatabase_Connection::setPort(int port_num)
+{
+	port = port_num;
+}
+
+void CDatabase_Connection::setSocket(string socket)
+{
+	socket_name = socket;
+}
+
+void CDatabase_Connection::setFlag(int flag_num)
+{
+	flag = flag_num;
 }
 
     // Wertzur¸ckgebende Elementfunktion
@@ -94,12 +107,30 @@ string CDatabase_Connection::GetDB()
 		return "";
 }
 
+int CDatabase_Connection::GetPort()
+{
+	return port;
+}
+
+string CDatabase_Connection::GetSocket()
+{
+	if( socket_name != "" )
+		return socket_name;
+	else
+		return "";
+}
+
+int CDatabase_Connection::GetFlag()
+{
+	return flag;
+}
+
 bool CDatabase_Connection::connect()
 {
 	try
 	{
             //cout << "Baue Verbindung zur Datenbank auf ...\n\n";
-            //mysql_real_connect (my, host.c_str(), username.c_str(), password.c_str(), db.c_str(), port, socket_name.c_str(), flag);
+		mysql_real_connect (my, host.c_str(), username.c_str(), password.c_str(), db.c_str(), port, socket_name.c_str(), flag);
 	}
 	catch(...)
 	{
@@ -116,8 +147,8 @@ bool CDatabase_Connection::close()
             //cout << "Verbindung wird beendet....\n\n";
 		if((this->connected)&&(this->initialised))
 		{
-                //mysql_free_result(mysql_res);
-                //mysql_close (my);
+			mysql_free_result(mysql_res);
+			mysql_close (my);
 			this->connected = false;
 			this->initialised = false;
 		}
@@ -146,9 +177,9 @@ bool CDatabase_Connection::query(string sql_query, unsigned int size)
 	}
 	try
 	{
-            //mysql_real_query(my, sql_query.c_str(),	strlen(sql_query.c_str()));
+		mysql_real_query(my, sql_query.c_str(),	strlen(sql_query.c_str()));
         
-            //mysql_res = mysql_store_result(my);
+		mysql_res = mysql_store_result(my);
 	}
 	catch(...)
 	{
@@ -166,7 +197,7 @@ map<string, string> CDatabase_Connection::fetch_assoc()
 	{
 		if(this->initialised == false)
 			throw "No query found!";
-        /*
+        
 		mysql_field_seek(mysql_res, 0); //!
 		if(mysql_affected_rows(this->my) == 0)
 			throw "Nothing found! Is your request right??";
@@ -182,7 +213,7 @@ map<string, string> CDatabase_Connection::fetch_assoc()
                 
 				daten[field->name] = row[i];
 			}
-		}*/
+		}
 	}
 	catch(char* error)
 	{
@@ -203,13 +234,16 @@ void CDatabase_Connection::LoadDefaults()
 	password = "";
 	host = "localhost";
 	db = "";
+	port = 0;
+	socket_name = "";
+	flag = 0;
 }
 
 bool CDatabase_Connection::UseDB(string db_name)
 {
 	try
 	{
-            //mysql_select_db(my, db_name.c_str());
+		mysql_select_db(my, db_name.c_str());
 	}
 	catch(...)
 	{
@@ -217,4 +251,163 @@ bool CDatabase_Connection::UseDB(string db_name)
 	}
 	db = db_name;
 	return true;
+}
+
+string CDatabase_Connection::error()
+{
+	if (mysql_errno(my) != 0)
+	{
+		return mysql_error(my);
+	}
+	return "no errors occured";
+}
+
+int CDatabase_Connection::errnum()
+{
+	return mysql_errno(my);
+}
+
+my_ulonglong CDatabase_Connection::affected_rows()
+{
+	return mysql_affected_rows(this->my);
+}
+
+my_bool CDatabase_Connection::autocommit(bool mode)
+{
+	return mysql_autocommit(this->my, mode);
+}
+
+string CDatabase_Connection::character_set_name()
+{
+	return mysql_character_set_name(this->my);
+}
+
+my_bool CDatabase_Connection::commit()
+{
+	return mysql_commit(this->my);
+}
+
+void CDatabase_Connection::debug(string debug)
+{
+	mysql_debug(debug.c_str());
+}
+
+int CDatabase_Connection::dump_debug_info()
+{
+	return mysql_dump_debug_info(this->my);
+}
+
+unsigned long CDatabase_Connection::real_escape_string(string to, const string from, unsigned long length)
+{
+	unsigned long result = 0;
+	try
+	{
+		char* zu = new char[to.length()];
+        
+		strncpy(zu, to.c_str(), strlen(to.c_str()) );
+		result = mysql_real_escape_string(this->my, zu, from.c_str(), length);
+        
+		delete [] zu;
+	}
+	catch(...)
+	{
+		cerr << "An unexpected error occured in function 'real_escape_string'!" << endl;
+		return -1;
+	}
+	return result;
+}
+
+unsigned int CDatabase_Connection::field_count()
+{
+	return mysql_field_count(this->my);
+}
+
+void CDatabase_Connection::free_result()
+{
+	mysql_free_result(this->mysql_res);
+}
+
+string CDatabase_Connection::get_client_info()
+{
+	return mysql_get_client_info();
+}
+
+unsigned long CDatabase_Connection::get_client_version()
+{
+	return mysql_get_client_version();
+}
+
+string CDatabase_Connection::get_host_info()
+{
+	return mysql_get_host_info(this->my);
+}
+
+unsigned long CDatabase_Connection::get_server_version()
+{
+	return mysql_get_server_version(this->my);
+}
+
+unsigned int CDatabase_Connection::get_proto_info()
+{
+	return mysql_get_proto_info(this->my);
+}
+
+string CDatabase_Connection::get_server_info()
+{
+	return mysql_get_server_info(this->my);
+}
+
+string CDatabase_Connection::info()
+{
+	return mysql_info(this->my);
+}
+
+my_ulonglong CDatabase_Connection::insert_id()
+{
+	return mysql_insert_id(this->my);
+}
+
+int CDatabase_Connection::kill(unsigned long pid)
+{
+	return mysql_kill(this->my, pid);
+}
+
+unsigned int CDatabase_Connection::num_fields()
+{
+	return mysql_num_fields(this->mysql_res);
+}
+
+my_ulonglong CDatabase_Connection::num_rows()
+{
+	return mysql_num_rows(this->mysql_res);
+}
+
+int CDatabase_Connection::ping()
+{
+	return mysql_ping(this->my);
+}
+
+int CDatabase_Connection::refresh(unsigned int options)
+{
+	return mysql_refresh(this->my, options);
+}
+
+int CDatabase_Connection::shutdown(enum mysql_enum_shutdown_level shutdown_level)
+{
+	return mysql_shutdown(this->my, shutdown_level);
+}
+
+string CDatabase_Connection::stat()
+{
+	return mysql_stat(this->my);
+}
+
+unsigned long CDatabase_Connection::thread_id()
+{
+	return mysql_thread_id(this->my);
+}
+
+unsigned int CDatabase_Connection::warning_count()
+{
+	return mysql_warning_count(this->my);
 }
