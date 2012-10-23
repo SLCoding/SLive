@@ -30,8 +30,8 @@ CDatabase_Connection::~CDatabase_Connection()
 	{
 		if(this->initialised == true)
         {
-            PQclear(res);
-            PQfinish(conn);
+                //PQclear(res);
+                //PQfinish(conn);
         }
 	}
 	catch(...)

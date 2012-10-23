@@ -12,7 +12,9 @@
 #include <iostream>
 #include <string>
 #include <map>
-#include "libpq-fe.h"
+#include <libpq-fe.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -100,6 +102,4 @@ public:
     //unsigned long thread_id(/*MYSQL**/); 		// Liefert die aktuelle Thread-ID
     //unsigned int warning_count(/*MYSQL**/);		// Liefert die Anzahl der Warnungen f¸r die vorangehende SQL-Anweisung
     //};
-
-#endif
 
