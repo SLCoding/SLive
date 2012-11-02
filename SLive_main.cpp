@@ -36,6 +36,15 @@ int main()
     {
         cout << "db connection OK" << endl;
         cout << "serverinfo: " << db.get_server_info() << endl;
+        cout << "serverversion: " << db.get_server_version()<< endl;
+        cout << "clientinfo: " << db.get_client_info() << endl;
+        cout << "clientversion: " << db.get_client_version() << endl;
+        cout << "host info: " << db.get_host_info() << endl;
+        cout << "proto info: " << db.get_proto_info() << endl;
+        cout << "thread id: " << db.thread_id() << endl;
+        cout << "character_set_name: " << db.character_set_name() << endl;
+        cout << "debug_info: " << db.dump_debug_info() << endl;
+        cout << "stat: " << db.stat() << endl;
     }
     else
     {
