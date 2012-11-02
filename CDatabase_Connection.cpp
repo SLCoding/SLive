@@ -13,7 +13,7 @@ CDatabase_Connection::CDatabase_Connection()
 {
 	try
 	{
-		my = mysql_init(NULL);
+		mysql_init(&my);
 		LoadDefaults();
 		this->connected = false;
 		this->initialised = false;
@@ -130,13 +130,16 @@ bool CDatabase_Connection::connect()
 	try
 	{
             //cout << "Baue Verbindung zur Datenbank auf ...\n\n";
-		mysql_real_connect (my, host.c_str(), username.c_str(), password.c_str(), db.c_str(), port, socket_name.c_str(), flag);
+		mysql_real_connect (&my, host.c_str(), username.c_str(), password.c_str(), db.c_str(), port, socket_name.c_str(), flag);
+        if(this->errnum() == 0)
+            this->connected = true;
+        else
+            return false;
 	}
 	catch(...)
 	{
 		return false;
 	}
-	this->connected = true;
 	return true;
 }
 
@@ -148,7 +151,7 @@ bool CDatabase_Connection::close()
 		if((this->connected)&&(this->initialised))
 		{
 			mysql_free_result(mysql_res);
-			mysql_close (my);
+			mysql_close (&my);
 			this->connected = false;
 			this->initialised = false;
 		}
@@ -177,9 +180,9 @@ bool CDatabase_Connection::query(string sql_query, unsigned int size)
 	}
 	try
 	{
-		mysql_real_query(my, sql_query.c_str(),	strlen(sql_query.c_str()));
+		mysql_real_query(&my, sql_query.c_str(),	strlen(sql_query.c_str()));
         
-		mysql_res = mysql_store_result(my);
+		mysql_res = mysql_store_result(&my);
 	}
 	catch(...)
 	{
@@ -199,7 +202,7 @@ map<string, string> CDatabase_Connection::fetch_assoc()
 			throw "No query found!";
         
 		mysql_field_seek(mysql_res, 0); //!
-		if(mysql_affected_rows(this->my) == 0)
+		if(mysql_affected_rows(&my) == 0)
 			throw "Nothing found! Is your request right??";
 		if((row = mysql_fetch_row (mysql_res)) != NULL)
 		{
@@ -234,7 +237,7 @@ void CDatabase_Connection::LoadDefaults()
 	password = "";
 	host = "localhost";
 	db = "";
-	port = 0;
+	port = 3306;
 	socket_name = "";
 	flag = 0;
 }
@@ -243,7 +246,7 @@ bool CDatabase_Connection::UseDB(string db_name)
 {
 	try
 	{
-		mysql_select_db(my, db_name.c_str());
+		mysql_select_db(&my, db_name.c_str());
 	}
 	catch(...)
 	{
@@ -255,36 +258,36 @@ bool CDatabase_Connection::UseDB(string db_name)
 
 string CDatabase_Connection::error()
 {
-	if (mysql_errno(my) != 0)
+	if (mysql_errno(&my) != 0)
 	{
-		return mysql_error(my);
+		return mysql_error(&my);
 	}
 	return "no errors occured";
 }
 
 int CDatabase_Connection::errnum()
 {
-	return mysql_errno(my);
+	return mysql_errno(&my);
 }
 
 my_ulonglong CDatabase_Connection::affected_rows()
 {
-	return mysql_affected_rows(this->my);
+	return mysql_affected_rows(&my);
 }
 
 my_bool CDatabase_Connection::autocommit(bool mode)
 {
-	return mysql_autocommit(this->my, mode);
+	return mysql_autocommit(&my, mode);
 }
 
 string CDatabase_Connection::character_set_name()
 {
-	return mysql_character_set_name(this->my);
+	return mysql_character_set_name(&my);
 }
 
 my_bool CDatabase_Connection::commit()
 {
-	return mysql_commit(this->my);
+	return mysql_commit(&my);
 }
 
 void CDatabase_Connection::debug(string debug)
@@ -294,7 +297,7 @@ void CDatabase_Connection::debug(string debug)
 
 int CDatabase_Connection::dump_debug_info()
 {
-	return mysql_dump_debug_info(this->my);
+	return mysql_dump_debug_info(&my);
 }
 
 unsigned long CDatabase_Connection::real_escape_string(string to, const string from, unsigned long length)
@@ -305,7 +308,7 @@ unsigned long CDatabase_Connection::real_escape_string(string to, const string f
 		char* zu = new char[to.length()];
         
 		strncpy(zu, to.c_str(), strlen(to.c_str()) );
-		result = mysql_real_escape_string(this->my, zu, from.c_str(), length);
+		result = mysql_real_escape_string(&my, zu, from.c_str(), length);
         
 		delete [] zu;
 	}
@@ -319,7 +322,7 @@ unsigned long CDatabase_Connection::real_escape_string(string to, const string f
 
 unsigned int CDatabase_Connection::field_count()
 {
-	return mysql_field_count(this->my);
+	return mysql_field_count(&my);
 }
 
 void CDatabase_Connection::free_result()
@@ -339,37 +342,37 @@ unsigned long CDatabase_Connection::get_client_version()
 
 string CDatabase_Connection::get_host_info()
 {
-	return mysql_get_host_info(this->my);
+	return mysql_get_host_info(&my);
 }
 
 unsigned long CDatabase_Connection::get_server_version()
 {
-	return mysql_get_server_version(this->my);
+	return mysql_get_server_version(&my);
 }
 
 unsigned int CDatabase_Connection::get_proto_info()
 {
-	return mysql_get_proto_info(this->my);
+	return mysql_get_proto_info(&my);
 }
 
 string CDatabase_Connection::get_server_info()
 {
-	return mysql_get_server_info(this->my);
+	return mysql_get_server_info(&my);
 }
 
 string CDatabase_Connection::info()
 {
-	return mysql_info(this->my);
+	return mysql_info(&my);
 }
 
 my_ulonglong CDatabase_Connection::insert_id()
 {
-	return mysql_insert_id(this->my);
+	return mysql_insert_id(&my);
 }
 
 int CDatabase_Connection::kill(unsigned long pid)
 {
-	return mysql_kill(this->my, pid);
+	return mysql_kill(&my, pid);
 }
 
 unsigned int CDatabase_Connection::num_fields()
@@ -384,30 +387,30 @@ my_ulonglong CDatabase_Connection::num_rows()
 
 int CDatabase_Connection::ping()
 {
-	return mysql_ping(this->my);
+	return mysql_ping(&my);
 }
 
 int CDatabase_Connection::refresh(unsigned int options)
 {
-	return mysql_refresh(this->my, options);
+	return mysql_refresh(&my, options);
 }
 
 int CDatabase_Connection::shutdown(enum mysql_enum_shutdown_level shutdown_level)
 {
-	return mysql_shutdown(this->my, shutdown_level);
+	return mysql_shutdown(&my, shutdown_level);
 }
 
 string CDatabase_Connection::stat()
 {
-	return mysql_stat(this->my);
+	return mysql_stat(&my);
 }
 
 unsigned long CDatabase_Connection::thread_id()
 {
-	return mysql_thread_id(this->my);
+	return mysql_thread_id(&my);
 }
 
 unsigned int CDatabase_Connection::warning_count()
 {
-	return mysql_warning_count(this->my);
+	return mysql_warning_count(&my);
 }

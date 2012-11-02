@@ -12,8 +12,9 @@
 #include "CClient.h"
 #include "CServer.h"
 #include "CSocket.h"
+#include "CDatabase_Connection.h"
 #include <iostream>
-
+#include <map>
 #include <string>
 #include <stdio.h>
 #include <sys/ipc.h>
@@ -25,6 +26,50 @@ using namespace std;
 
 int main()
 {
+    CDatabase_Connection db;
+    map<string, string> result;
+    db.setUsername("root");
+    db.setPassword("");
+    db.setDB("stundenplan");
+    db.setHost("127.0.0.1");
+    if(db.connect())
+    {
+        cout << "db connection OK" << endl;
+        cout << "serverinfo: " << db.get_server_info() << endl;
+    }
+    else
+    {
+        cout << "fehler: " << db.error() << endl; 
+    }
+    string sql = "SELECT * FROM stundenplan;";
+    if(db.query(sql, (int)sql.length()))
+    {
+        cout << "query ok" << endl;
+    }
+    else
+    {
+        cout << "query not ok!" << endl;
+    }
+
+    cout << "affected rows: " << db.affected_rows() << endl;
+    try
+    {
+        int i = 0;
+        while(i < db.affected_rows())
+        {
+            result = db.fetch_assoc() ;
+            cout << "Raum: " << result["Raum"] << endl;
+            i++;
+        }
+    }
+    catch(char *e)
+    {
+        cout << e << endl;
+    }
+    catch(string e)
+    {
+        cout << e << endl;
+    }
     CChat_Server chat;
     CMusic_Server music;
     CClient client;

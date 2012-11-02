@@ -5,7 +5,7 @@
 //  Created by Markus Scholl on 10.10.12.
 //  Copyright (c) 2012 CLMM. All rights reserved.
 //
-
+//  http://www.macuser.de/forum/f25/xcode-c-mysql-629682/  INSTALL NOTES UNDER MAC FOR XCODE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifndef __SLive__CDatabase_Connection__
 #define __SLive__CDatabase_Connection__
 
@@ -19,7 +19,7 @@ using namespace std;
 class CDatabase_Connection
 {
 private:
-    MYSQL *my;					// Handle einer Datenbankverbindung
+    MYSQL my;					// Handle einer Datenbankverbindung
     MYSQL_ROW  row;				// Eine typensichere Darstellung eines Datensatzes (Zeile)
     MYSQL_RES  *mysql_res;		// Ergebnis einer Anfrage, welche Zeilen zur¸ckgibt (SELECT,
         // SHOW, DESCRIBE,EXPLAIN)
