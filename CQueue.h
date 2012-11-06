@@ -44,8 +44,7 @@ private:
     int queue_cont_ref;
     
     long default_type;
-    long send_type;
-    long rec_type;
+    
 public:
     
     CQueue();
@@ -54,12 +53,10 @@ public:
     int get_queue_id();
     
     bool set_type(long type);
-    bool set_send_type(long type = 0);      //Type of 0 will use the default type to send
-    bool set_rec_type(long type = 0);       //Type of 0 will use the default type to receive
     
-    bool send_msg(string msg, long type = 1) const;   //send message    
-    t_msg receive_msg(long type = 0) const;           //get message (with block)
-    t_msg get_msg(long type = 0) const;               //get message (no block)
+    bool send_msg(string msg, bool use_p_type = false, long type = 1) const;   //send message    
+    t_msg receive_msg(bool use_p_type = false, long type = 0) const;           //get message (with block)
+    t_msg get_msg(bool use_p_type = false, long type = 0) const;               //get message (no block)
     bool destroy();                             //Destroy Queue
     
     const CQueue& operator << (const string& s) const;     // send the string
