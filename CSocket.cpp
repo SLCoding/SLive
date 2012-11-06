@@ -36,7 +36,9 @@ bool CSocket::is_valid() const
 bool CSocket::createSocket()
 {
     // Create the socket - communication is via TCP/IP
+    int i = 1;
     socket_handle = socket( AF_INET, SOCK_STREAM, 0 );
+    setsockopt(socket_handle, SOL_SOCKET, SO_REUSEADDR, &i, sizeof(i));
     if (socket_handle < 0)
     {
         throw string("Can't create a socket!");
@@ -144,7 +146,7 @@ bool CSocket::send(string message) const
     // send the data, if something goes wrong and some data could not be send, send the remainder until all of data are transmitted
         // while(transmitted_data != message.length())
         //  {
-        send_return = ::send(socket_handle, char_message, message.length()/* - transmitted_data*/, 0);
+        send_return = ::write(socket_handle, char_message, message.length()/* - transmitted_data*/);
         if(send_return == -1)
         {
             delete [] char_message;
@@ -162,7 +164,7 @@ string CSocket::recv()
         throw "Socket not ready!";
     char char_buffer[buffer];
     long recv_size;
-    recv_size = ::recv(socket_handle, char_buffer, buffer, 0);
+    recv_size = ::read(socket_handle, char_buffer, buffer);
     if(recv_size == 0)
         throw string("Client terminate connection!");
     else if(recv_size < 0)

@@ -26,6 +26,7 @@ using namespace std;
 
 int main()
 {
+    /*
     CDatabase_Connection db;
     map<string, string> result;
     db.setUsername("root");
@@ -79,19 +80,16 @@ int main()
     {
         cout << e << endl;
     }
+     */
+    
     CChat_Server chat;
     CMusic_Server music;
-    CClient client;
     CLogger logger;
     
     int ret4 = logger.start(NULL, CLogger_run);
-    
+    CServer_Manager manager;
     /* hole die Messagetypnummer aus dem ersten Parameter */
     
-    int ret1 = chat.start(NULL, CChat_Server_run);
-    
-        // cout << "ret: " << ret1 << endl;
-    chat.join(ret1, NULL);
     logger.join(ret4, NULL);
     
     return 0;

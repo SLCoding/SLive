@@ -11,18 +11,25 @@
 
 #include <iostream>
 #include "CServer.h"
+#include "CSocket.h"
 
-void* CClient_run(void *param);
+    // void* CClient_run(void *param);
 
-class CClient : public CServer
+class CClient 
 {
 private:
+    CSocket *sock;
+    int id;
     
 protected:
     
 public:
-    CClient() {;}
-    friend void* CClient_run(void *param);
+    CClient(int, CSocket*);
+    void setSocket(CSocket*);
+    void setID(int);
+
+    CSocket* getSocket();
+    int getID();
 };
 
 #endif /* defined(__SLive__CClient__) */

@@ -10,6 +10,8 @@
 #define __SLive__CServer_Manager__
 
 #include <iostream>
+#include <list>
+#include "CSocket.h"
 #include "CDatabase_Connection.h"
 #include "CServer.h"
 #include "CLogger.h"
@@ -25,6 +27,7 @@ private:
     int chat_thread_id;
     int music_thread_id;
     int db_thread_id;
+    list<CSocket> client_sockets;
 protected:
     
 public:

@@ -7,7 +7,7 @@
 //
 
 #include "CClient.h"
-
+/*
 void* CClient_run(void *param)
 {
     while(1)
@@ -18,4 +18,32 @@ void* CClient_run(void *param)
         i = 0;
     }
 }
+*/
+
+CClient::CClient(int id, CSocket *sock)
+{
+    this->sock = sock;
+    this->id = id;
+}
+
+void CClient::setSocket(CSocket *sock)
+{
+    this->sock = sock;
+}
+
+void CClient::setID(int id)
+{
+    this->id = id;
+}
+
+CSocket* CClient::getSocket()
+{
+    return this->sock;
+}
+
+int CClient::getID()
+{
+    return this->id;
+}
+
 
