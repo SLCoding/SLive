@@ -18,6 +18,7 @@
 
 void* accept_new_Clients(void* param);
 void* client_processing(void* param);
+void* client_messagequeue_processing(void* param);
 
 class CChat_Server : public CServer
 {
@@ -30,6 +31,7 @@ public:
     CChat_Server() {;}
     friend void* accept_new_Clients(void* param);
     friend void* client_processing(void* param);
+    friend void* client_messagequeue_processing(void* param);
 };
 
 #endif /* defined(__SLive__CChat_Server__) */

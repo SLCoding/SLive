@@ -31,6 +31,7 @@ void* accept_new_Clients(void* param)
         CClient *client = new CClient(++client_id, client_socket); // Create a new client
         server->clients.push_back(client); // add the client to the list
         server->client_thread.start((void*)client, client_processing);    // start a seperate thread for the new client
+        server->client_thread.start((void*)client, client_messagequeue_processing);    // start a seperate thread for the new client
         queue << "Thread gestartet!";
     }
     return NULL;
@@ -40,10 +41,13 @@ void* client_processing(void* param)
 {
     CClient *myself = (CClient*)param;
     CQueue queue_log(8300);
+    CQueue client_queue(8302);
+    client_queue.set_type(myself->getID());
     queue_log.set_type(3);
     bool logout = false;
     string message;
     string command;
+    string parameter = "";
     try
     {
         while(!logout)
@@ -59,18 +63,32 @@ void* client_processing(void* param)
                 {
                     command = sub;
                     s >> sub;
-                    while(!((sub.substr(0,1)) == "/"))
-                        command += sub;
+                    while( ((sub.substr(0,1)) != "/") && (s))
+                    {
+                        parameter += sub;
+                        s >> sub;
+                    }
                 }
                 cout << "Command: " << command << endl;
-                if(message == "/usr_logout true\n")
+                cout << "Parameter: " << parameter << endl;
+                if(command == "/usr_logout")
                 {
-                    logout = true;
-                    break;
-                    queue_log << "Client hat sich ausgeloggt!";
+                    if(parameter == "true")
+                    {
+                        logout = true;
+                        queue_log << "Client hat sich ausgeloggt!";
+                        myself->getSocket().closeSocket();
+                        break;
+                    }
                 }
-                queue_log << message;
-                myself->getSocket() << message;
+                if(command == "/send")
+                {
+                    client_queue << parameter;
+                }
+                command = "";
+                parameter = "";
+                if(logout)
+                    break;
             }
             while (s);
         }
@@ -80,5 +98,30 @@ void* client_processing(void* param)
         queue_log.set_type(2);
         queue_log << e;
     }
+    return NULL;
+}
+
+void* client_messagequeue_processing(void* param)
+{
+    CClient *myself = (CClient*)param;
+    CQueue queue_log(8300);
+    CQueue queue(8301);
+    queue.set_type(myself->getID());
+    queue_log.set_type(3);
+    string message;
+    while(true)
+    {
+        queue >> message;
+        myself->getSocket() << message;
+    }
+}
+
+void* message_dispatcher(void* param)
+{
+    CQueue messages(8302);
+    CQueue server2client(8301);
+    CQueue logger(8300);
+
+    
     return NULL;
 }
