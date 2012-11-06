@@ -89,12 +89,10 @@ int main()
     int ret4 = logger.start(NULL, CLogger_run);
     CServer_Manager manager;
     /* hole die Messagetypnummer aus dem ersten Parameter */
-<<<<<<< HEAD
     
     logger.join(ret4, NULL);
     
     return 0;
-=======
     try
     {
      CQueue queue(257);  
@@ -103,10 +101,10 @@ int main()
         
         queue<<"TEST";
         
-        int ret1 = chat.start(NULL, CChat_Server_run);
+            //  int ret1 = chat.start(NULL, CChat_Server_run);
         
         // cout << "ret: " << ret1 << endl;
-        chat.join(ret1, NULL);
+            // chat.join(ret1, NULL);
         logger.join(ret4, NULL);
         
 
@@ -116,5 +114,4 @@ int main()
         cout<<s;
     }
         return 0;
->>>>>>> dev-japortie
 }
