@@ -17,9 +17,6 @@ CQueue::CQueue()
 CQueue::CQueue(int queue_id)
 {
     default_type = 1;
-    send_type = 0;
-    rec_type = 0;
-    
     //create 2 queues
     //first for sending messages
     //second for sending following parts of a message
@@ -36,72 +33,24 @@ CQueue::CQueue(int queue_id)
 
 bool CQueue::set_type(long type)
 {
-    if(type !=0)
-    {
-        default_type = type;
-        return true;
-    }
-    else 
-    {
-        throw string("Couldn't set type: Zero is no valid message type");
-        return false;
-    }
-    return false;
+    default_type = type;
+    return true;
 }  
 
 
-bool CQueue::set_send_type(long type)
-{
-    if(type >=0)
-    {
-        send_type = type;
-        return true;
-    }
-    else 
-    {
-        throw string("Couldn't set type: Negative types are not valid for sending");
-        return false;
-    }
-    return false;
+
+
+
+
+bool CQueue::send_msg(string msg, bool use_p_type, long type) const
+{    
+    if(!use_p_type)
+        type = default_type;
     
-}
-bool CQueue::set_rec_type(long type)
-{
-    send_type = type;
-    return true;
-    
-}
-
-
-
-
-
-bool CQueue::send_msg(string msg, long type) const
-{
-    if(type <0)
-    {
+    if(type == 0)
         throw string("Couldn't set type: Negative types are not valid for sending");
-        return false;
-    }
-    else if(type == 0)
-    {
-        if(send_type == 0)
-        {
-            if(default_type == 0)
-            {
-                throw string("Couldn't set type: Zero is no valid message type");
-                return false;
-            }
-            else
-            {
-                type = default_type;
-            }
-        }
-        else
-        {
-            type = send_type;
-        }
-    }
+    
+    
     
     long length = msg.length();
     int struct_size = sizeof(msg_part) - sizeof(long);
@@ -145,10 +94,10 @@ bool CQueue::send_msg(string msg, long type) const
 }
 
 
-t_msg CQueue::receive_msg(long type) const
+t_msg CQueue::receive_msg(bool use_p_type, long type) const
 {
-    if(type == 0)
-        throw string("Couldn't set type: Zero is no valid message type");
+    if(!use_p_type)
+        type = default_type;
     
     
     
@@ -178,10 +127,11 @@ t_msg CQueue::receive_msg(long type) const
 }
 
 
-t_msg CQueue::get_msg(long type) const
+t_msg CQueue::get_msg(bool use_p_type, long type) const
 {
-    if(type == 0)
-        throw string("Couldn't set type: Zero is no valid message type");
+    if(!use_p_type)
+        type = default_type;
+    
     
     
     string msg_str;
