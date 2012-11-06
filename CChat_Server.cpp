@@ -8,6 +8,7 @@
 
 #include "CChat_Server.h"
 #include "CQueue.h"
+#include <sstream>
 
 void* accept_new_Clients(void* param)
 {
@@ -24,19 +25,12 @@ void* accept_new_Clients(void* param)
     while(true)
     {
         queue << "warte auf Client-Anfrage...";
-            //client_socket;
         CSocket client_socket = sock.accept();
-            // client_socket << "Hallo Test\n";
-            //queue << "Client-Anfrage angenommen";
         client_socket.setBuffer(8192);
-        cout << "Adresse:" << &client_socket << endl;
-            //client_socket >> rec;
-            //queue << rec;
-        // queue << "Setze Lese-Buffer auf 8192";
         queue << "client connected";
-        CClient *client = new CClient(++client_id, &client_socket); // Create a new client
+        CClient *client = new CClient(++client_id, client_socket); // Create a new client
         server->clients.push_back(client); // add the client to the list
-        server->client_thread.start(reinterpret_cast<void*>(client), client_processing);    // start a seperate thread for the new client
+        server->client_thread.start((void*)client, client_processing);    // start a seperate thread for the new client
         queue << "Thread gestartet!";
     }
     return NULL;
@@ -44,43 +38,47 @@ void* accept_new_Clients(void* param)
 
 void* client_processing(void* param)
 {
-    CThread thread;
-    CClient *myself = reinterpret_cast<CClient*>(param);
-        // CSocket sock = (myself->getSocket())->getSocket();
-    CSocket *sock = myself->getSocket();
-    CSocket sock2(sock->getSocket());
-    cout << "Adresse:" << sock << endl;
-        // CQueue queue(myself->getID());
+    CClient *myself = (CClient*)param;
     CQueue queue_log(8300);
-        // queue.set_type(3);
     queue_log.set_type(3);
     bool logout = false;
     string message;
-    while(!logout)
+    string command;
+    try
     {
-        queue_log << "Warte auf Nachricht";
-            //message = sock->recv();
-        sock2 >> message;
-        queue_log << "Nachricht empfangen";
-        if(message == "/usr_logout true")
+        while(!logout)
         {
-            logout = true;
-        queue_log << "Client hat sich ausgeloggt!";
+            queue_log << "Warte auf Nachricht";
+            myself->getSocket() >> message;
+            std::istringstream s(message);
+            do
+            {
+                string sub;
+                s >> sub;
+                if(sub.substr(0,1) == "/")
+                {
+                    command = sub;
+                    s >> sub;
+                    while(!((sub.substr(0,1)) == "/"))
+                        command += sub;
+                }
+                cout << "Command: " << command << endl;
+                if(message == "/usr_logout true\n")
+                {
+                    logout = true;
+                    break;
+                    queue_log << "Client hat sich ausgeloggt!";
+                }
+                queue_log << message;
+                myself->getSocket() << message;
+            }
+            while (s);
         }
-        queue_log << message;
-            //thread.start(reinterpret_cast<void*>(&message), processing_message);
-            //sock->send("Hallo\n");
-        sock2 << "Hallo\n";
     }
-    return NULL;
-}
-
-void* processing_message(void* param)
-{
-    string *message = reinterpret_cast<string*>(param);
-    CQueue queue(8300);
-    queue.set_type(3);
-    queue << *message;
-
+    catch(string e)
+    {
+        queue_log.set_type(2);
+        queue_log << e;
+    }
     return NULL;
 }

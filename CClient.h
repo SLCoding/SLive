@@ -18,17 +18,17 @@
 class CClient 
 {
 private:
-    CSocket *sock;
+    CSocket sock;
     int id;
     
 protected:
     
 public:
-    CClient(int, CSocket*);
-    void setSocket(CSocket*);
+    CClient(int, CSocket);
+    void setSocket(CSocket);
     void setID(int);
 
-    CSocket* getSocket();
+    CSocket getSocket();
     int getID();
 };
 

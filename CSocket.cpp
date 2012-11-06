@@ -23,7 +23,7 @@ CSocket::CSocket(int socket)
 
 CSocket::~CSocket()
 {
-    closeSocket();
+   ;
 }
 
 bool CSocket::is_valid() const
