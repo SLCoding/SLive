@@ -29,6 +29,7 @@ void* accept_new_Clients(void* param)
             // client_socket << "Hallo Test\n";
             //queue << "Client-Anfrage angenommen";
         client_socket.setBuffer(8192);
+        cout << "Adresse:" << &client_socket << endl;
             //client_socket >> rec;
             //queue << rec;
         // queue << "Setze Lese-Buffer auf 8192";
@@ -47,6 +48,8 @@ void* client_processing(void* param)
     CClient *myself = reinterpret_cast<CClient*>(param);
         // CSocket sock = (myself->getSocket())->getSocket();
     CSocket *sock = myself->getSocket();
+    CSocket sock2(sock->getSocket());
+    cout << "Adresse:" << sock << endl;
         // CQueue queue(myself->getID());
     CQueue queue_log(8300);
         // queue.set_type(3);
@@ -56,7 +59,8 @@ void* client_processing(void* param)
     while(!logout)
     {
         queue_log << "Warte auf Nachricht";
-        (*sock) >> message;
+            //message = sock->recv();
+        sock2 >> message;
         queue_log << "Nachricht empfangen";
         if(message == "/usr_logout true")
         {
@@ -65,7 +69,8 @@ void* client_processing(void* param)
         }
         queue_log << message;
             //thread.start(reinterpret_cast<void*>(&message), processing_message);
-        (*sock) << "Hallo\n";
+            //sock->send("Hallo\n");
+        sock2 << "Hallo\n";
     }
     return NULL;
 }
