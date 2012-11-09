@@ -24,13 +24,17 @@ using namespace std;
 class CThread
 {
 private:
-    list<Thread> threads;
+        //list<Thread> threads;
+        //Thread threads;
+    pthread_t *thread;
 protected:
     
 public:
     CThread();
-    int start(void*, void * (*start_routine)(void *));
-    int join(int id, void **thread_return);
+    pthread_t* start(void*, void * (*start_routine)(void *));
+    int join(void **thread_return);
+    int cancel(pthread_t *thread);
+        // pthread_t getThread(pthread_t *thread);
     // void exit(void *ret);
 };
 

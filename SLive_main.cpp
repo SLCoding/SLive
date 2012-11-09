@@ -86,11 +86,11 @@ int main()
     CMusic_Server music;
     CLogger logger;
     
-    int ret4 = logger.start(NULL, CLogger_run);
+    logger.start(NULL, CLogger_run);
     CServer_Manager manager;
     /* hole die Messagetypnummer aus dem ersten Parameter */
     
-    logger.join(ret4, NULL);
+    logger.join(NULL);
     
     return 0;
 }

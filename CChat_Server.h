@@ -20,11 +20,19 @@ void* accept_new_Clients(void* param);
 void* client_processing(void* param);
 void* client_messagequeue_processing(void* param);
 
+struct Client_processing
+{
+    CClient *client;
+    CThread *thread_processing;
+    CThread *thread_messagequeue;
+    pthread_t *thread_id_processing;
+    pthread_t *thread_id_messagequeue;
+};
+
 class CChat_Server : public CServer
 {
 private:
-    CThread client_thread;
-    list<CClient*> clients;
+    list<Client_processing> clients;
 protected:
     
 public:

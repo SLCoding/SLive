@@ -8,7 +8,9 @@
 
 #include "CChat_Server.h"
 #include "CQueue.h"
+#include <pthread.h>
 #include <sstream>
+#include <stdio.h>
 
 void* accept_new_Clients(void* param)
 {
@@ -16,7 +18,6 @@ void* accept_new_Clients(void* param)
     CQueue queue(8300);
     queue.set_type(3);
     int client_id = 8300;
-    string rec;
     CSocket sock;
     queue << "Socket erstellt...";
     sock.bind(8376);
@@ -28,18 +29,26 @@ void* accept_new_Clients(void* param)
         CSocket client_socket = sock.accept();
         client_socket.setBuffer(8192);
         queue << "client connected";
-        CClient *client = new CClient(++client_id, client_socket); // Create a new client
-        server->clients.push_back(client); // add the client to the list
-        server->client_thread.start((void*)client, client_processing);    // start a seperate thread for the new client
-        server->client_thread.start((void*)client, client_messagequeue_processing);    // start a seperate thread for the new client
+        
+        Client_processing client_obj;
+        client_obj.client = new CClient(++client_id, client_socket); // Create a new client
+        
+        client_obj.thread_messagequeue = new CThread; // create a new thread object for the new client
+        client_obj.thread_id_messagequeue = client_obj.thread_messagequeue->start((void*)client_obj.client, client_messagequeue_processing);// start a seperate thread for listening on the msg
+
+        client_obj.thread_processing = new CThread;
+        client_obj.thread_id_processing = client_obj.thread_processing->start((void*)&client_obj, client_processing);// start a seperate thread for processing incoming messages
+
         queue << "Thread gestartet!";
+        server->clients.push_back(client_obj); // add the client to the list
     }
-    return NULL;
+    pthread_exit((void*)0);
 }
 
 void* client_processing(void* param)
 {
-    CClient *myself = (CClient*)param;
+    Client_processing *myself_struct = (Client_processing*)param;
+    CClient *myself = myself_struct->client;
     CQueue queue_log(8300);
     CQueue client_queue(8302);
     client_queue.set_type(myself->getID());
@@ -52,8 +61,9 @@ void* client_processing(void* param)
     {
         while(!logout)
         {
-            queue_log << "Warte auf Nachricht";
+            
             myself->getSocket() >> message;
+            // parse message 
             std::istringstream s(message);
             do
             {
@@ -65,30 +75,36 @@ void* client_processing(void* param)
                     s >> sub;
                     while( ((sub.substr(0,1)) != "/") && (s))
                     {
-                        parameter += sub;
+                        parameter += sub + " ";
                         s >> sub;
                     }
                 }
-                cout << "Command: " << command << endl;
-                cout << "Parameter: " << parameter << endl;
+                
                 if(command == "/usr_logout")
                 {
                     if(parameter == "true")
                     {
                         logout = true;
-                        queue_log << "Client hat sich ausgeloggt!";
+                        queue_log << "Client " + std::to_string( myself->getID() ) + " hat sich ausgeloggt!";
                         myself->getSocket().closeSocket();
-                        break;
+                        // Send a kill-message to his brother thread
+                        CQueue queue(8301);
+                        queue.set_type(myself->getID());
+                        queue << "ENDE!!!";
+                        pthread_exit((void*)0);
                     }
+                }
+                if(command == "/usr_login")
+                {
+
                 }
                 if(command == "/send")
                 {
-                    client_queue << parameter;
+                    string ausgabe = "Client " + std::to_string( myself->getID() ) + " sendet " + parameter;
+                    queue_log << ausgabe;
                 }
                 command = "";
                 parameter = "";
-                if(logout)
-                    break;
             }
             while (s);
         }
@@ -97,8 +113,21 @@ void* client_processing(void* param)
     {
         queue_log.set_type(2);
         queue_log << e;
+        queue_log << "Client " + std::to_string( myself->getID() ) + " brach Verbindung ab";
+        if(e == "Client terminate connection!")
+        {
+                //queue_log << "Beende Threads...";
+            myself->getSocket().closeSocket();
+                //myself_struct->thread_messagequeue->cancel(myself_struct->thread_id_messagequeue);
+
+            CQueue queue(8301);
+            queue.set_type(myself->getID());
+            queue << "ENDE!!!";
+            myself_struct->thread_messagequeue->join(NULL);
+            pthread_exit((void*)0);
+        }
     }
-    return NULL;
+    pthread_exit((void*)0);
 }
 
 void* client_messagequeue_processing(void* param)
@@ -112,6 +141,11 @@ void* client_messagequeue_processing(void* param)
     while(true)
     {
         queue >> message;
+        if(message == "ENDE!!!")
+        {
+            queue_log << "Beende thread...";
+            pthread_exit((void*)0);
+        }
         myself->getSocket() << message;
     }
 }
@@ -123,5 +157,5 @@ void* message_dispatcher(void* param)
     CQueue logger(8300);
 
     
-    return NULL;
+    pthread_exit((void*)0);
 }

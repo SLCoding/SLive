@@ -13,15 +13,18 @@ CThread::CThread()
     ;
 }
 
-int CThread::start(void *param, void * (*start_routine)(void *))
+pthread_t* CThread::start(void *param, void * (*start_routine)(void *))
 {
     try
     {
-        Thread thread_object;
-        thread_object.thread = new pthread_t;
-        thread_object.thread_handle = pthread_create( thread_object.thread , NULL, start_routine, (void*) param);
-        threads.push_back(thread_object);
-        return thread_object.thread_handle;
+            //  Thread thread_object;
+            //thread_object.thread = new pthread_t;
+            // thread_object.thread_handle = pthread_create( thread_object.thread , NULL, start_routine, (void*) param);
+                    //  threads.push_back(thread_object);
+        thread = new pthread_t;
+        pthread_create( thread , NULL, start_routine, (void*) param);
+
+        return thread;
     }
     catch(exception e)
     {
@@ -29,23 +32,44 @@ int CThread::start(void *param, void * (*start_routine)(void *))
     }
 }
 
-int CThread::join(int id, void **thread_return)
+int CThread::join(void **thread_return)
 {
-    list<Thread>::const_iterator iterator;
-    for (iterator = threads.begin(); iterator != threads.end(); ++iterator)
-    {
-        if( (*iterator).thread_handle == id)
-        {
+        //list<Thread>::const_iterator iterator;
+        //for (iterator = threads.begin(); iterator != threads.end(); ++iterator)
+        //{
+        //if( (*iterator).thread_handle == id)
+        //{
             try
             {
-                return pthread_join( *((*iterator).thread), thread_return );
+                    //return pthread_join( *((*iterator).thread), thread_return );
+                return pthread_join(*thread, thread_return);
             }
             catch(exception e)
             {
                 throw e.what();
             }
-        }
-    }
+        //}
+        //}
+    return -1;
+}
+
+int CThread::cancel(pthread_t *thread)
+{
+        // list<Thread>::const_iterator iterator;
+        //for (iterator = threads.begin(); iterator != threads.end(); ++iterator)
+        //{
+        //if( (*iterator).thread_handle == id)
+        //{
+            try
+            {
+                return pthread_cancel(*thread);
+            }
+            catch(exception e)
+            {
+                throw e.what();
+            }
+        // }
+        //  }
     return -1;
 }
 
