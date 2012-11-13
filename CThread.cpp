@@ -73,6 +73,26 @@ int CThread::cancel(pthread_t *thread)
     return -1;
 }
 
+int CThread::cancel()
+{
+        // list<Thread>::const_iterator iterator;
+        //for (iterator = threads.begin(); iterator != threads.end(); ++iterator)
+        //{
+        //if( (*iterator).thread_handle == id)
+        //{
+    try
+    {
+        return pthread_cancel(*thread);
+    }
+    catch(exception e)
+    {
+        throw e.what();
+    }
+        // }
+        //  }
+    return -1;
+}
+
 /*
 void CThread::exit(void *ret)
 {

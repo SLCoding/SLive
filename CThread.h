@@ -33,7 +33,9 @@ public:
     CThread();
     pthread_t* start(void*, void * (*start_routine)(void *));
     int join(void **thread_return);
+    int cancel();
     int cancel(pthread_t *thread);
+    pthread_t* getThreadHandle() { return thread; }
         // pthread_t getThread(pthread_t *thread);
     // void exit(void *ret);
 };

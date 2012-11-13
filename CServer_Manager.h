@@ -14,6 +14,7 @@
 #include "CSocket.h"
 #include "CDatabase_Connection.h"
 #include "CServer.h"
+#include "CChat_Server.h"
 #include "CLogger.h"
 
 void* CServer_Manager_run(void* param);
@@ -21,7 +22,7 @@ void* CServer_Manager_run(void* param);
 class CServer_Manager : public CThread
 {
 private:
-    CServer *chat;
+    CChat_Server *chat;
     CServer *music;
     CDatabase_Connection *dbconn;
     int chat_thread_id;

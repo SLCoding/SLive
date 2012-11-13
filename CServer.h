@@ -19,7 +19,7 @@ private:
 protected:
     
 public:
-    
+    CServer() {;}
 };
 
 #endif /* defined(__SLive__CServer__) */

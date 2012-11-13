@@ -19,27 +19,31 @@
 void* accept_new_Clients(void* param);
 void* client_processing(void* param);
 void* client_messagequeue_processing(void* param);
+void* message_dispatcher(void* param);
 
 struct Client_processing
 {
     CClient *client;
     CThread *thread_processing;
     CThread *thread_messagequeue;
-    pthread_t *thread_id_processing;
-    pthread_t *thread_id_messagequeue;
+        // pthread_t *thread_id_processing;
+        //pthread_t *thread_id_messagequeue;
 };
 
 class CChat_Server : public CServer
 {
 private:
     list<Client_processing> clients;
+    pthread_t* message_dispatcher_obj;
 protected:
     
 public:
-    CChat_Server() {;}
+    CChat_Server();
     friend void* accept_new_Clients(void* param);
     friend void* client_processing(void* param);
     friend void* client_messagequeue_processing(void* param);
+    friend void* message_dispatcher(void* param);
+    void start_message_dispatcher();
 };
 
 #endif /* defined(__SLive__CChat_Server__) */

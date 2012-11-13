@@ -81,7 +81,6 @@ int main()
         cout << e << endl;
     }
      */
-    
     CChat_Server chat;
     CMusic_Server music;
     CLogger logger;

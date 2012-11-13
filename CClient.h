@@ -20,6 +20,7 @@ class CClient
 private:
     CSocket sock;
     int id;
+    bool login;
     
 protected:
     
@@ -30,6 +31,8 @@ public:
 
     CSocket getSocket();
     int getID();
+    bool getLoginStatus() { return login; }
+    void setLoginStatus(bool login) { this->login = login; }
 };
 
 #endif /* defined(__SLive__CClient__) */
