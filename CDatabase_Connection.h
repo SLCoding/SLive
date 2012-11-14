@@ -47,6 +47,7 @@ private:
 public:
     CDatabase_Connection();
     virtual ~CDatabase_Connection();
+    CDatabase_Connection(const CDatabase_Connection& rhs); // usually rhs: "Right Hand Side"
     // Elementfunktionen
     void setUsername(string);           // Setzt Benuternamen
     void setPassword(string);           // Setzt Passwort

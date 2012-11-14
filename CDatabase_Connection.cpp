@@ -38,6 +38,30 @@ CDatabase_Connection::~CDatabase_Connection()
 	}
 }
 
+CDatabase_Connection:: CDatabase_Connection(const CDatabase_Connection& rhs)
+{
+    try
+	{
+		mysql_init(&this->my);
+            //LoadDefaults();
+        this->setUsername(rhs.username);
+        this->setPassword(rhs.password);
+        this->setHost(rhs.host);
+        this->setPort(rhs.port);
+        this->setSocket(rhs.socket_name);
+
+		this->connected = false;
+		this->initialised = false;
+
+        this->mysql_res = NULL;
+        this->field = NULL;
+	}
+	catch(...)
+	{
+		cerr << "An unexpected error occured in function 'Copy-Constructor'!" << endl;
+	}
+}
+
     // Speichernde Elementfunktionen
 void CDatabase_Connection::setUsername(string name)
 {
