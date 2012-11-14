@@ -10,11 +10,12 @@
 #define __SLive__CMusic_Server__
 
 #include <iostream>
-#include "CServer.h"
+    //#include "CServer.h"
+#include "CThread.h"
 
 void *CMusik_Server_run(void *param);
 
-class CMusic_Server : public CServer
+class CMusic_Server : public CThread // CServer
 {
 private:
     

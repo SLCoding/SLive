@@ -14,10 +14,9 @@
 CServer_Manager::CServer_Manager()
 {
     chat = new CChat_Server;
-    music = new CMusic_Server;
+        // music = new CMusic_Server;
     dbconn = new CDatabase_Connection;
 
     pthread_t* chatid = chat->start(reinterpret_cast<void*>(chat), accept_new_Clients);
     chat->start_message_dispatcher();
-    chat->join(NULL);
 }

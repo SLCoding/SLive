@@ -33,6 +33,7 @@ class CSocket
         int buffer;
         bool is_valid() const;
         bool createSocket();                        // Create a specific socket
+        string ip;
     
     public:
         CSocket();
@@ -45,11 +46,12 @@ class CSocket
         string recv();                                          // receive message
         bool closeSocket();                                     // close the socket and terminate communication
         void setBuffer(int buffer_size = 1024);                 // Set the maximum buffer for receiving data / Minimum buffer size is 1024 / Maximum buffer size is 16384
-        int getBuffer();
-        int getSocket() { return socket_handle;}
+        const int getBuffer() const;
+        const int getSocket() const;
         const CSocket& operator << (const string& s) const;     // send the string
         const CSocket& operator << (const char* s) const;     // send the string
         const CSocket& operator >> (string& s);                 // receive data and store them in the string
+        const string getIP() const;
     
         // Client-functions
         bool connect(string address, int port);     // connect to the target computer

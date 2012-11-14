@@ -27,7 +27,8 @@ using namespace std;
 int main()
 {
     CLogger logger;
-    
+    CQueue log(8300);
+    log.set_type(3);
     logger.start(NULL, CLogger_run);
     CServer_Manager manager;
 

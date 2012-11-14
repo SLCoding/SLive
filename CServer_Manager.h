@@ -23,7 +23,7 @@ class CServer_Manager : public CThread
 {
 private:
     CChat_Server *chat;
-    CServer *music;
+        // CServer *music;
     CDatabase_Connection *dbconn;
     int chat_thread_id;
     int music_thread_id;

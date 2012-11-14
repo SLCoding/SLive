@@ -8,7 +8,7 @@
 
 #ifndef __SLive__CServer__
 #define __SLive__CServer__
-
+/*
 #include <iostream>
 #include "CThread.h"
 
@@ -21,5 +21,5 @@ protected:
 public:
     CServer() {;}
 };
-
+*/
 #endif /* defined(__SLive__CServer__) */
