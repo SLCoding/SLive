@@ -46,6 +46,7 @@ private:
     
 public:
     CDatabase_Connection();
+    CDatabase_Connection(string user, string password, string DB, string Host = "127.0.0.1", int port = 3306);
     virtual ~CDatabase_Connection();
     // Elementfunktionen
     void setUsername(string);           // Setzt Benuternamen
