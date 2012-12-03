@@ -3,7 +3,7 @@
 //  SLive
 //
 //  Created by Marcus Schütte on 14.11.12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 CLMM. All rights reserved.
 //
 
 #include "CSLiveDB.h"
@@ -28,12 +28,16 @@ bool CSLiveDB::checkUsername(string name)
     
 }
 
-map<string, string> CSLiveDB::getUserById(string id)
+sUser CSLiveDB::getUserById(string id)
 {
     string query = "SELECT * FROM user WHERE id = '" + id + "';";
     dbconn.query(query, query.length());
     map<string, string> result;
     result = dbconn.fetch_assoc();
+    
+    sUser usr;
+    usr.id = result["id"];
+    
     
     return result;
 }
@@ -52,21 +56,53 @@ list<map<string, string> > CSLiveDB::getBdylist(string id)
     string query = "SELECT * FROM buddy WHERE id = " + id + ";";
     dbconn.query(query, query.length());
     
-}
-map<string, string> CSLiveDB::getBdyByName(string id, string name)
-{
-
-
-}
-
-map<string, string> CSLiveDB::getConferenceById(string id)
-{
-
-}
-list<map<string, string> > CSLiveDB::getConferenceByUser(string id)
-{
+    list<map<string, string > > result;
+    for(int i=0; i<dbconn.affected_rows(); i++)
+    {
+        result.push_front(dbconn.fetch_assoc());
+    }
     
+    return result;
+}
+/*map<string, string> CSLiveDB::getBdyByName(string id, string name)
+{
+    string query = "SELECT * FROM user WHERE name LIKE '" + name + "';";
+    dbconn.query(query, query.length());
+    map<string, string> result;
+    result = dbconn.fetch_assoc();
     
+    return result;
+    
+}*/
+
+list<string> CSLiveDB::getConferenceById(int id)
+{
+    stringstream ss;
+    ss << id;
+    string query = "SELECT * FROM conference WHERE id=" + ss.str() + ";";
+    dbconn.query(query, query.length());
+    list<string> result;
+    for(int i=0; i<dbconn.affected_rows(); i++)
+    {
+        result.push_front(dbconn.fetch_assoc().first());
+    }
+    
+    return result;
+}
+
+list<string> CSLiveDB::getConferenceByUser(string id)
+{
+    stringstream ss;
+    ss << id;
+    string query = "SELECT * FROM conference WHERE id=" + ss.str() + ";";
+    dbconn.query(query, query.length());
+    list<map<string, string > > result;
+    for(int i=0; i<dbconn.affected_rows(); i++)
+    {
+        result.push_front(dbconn.fetch_assoc());
+    }
+    
+    return result;
 }
 
 list<map<string, string> > CSLiveDB::getLogByUser(string id)
