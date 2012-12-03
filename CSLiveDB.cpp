@@ -16,6 +16,247 @@ CSLiveDB::CSLiveDB(string user, string password, string DB, string Host, int por
 
 
 
+
+cUser::cUser(CSLiveDB db)
+{
+    this->db = db;
+}
+
+cUser::cUser(CSLiveDB db, int id, string name, string pwhash, string email)
+{
+    this->db = db;
+    this->id = id;
+    this->name = name;
+    this->pwhash = pwhash;
+    this->email = email;
+    this->conf_list = conf_list;
+    this->bdy_list = bdy_list;
+}
+
+
+cUser::cUser(CSLiveDB db, int id, string name, string pwhash, string email, list<cConference> conf_list, list<cUser> bdy_list)
+{
+    this->db = db;
+    this->id = id;
+    this->name = name;
+    this->pwhash = pwhash;
+    this->email = email;
+    this->conf_list = conf_list;
+    this->bdy_list = bdy_list;
+}
+
+
+int cUser::get_id()
+{
+    return this->id;
+}
+string cUser::get_name()
+{
+    return this->name;
+}
+string cUser::get_email()
+{
+    return this->email;
+}
+string cUser::get_server()
+{
+    return this->server;
+}
+list<cConference> cUser::get_confList()
+{
+    return this->conf_list;
+}
+list<cUser> cUser::get_bdyList()
+{
+    return this->bdy_list;
+}
+
+bool cUser::set_id(int id)
+{
+    stringstream query;
+    
+    query<<"UPDATE user SET id = " << id << " WHERE id = " << this->id << ";";
+    this->db.dbconn.query(query.str(), query.str().length());
+    
+    this->id = id;
+    return true;
+}
+bool cUser::set_name(string name)
+{
+    stringstream query;
+    
+    query<<"UPDATE user SET name = '" << name << "' WHERE id = " << this->id << ";";
+    this->db.dbconn.query(query.str(), query.str().length());
+    
+    this->name = name;
+    
+    return true;
+}
+bool cUser::set_email(string email)
+{
+    stringstream query;
+    
+    query<<"UPDATE user SET email = '" << email << "' WHERE id = " << this->id << ";";
+    this->db.dbconn.query(query.str(), query.str().length());
+    
+    this->email = email;
+    
+    return true;
+}
+bool cUser::set_server(string server)
+{
+    stringstream query;
+    
+    query<<"UPDATE user SET server = '" << server << "' WHERE id = " << this->id << ";";
+    this->db.dbconn.query(query.str(), query.str().length());
+    
+    
+    this->server = server;
+    
+    return true;
+}
+
+
+bool cUser::add_conf(string conf_id)
+{
+    stringstream query;
+    
+    query<<"INSERT INTO conference(id, user_id) VALUES('" << conf_id << "', " << this->id << ");";
+    this->db.dbconn.query(query.str(), query.str().length());
+    
+    this->conf_list.push_front(this->db.get_Conf(conf_id));
+    
+    return true;
+}
+bool cUser::add_conf(cConference conf)
+{
+    return this->add_conf(conf.get_id());
+    
+}
+
+bool cUser::add_bdy(int bdy_id)
+{
+    stringstream query;
+    
+    query<<"INSERT INTO buddy(user_id, bdy_id) VALUES(" << this->id << ", " << bdy_id << ");";
+    this->db.dbconn.query(query.str(), query.str().length());
+    
+    this->bdy_list.push_front(this->db.get_User(bdy_id));
+    
+    return true;
+}
+bool cUser::add_bdy(cUser bdy)
+{
+    return add_bdy(bdy.get_id());
+    
+}
+
+
+bool cUser::del_conf(string conf_id)
+{    
+    stringstream query;
+    
+    query<<"DELETE FROM conference WHERE id LIKE '"<< conf_id <<"'* AND user_id = "<< this->id <<";";
+    this->db.dbconn.query(query.str(), query.str().length());
+    
+    this->conf_list.remove(this->db.get_Conf(conf_id));
+    
+    return true;
+    
+}
+bool cUser::del_conf(cConference conf)
+{
+    return this->del_conf(conf.get_id());
+}
+
+bool cUser::del_bdy(int bdy_id)
+{
+    stringstream query;
+    
+    query<<"DELETE FROM buddy WHERE user_id = "<< this->id <<"'* AND bdy_id = "<< bdy_id <<";";
+    this->db.dbconn.query(query.str(), query.str().length());
+    
+    this->bdy_list.remove(this->db.get_User(bdy_id));
+    
+    return true;
+}
+bool cUser::del_bdy(cUser bdy)
+{
+    return this->del_bdy(bdy.get_id());
+}
+
+bool cUser::del_user()
+{
+    stringstream query;
+    query<<"DELETE FROM conference WHERE user_id = "<< this->id <<";";
+    this->db.dbconn.query(query.str(), query.str().length());
+    
+    query<<"DELETE FROM buddy WHERE user_id = "<< this->id <<";";
+    this->db.dbconn.query(query.str(), query.str().length());    
+    
+    query<<"DELETE FROM user WHERE id = "<< this->id <<";";
+    this->db.dbconn.query(query.str(), query.str().length());
+    
+    return true;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //"Search in Database" - methods
 bool CSLiveDB::checkUsername(string name)
 {

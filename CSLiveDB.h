@@ -15,8 +15,6 @@
 #include <list>
 #include <sstream>
 #include "CDatabase_Connection.h"
-#include "CSLiveDBConf.h"
-#include "CSLiveDBUser.h"
 using namespace std;
 
 
@@ -31,6 +29,9 @@ class cUser;
 
 class CSLiveDB
 {
+    friend class cUser;
+    friend class cConference;
+    
 private:
     CDatabase_Connection dbconn;
     
@@ -39,9 +40,8 @@ protected:
     
     
 public:
+    CSLiveDB();
     CSLiveDB(string user, string password, string DB, string Host = "127.0.0.1", int port = 3306);
-    
-    
     
     
     
@@ -62,11 +62,6 @@ public:
     
     cUser get_User(int id);
     cUser get_User(string name);
-    
-    
-    
-    
-    
 };
 
 
@@ -77,13 +72,15 @@ class cUser
     friend class CSLiveDB;
 private:
     cUser(CSLiveDB db);
-    cUser(CSLiveDB db, int id, string name, string email, string conf_list, string bdy_list);
+    cUser(CSLiveDB db, int id, string name, string pwhash, string email);
+    cUser(CSLiveDB db, int id, string name, string pwhash, string email, list<cConference> conf_list, list<cUser> bdy_list);
     
     
     CSLiveDB db;
     
     int id;
     string name;
+    string pwhash;
     string email;
     string server;
     list<cConference> conf_list;
@@ -98,7 +95,7 @@ public:
     string get_email();
     string get_server();
     list<cConference> get_confList();
-    list<cUser> get_usrList();
+    list<cUser> get_bdyList();
     
     bool set_id(int id);
     bool set_name(string name);
