@@ -127,7 +127,7 @@ class cConference
     friend class CSLiveDB;
 private:
     cConference(CSLiveDB db);
-    cConference(CSLiveDB db, string id, list<cUser>);
+    cConference(CSLiveDB db, string id, list<cUser> usr_list);
     
     
     CSLiveDB db;
@@ -142,7 +142,7 @@ public:
     list<cUser> get_usrList();
     
     bool set_id(string id);
-    bool set_usrList(list<cUser>);
+    //bool set_usrList(list<cUser>);
     
     
     bool add_usr(int usr_id);

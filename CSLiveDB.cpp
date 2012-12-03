@@ -215,6 +215,88 @@ bool cUser::del_user()
 
 
 
+cConference::cConference(CSLiveDB db)
+{
+    this->db = db;
+}
+cConference::cConference(CSLiveDB db, string id, list<cUser> usr_list)
+{
+    this->db  = db;
+    this->id = id;
+    this->usr_list = usr_list;
+}
+    
+
+string cConference::get_id()
+{
+    return this->id;
+}
+list<cUser> cConference::get_usrList()
+{
+    return this->usr_list;
+}
+  
+bool cConference::set_id(string id)
+{
+    stringstream query;
+    
+    query<<"UPDATE conference SET id = '" << id << "' WHERE id LIKE '" << this->id << "';";
+    this->db.dbconn.query(query.str(), query.str().length());
+    
+    this->id = id;
+    return true;
+
+}
+/*bool cConference::set_usrList(list<cUser>)
+{
+    
+}*/
+    
+    
+bool cConference::add_usr(int usr_id)
+{
+    stringstream query;
+    
+    query<<"INSERT INTO conference(id, user_id) VALUES('" << this->id << "', " << usr_id << ");";
+    this->db.dbconn.query(query.str(), query.str().length());
+    
+    this->usr_list.push_front(this->db.get_User(usr_id));
+    
+    return true;
+}
+bool cConference::add_usr(cUser usr)
+{
+    return this->add_usr(usr.get_id());
+}
+    
+bool cConference::del_usr(int usr_id)
+{
+    stringstream query;
+    
+    query<<"DELETE FROM conference WHERE id LIKE '"<< this->id <<"'* AND user_id = "<< usr_id <<";";
+    this->db.dbconn.query(query.str(), query.str().length());
+    
+    this->usr_list.remove(this->db.get_User(usr_id));
+    
+    return true;
+
+}
+bool cConference::del_usr(cUser usr)
+{
+    return this->del_usr(usr.get_id());
+}
+  
+bool cConference::del_conf()
+{
+    stringstream query;
+    
+    query<<"DELETE FROM conference WHERE id LIKE '"<< this->id <<"';";
+    this->db.dbconn.query(query.str(), query.str().length());
+    
+    return true;
+}
+    
+
 
 
 
