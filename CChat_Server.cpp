@@ -11,6 +11,7 @@
 #include <pthread.h>
 #include <sstream>
 #include <stdio.h>
+#include "CSLiveDB.h"
 
 CChat_Server::CChat_Server() /*: CServer()*/
 {
@@ -376,7 +377,7 @@ void* message_dispatcher(void* param)
                 }
                 else
                 {
-                    map<string, string> bdy_name = chat->database->getUserById(id_sender);
+                        //map<string, string> bdy_name = chat->database->getUserById(id_sender);
 
                     logger << "Sende Nachricht an " + id_recipient + " von sender " + id_sender + " " + message;
 
