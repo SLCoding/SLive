@@ -3,7 +3,10 @@
 //  SLive
 //
 //  Created by Marcus Schütte on 14.11.12.
+<<<<<<< HEAD
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+=======
+>>>>>>> dev-japortie
 //  Copyright (c) 2012 CLMM. All rights reserved.
 //
 
@@ -15,6 +18,12 @@ CSLiveDB::CSLiveDB(string user, string password, string DB, string Host, int por
     dbconn.connect();
 }
 
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> dev-japortie
 cUser::cUser(CSLiveDB db)
 {
     this->db = db;
@@ -337,6 +346,9 @@ bool cConference::del_conf()
 
 
 
+<<<<<<< HEAD
+>>>>>>> dev-japortie
+=======
 >>>>>>> dev-japortie
 //"Search in Database" - methods
 bool CSLiveDB::checkUsername(string name)
@@ -351,7 +363,11 @@ bool CSLiveDB::checkUsername(string name)
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 map<string, string> CSLiveDB::getUserById(string id)
+=======
+sUser CSLiveDB::getUserById(string id)
+>>>>>>> dev-japortie
 =======
 sUser CSLiveDB::getUserById(string id)
 >>>>>>> dev-japortie
@@ -362,11 +378,17 @@ sUser CSLiveDB::getUserById(string id)
     result = dbconn.fetch_assoc();
     
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> dev-japortie
     sUser usr;
     usr.id = result["id"];
     
     
+<<<<<<< HEAD
+>>>>>>> dev-japortie
+=======
 >>>>>>> dev-japortie
     return result;
 }
@@ -386,6 +408,7 @@ list<map<string, string> > CSLiveDB::getBdylist(string id)
     dbconn.query(query, query.length());
     
 <<<<<<< HEAD
+<<<<<<< HEAD
 }
 map<string, string> CSLiveDB::getBdyByName(string id, string name)
 {
@@ -402,6 +425,8 @@ list<map<string, string> > CSLiveDB::getConferenceByUser(string id)
     
     
 =======
+=======
+>>>>>>> dev-japortie
     list<map<string, string > > result;
     for(int i=0; i<dbconn.affected_rows(); i++)
     {
@@ -449,6 +474,9 @@ list<string> CSLiveDB::getConferenceByUser(string id)
     }
     
     return result;
+<<<<<<< HEAD
+>>>>>>> dev-japortie
+=======
 >>>>>>> dev-japortie
 }
 

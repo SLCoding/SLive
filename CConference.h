@@ -21,7 +21,10 @@ class CConference
 private:
     int id;
     CDatabase_Connection db_conn;
+<<<<<<< HEAD
         // CQueue client_queue;
+=======
+>>>>>>> dev-japortie
     CQueue client_queue;
     list<int> client_list;
     

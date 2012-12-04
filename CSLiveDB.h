@@ -3,7 +3,10 @@
 //  SLive
 //
 //  Created by Marcus Schütte on 14.11.12.
+<<<<<<< HEAD
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+=======
+>>>>>>> dev-japortie
 //  Copyright (c) 2012 CLMM. All rights reserved.
 //
 
@@ -14,23 +17,42 @@
 #include <map>
 #include <string>
 #include <list>
+<<<<<<< HEAD
 #include "CDatabase_Connection.h"
 using namespace std;
 
 class CSLiveDB
 {
+=======
+>>>>>>> dev-japortie
 #include <sstream>
 #include "CDatabase_Connection.h"
 using namespace std;
 
 
+<<<<<<< HEAD
 class cConference;
 class cUser;
 
+=======
+
+
+
+class cConference;
+class cUser;
+
+
+
+
+>>>>>>> dev-japortie
 class CSLiveDB
 {
     friend class cUser;
     friend class cConference;
+<<<<<<< HEAD
+=======
+    
+>>>>>>> dev-japortie
 private:
     CDatabase_Connection dbconn;
     
@@ -43,6 +65,7 @@ public:
     CSLiveDB(string user, string password, string DB, string Host = "127.0.0.1", int port = 3306);
     
     
+<<<<<<< HEAD
     //"Search in Database" - methods
     bool checkUsername(string name);
     
@@ -78,6 +101,9 @@ public:
     
 };
 
+=======
+    
+>>>>>>> dev-japortie
     cConference create_conf();
     cConference create_conf(string id);
     cConference create_conf(string id, list<cUser> usr_list);
@@ -188,4 +214,9 @@ public:
     
 };
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> dev-japortie
 #endif
