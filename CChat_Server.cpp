@@ -14,6 +14,8 @@
 
 CChat_Server::CChat_Server() /*: CServer()*/
 {
+    this->database = new CSLiveDB("", "", "", "", 0);
+
     this->thread_server_communication_incoming = new CThread;
     this->thread_server_communication_outgoing = new CThread;
 
@@ -29,14 +31,18 @@ void CChat_Server::start_message_dispatcher()
 void* accept_new_Clients(void* param)
 {
     CChat_Server *server = reinterpret_cast<CChat_Server*>(param);
+
     CQueue queue(8300);
-    queue.set_type(3);
-    int client_id = 8300;
+
     CSocket sock;
-        //queue << "Socket erstellt...";
+
+    int client_id = 8300;
+    
+    queue.set_type(3);
+    
     sock.bind(8376);
-        // queue << "Port auf Adresse gebunden...";
     sock.listen();
+    
     while(true)
     {
         queue << "warte auf Client-Anfrage...";
@@ -46,6 +52,8 @@ void* accept_new_Clients(void* param)
         
         Client_processing client_obj;
         client_obj.client = new CClient(++client_id, client_socket); // Create a new client
+
+        client_obj.db = server->database;
 
         client_obj.thread_processing = new CThread;
         client_obj.thread_processing->start((void*)&client_obj, client_processing);// start a seperate thread for processing incoming messages
@@ -59,15 +67,21 @@ void* accept_new_Clients(void* param)
 void* client_processing(void* param)
 {
     Client_processing *myself_struct = (Client_processing*)param;
+
     CClient *myself = myself_struct->client;
+
     CQueue queue_log(8300);
     CQueue client_queue(8302);
-    client_queue.set_type(5);
-    queue_log.set_type(3);
+
     bool logout = false;
+
     string message;
     string command;
     string parameter = "";
+
+    client_queue.set_type(5);
+    queue_log.set_type(3);
+    
     try
     {
         while(!logout)
@@ -103,9 +117,9 @@ void* client_processing(void* param)
                             myself->getSocket().closeSocket();
 
                             // Send a kill-message to his brother thread
-                                //CQueue queue(8301);
-                                //queue.set_type(myself->getID());
-                                //queue << "ENDE!!!";
+                            CQueue queue(8301);
+                            queue.set_type(myself->getID());
+                            queue << "ENDE!!!";
                             myself->setLoginStatus(false);
                             
                             pthread_exit((void*)0);
@@ -118,27 +132,34 @@ void* client_processing(void* param)
                     std::istringstream s(parameter);
                     s >> username;
                     s >> pw;
+
                     
                     //datenbankaufruf um username und pw zu überprüfen
                     // rufe id ab, setze client id manuell nach
                         // myself->setdID(...);
                         // speichere in db anmeldung auf diesem server!
-                        //  myself_struct->thread_messagequeue = new CThread; // create a new thread object for the new client
-                        //myself_struct->thread_messagequeue->start((void*)myself, client_messagequeue_processing);// start a seperate thread for listening on the msg
-                    myself->getSocket() << "true " + std::to_string( myself->getID() ) + "\n";
+                    myself_struct->thread_messagequeue = new CThread; // create a new thread object for the new client
+                    myself_struct->thread_messagequeue->start((void*)myself, client_messagequeue_processing);// start a seperate thread for listening on the msg
+                    myself->getSocket() << "/login 1 " + std::to_string( myself->getID() ) + "\n";
                     myself->setLoginStatus(true);
                 }
                 if(command == "/usr_register")
                 {
-                    
-                }
-                if(command == "/send")
-                {
-                    if(myself->getLoginStatus())
+                    string username, pw;
+                    std::istringstream s(parameter);
+                    bool name_in_use = true;
+
+                    s >> username;
+                    s >> pw;
+
+                    name_in_use = myself_struct->db->checkUsername(username);
+                    if(name_in_use)
                     {
-                        string ausgabe = "Client " + std::to_string( myself->getID() ) + " sendet " + parameter;
-                        queue_log << ausgabe;
-                        client_queue << std::to_string( myself->getID() ) + " " + parameter;
+                        myself->getSocket() << "/usr_register name_already_in_use\n";
+                    }
+                    else
+                    {
+                        myself->getSocket() << "/usr_register 1\n";
                     }
                 }
                 if(command == "/bdy_search")
@@ -187,18 +208,20 @@ void* client_processing(void* param)
 
                     }
                 }
-                if(command == "/conf_send")
+                if(command == "/conf_create")
                 {
                     if(myself->getLoginStatus())
                     {
 
                     }
                 }
-                if(command == "/conf_create")
+                if(command == "/conf_send")
                 {
                     if(myself->getLoginStatus())
                     {
-
+                        string ausgabe = "Client " + std::to_string( myself->getID() ) + " sendet " + parameter;
+                        queue_log << ausgabe;
+                        client_queue << std::to_string( myself->getID() ) + " " + parameter;
                     }
                 }
                 if(command == "/conf_add")
@@ -263,23 +286,26 @@ void* client_processing(void* param)
         if(e == "Client terminate connection!")
         {
             myself->getSocket().closeSocket();
-                //CQueue queue(8301);
-                //queue.set_type(myself->getID());
-                //queue << "ENDE!!!";
+            CQueue queue(8301);
+            queue.set_type(myself->getID());
+            queue << "ENDE!!!";
             myself->setLoginStatus(false);
             pthread_exit((void*)0);
         }
     }
     pthread_exit((void*)0);
 }
-/*
+
 void* client_messagequeue_processing(void* param)
 {
     CClient *myself = (CClient*)param;
+    
     CQueue queue_log(8300);
     CQueue queue(8301);
+    
     queue.set_type(myself->getID());
     queue_log.set_type(3);
+
     queue_log << "id:" + std::to_string(myself->getID());
 
     string message;
@@ -295,22 +321,27 @@ void* client_messagequeue_processing(void* param)
         myself->getSocket() << message;
     }
 }
-*/
-// verarbeitet die liste von zu sendenden nachrichten und leitet die nachrichten in die entsprechenden messagequeues weiter
+
+// verarbeitet die liste von zu sendenden nachrichten und leitet die nachrichten in die entsprechenden sockets weiter oder an einen zielserver
 void* message_dispatcher(void* param)
 {
     CChat_Server *chat = reinterpret_cast<CChat_Server*>(param);
+
     CQueue messages(8302);
     CQueue server2server(8303);
-    server2server.set_type(10);
-    messages.set_type(5);
-        //CQueue server2client(8301);
     CQueue logger(8300);
-    logger.set_type(3);
+
     string message;
     istringstream ss;
+
     bool found = false;
-    bool not_search = false;
+    bool search = true;
+    bool found_db = true;
+
+    server2server.set_type(10);
+    messages.set_type(5);
+    logger.set_type(3);
+
     while(true)
     {
         messages >> message;
@@ -322,6 +353,10 @@ void* message_dispatcher(void* param)
         s >> id_recipient;
         s >> message;
 
+        found = false;
+        found_db = true;
+        search = true;
+
         list<Client_processing>::const_iterator iterator;
         for (iterator = chat->clients.begin(); iterator != chat->clients.end(); ++iterator)
         {
@@ -329,30 +364,39 @@ void* message_dispatcher(void* param)
             {
                 if(iterator->client->getLoginStatus() == false)
                 {
-                        // todo:
-                        // überprüfe anmeldung wo anders, wenn nicht
-                        // speichere nachricht in datenbank ab für spätere übertragung
+                    // todo:
+                    // überprüfe anmeldung wo anders, wenn nicht
+                    // speichere nachricht in datenbank ab für spätere übertragung
+
+                    found_db = true; // oder false, db aufruf abhängig
                     chat->logout(iterator->client);
-                    not_search = true; // wenn nicht woanders angemeldet
+                    search = false; // wenn nicht woanders angemeldet
                     logger << "Nicht suchen...";
                     break;
                 }
-                logger << "Sende Nachricht an " + id_recipient + " von sender " + id_sender + " " + message;
+                else
+                {
+                    map<string, string> bdy_name = chat->database->getUserById(id_sender);
+                    
+                    logger << "Sende Nachricht an " + id_recipient + " von sender " + id_sender + " " + message;
                    
-                iterator->client->getSocket() << message;
-                found = true;
+                    iterator->client->getSocket() << "/conf_send " << id_recipient << " " << bdy_name[id_sender] << " " << message << "\n";
+                    found = true;
+                }
             }
         }
+        
+        if(found == true)
+            continue;
 
-        if((found == false) && (not_search == false))
+        if((found == false) && (search == true) && (found_db == true))
         {
-                // frage datenbank nach standort von user
+            // frage datenbank nach standort von user
             // bekomme server ip adresse
+            
             logger << "Client nicht gefunden, kontaktiere Server...leite Nachricht weiter...";
             server2server << id_recipient + " " + id_sender + " " + message + " " + "127.0.0.1"; // + serverip;
         }
-        found = false;
-        not_search = false;
     }
     pthread_exit((void*)0);
 }
@@ -362,12 +406,20 @@ void* server_communication_outgoing(void* param)
 {
     CQueue log(8300);
     CQueue msg(8303);
+    
+    list<CSocket> socks;
+    
+    string message2send;
+    string message;
+    string recipient;
+    string sender;
+    string ip;
+    
+    bool found = false;
+
     log.set_type(3);
     msg.set_type(10);
-    list<CSocket> socks;
-    string message2send;
-    string message, recipient, sender, ip;
-    bool found = false;
+    
     try
     {
         while(true)
@@ -377,7 +429,7 @@ void* server_communication_outgoing(void* param)
             log << "server_communication_outgoing hat message empfangen!!";
             std::istringstream ss(message2send);
             ss >> recipient >> sender >> message >> ip;
-
+            
             list<CSocket>::const_iterator iterator;
             for (iterator = socks.begin(); iterator != socks.end(); ++iterator)
             {
@@ -419,56 +471,102 @@ void* server_communication_outgoing(void* param)
 void* server_communication_incoming(void* param)
 {
     CChat_Server *chat = reinterpret_cast<CChat_Server*>(param);
+
     CQueue queue(8300);
-    queue.set_type(3);
+    
     CSocket sock;
+    
+    queue.set_type(3);
+
     sock.bind(8377);
     sock.listen();
+    
     while(true)
     {
         queue << "warte auf Server-Anfrage...";
         CSocket client_socket = sock.accept();
         client_socket.setBuffer(8192);
+
+        server incoming_server;
+        
         queue << "server connected";
         CThread *thread = new CThread;
-        thread->start(reinterpret_cast<void*>(&client_socket), messageForClient);
-        chat->incoming_messages.push_back(thread);
+        incoming_server.thread = thread;
+        incoming_server.sock = &client_socket;
+        incoming_server.chat = reinterpret_cast<void*>( chat );
+            // chat->incoming_messages.push_back(thread);
+        chat->server_list.push_back(incoming_server);
+        thread->start(reinterpret_cast<void*>(&incoming_server), messageForClient);
     }
     pthread_exit((void*)0);
 }
 
 void* messageForClient(void* param)
 {
-    CSocket *sock = reinterpret_cast<CSocket*>(param);
+    server *incoming_server = reinterpret_cast<server*>(param);
+    CChat_Server *chat = reinterpret_cast<CChat_Server*>(incoming_server->chat);
+
     CQueue log(8300);
-    string message2recipe;
-    string message, recipient, sender, ip;
     CQueue client(8301);
+
+    string message2recipe;
+    string message;
+    string recipient;
+    string sender;
+    string ip;
+
+    bool found = false;
+    
     log.set_type(3);
+
     try
     {
         while(true)
         {
             log << "warte auf eingehende message";
-            *sock >> message2recipe;
+            message2recipe = incoming_server->sock->recv();
             log << "message eingegangen";
             std::istringstream ss(message2recipe);
 
             ss >> recipient >> sender >> message;
+            list<Client_processing>::const_iterator iterator;
+            for (iterator = chat->clients.begin() ; iterator != chat->clients.end(); ++iterator)
+            {
+                if(iterator->client->getID() == atoi( recipient.c_str()) )
+                {
+                    log << "client gefunden!! ";
+                    log << "message " + message + " beim client " + recipient + " angekommen!";
+                    iterator->client->getSocket() << recipient + " " + sender + " " + message;
+                    log << "message gesendet";
+                    found = true;
+                }
+            }
+                //client.set_type( atoi(recipient.c_str()) );
 
-            client.set_type( atoi(recipient.c_str()) );
-            log << "message " + message + " beim client " + recipient + " angekommen!";
-            client << message;
+                //client << message;
         }
     }
     catch(string e)
     {
-        log.set_type(2);
-        log << e;
+        log.set_type(1);
+            // log << e;
         if(e == "Client terminate connection!")
         {
-            sock->closeSocket();
-            pthread_exit((void*)0);
+            log << "Server terminate connection!";
+
+            list<server>::const_iterator iterator;
+            for (iterator = chat->server_list.begin() ; iterator != chat->server_list.end(); ++iterator)
+            {
+                // if the iterator object and the server object equal
+                if((memcmp( reinterpret_cast<void*>( &iterator ),reinterpret_cast<void*>( incoming_server ), sizeof(server))) == 0)
+                {
+                    incoming_server->sock->closeSocket();
+                    // delete server object in the list
+                    chat->server_list.erase(iterator);
+                    // kill thread
+                    pthread_exit((void*)0);
+                }
+            }    
         }
     }
     pthread_exit((void*)0);
@@ -487,5 +585,4 @@ void CChat_Server::logout(CClient *client)
             this->clients.erase(iterator);
         }
     }
-
 }

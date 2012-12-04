@@ -10,19 +10,18 @@
 
 
 
-
 CConference::CConference(CDatabase_Connection p_db_conn)
 {
-    client_queue = CQueue(8301);
-    client_queue.set_type(1);
+        //client_queue = CQueue(8301);
+        //client_queue.set_type(1);
     this->db_conn = p_db_conn;
     
 }
 
 CConference::CConference(CDatabase_Connection p_db_conn, int p_id)
 {
-    client_queue = CQueue(8301);
-    client_queue.set_type(1);
+        //client_queue = CQueue(8301);
+        //client_queue.set_type(1);
     this->db_conn = p_db_conn;
     this->id = p_id;
     
@@ -32,8 +31,8 @@ CConference::CConference(CDatabase_Connection p_db_conn, int p_id)
 
 CConference::CConference(CDatabase_Connection p_db_conn, int p_id, list<int> p_client_list)
 {
-    client_queue = CQueue(8301);
-    client_queue.set_type(1);
+        //client_queue = CQueue(8301);
+        //client_queue.set_type(1);
     this->db_conn = p_db_conn;
     
     this->id = p_id;
@@ -68,7 +67,7 @@ bool CConference::send_msg(string message)
     
     for(I=this->client_list.begin(); I != this->client_list.end(); ++I)
     {
-        client_queue.send_msg(message, true, *I);
+            //client_queue.send_msg(message, true, *I);
     }
     
     return true;
