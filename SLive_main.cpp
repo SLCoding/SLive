@@ -7,19 +7,7 @@
 //
 
 #include "CServer_Manager.h"
-#include "CChat_Server.h"
-#include "CMusic_Server.h"
-#include "CClient.h"
-#include "CServer.h"
-#include "CSocket.h"
-#include "CDatabase_Connection.h"
-#include <iostream>
-#include <map>
-#include <string>
-#include <stdio.h>
-#include <sys/ipc.h>
-#include <sys/msg.h>
-
+#include "CLogger.h"
 #include "CQueue.h"
 
 using namespace std;

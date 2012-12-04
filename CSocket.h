@@ -34,6 +34,7 @@ class CSocket
         bool is_valid() const;
         bool createSocket();                        // Create a specific socket
         string ip;
+        string local_ip;
     
     public:
         CSocket();
@@ -51,7 +52,8 @@ class CSocket
         const CSocket& operator << (const string& s) const;     // send the string
         const CSocket& operator << (const char* s) const;     // send the string
         const CSocket& operator >> (string& s);                 // receive data and store them in the string
-        const string getIP() const;
+        const string getIP() const; // return the ip adress of the target
+        const string getLocalIP() const;
     
         // Client-functions
         bool connect(string address, int port);     // connect to the target computer

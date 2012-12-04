@@ -218,3 +218,15 @@ const int CSocket::getSocket() const
 {
     return socket_handle;
 }
+
+const string CSocket::getLocalIP() const
+{
+    char hostname[1024];
+    hostname[1023] = '\0';
+    gethostname(hostname, 1023);
+    
+    struct hostent *_host;
+    _host = gethostbyname(hostname);
+    memcpy( (char *)&host.sin_addr, _host->h_addr, _host->h_length );
+    return std::string( _host->h_addr );
+}

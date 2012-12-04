@@ -68,7 +68,7 @@ void* accept_new_Clients(void* param)
 void* client_processing(void* param)
 {
     Client_processing *myself_struct = (Client_processing*)param;
-
+    cUser *user;
     CClient *myself = myself_struct->client;
 
     CQueue queue_log(8300);
@@ -123,6 +123,8 @@ void* client_processing(void* param)
                             queue << "ENDE!!!";
                             myself->setLoginStatus(false);
 
+                            user->set_server("");
+
                             pthread_exit((void*)0);
                         }
                     }
@@ -134,15 +136,23 @@ void* client_processing(void* param)
                     s >> username;
                     s >> pw;
 
+                    bool login = myself_struct->db->checkUsername(username);
+                        //bool pw = myself_struct->db->
 
-                        //datenbankaufruf um username und pw zu überprüfen
-                        // rufe id ab, setze client id manuell nach
-                        // myself->setdID(...);
-                        // speichere in db anmeldung auf diesem server!
-                    myself_struct->thread_messagequeue = new CThread; // create a new thread object for the new client
-                    myself_struct->thread_messagequeue->start((void*)myself, client_messagequeue_processing);// start a seperate thread for listening on the msg
-                    myself->getSocket() << "/login 1 " + std::to_string( myself->getID() ) + "\n";
-                    myself->setLoginStatus(true);
+                    if(login == true)
+                    {
+                        user = &myself_struct->db->get_User(username);
+                        myself->setID(user.get_id());
+                        user.set_server( (myself->getSocket()).getLocalIP() );
+                        
+                        myself_struct->thread_messagequeue = new CThread; // create a new thread object for the new client
+                        myself_struct->thread_messagequeue->start((void*)myself, client_messagequeue_processing);// start a seperate thread for listening on the msg
+                        
+                        myself->getSocket() << "/login 1 " + std::to_string( myself->getID() ) + "\n";
+                        myself->setLoginStatus(true);
+                    }
+                    else
+                        myself->getSocket() << "/login 0 0\n";
                 }
                 if(command == "/usr_register")
                 {
@@ -160,6 +170,7 @@ void* client_processing(void* param)
                     }
                     else
                     {
+                        user = &myself_struct->db->create_User(username); // noch zu aktualisieren
                         myself->getSocket() << "/usr_register 1\n";
                     }
                 }
@@ -167,7 +178,7 @@ void* client_processing(void* param)
                 {
                     if(myself->getLoginStatus())
                     {
-
+                        
                     }
                 }
                 /* if(command == "/bdy_send")
