@@ -22,6 +22,7 @@ private:
     int id;
     CDatabase_Connection db_conn;
         // CQueue client_queue;
+    CQueue client_queue;
     list<int> client_list;
     
 protected:
