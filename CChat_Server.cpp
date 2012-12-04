@@ -381,7 +381,7 @@ void* message_dispatcher(void* param)
 
                     logger << "Sende Nachricht an " + id_recipient + " von sender " + id_sender + " " + message;
 
-                    iterator->client->getSocket() << "/conf_send " << id_recipient << " " << bdy_name[id_sender] << " " << message << "\n";
+                    iterator->client->getSocket() << "/conf_send " << id_recipient << " " << id_sender << " " << message << "\n";
                     found = true;
                 }
             }

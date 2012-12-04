@@ -14,9 +14,6 @@ CSLiveDB::CSLiveDB(string user, string password, string DB, string Host, int por
     dbconn.connect();
 }
 
-
-
-
 cUser::cUser(CSLiveDB db)
 {
     this->db = db;
@@ -298,47 +295,6 @@ bool cConference::del_conf()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     //"Search in Database" - methods
 bool CSLiveDB::checkUsername(string name)
 {
@@ -351,14 +307,14 @@ bool CSLiveDB::checkUsername(string name)
 
 }
 
-sUser CSLiveDB::getUserById(string id)
+cUser CSLiveDB::getUserById(string id)
 {
     string query = "SELECT * FROM user WHERE id = '" + id + "';";
     dbconn.query(query, query.length());
     map<string, string> result;
     result = dbconn.fetch_assoc();
 
-    sUser usr;
+    cUser usr;
     usr.id = result["id"];
 
 
