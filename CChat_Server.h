@@ -1,10 +1,10 @@
-//
-//  CChat_Server.h
-//  SLive
-//
-//  Created by Markus Scholl on 10.10.12.
-//  Copyright (c) 2012 CLMM. All rights reserved.
-//
+    //
+    //  CChat_Server.h
+    //  SLive
+    //
+    //  Created by Markus Scholl on 10.10.12.
+    //  Copyright (c) 2012 CLMM. All rights reserved.
+    //
 
 #ifndef __SLive__CChat_Server__
 #define __SLive__CChat_Server__
@@ -50,9 +50,9 @@ private:
     CThread *thread_server_communication_outgoing;
     CThread *thread_server_communication_incoming;
     CSLiveDB *database;
-    
+
 protected:
-    
+
 public:
     CChat_Server();
     friend void* accept_new_Clients(void* param);

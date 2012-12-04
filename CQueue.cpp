@@ -3,12 +3,16 @@
 //  SLive
 //
 //  Created by Marcus Schütte on 17.10.12.
-//  Copyright (c) 2012 CLMM. All rights reserved.
+//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 #include "CQueue.h"
 #include <iostream>
 
 
+CQueue::CQueue()
+{
+    
+}
 
 CQueue::CQueue(int queue_id)
 {

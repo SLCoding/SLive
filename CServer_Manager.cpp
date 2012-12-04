@@ -1,10 +1,10 @@
-//
-//  CServer_Manager.cpp
-//  SLive
-//
-//  Created by Markus Scholl on 10.10.12.
-//  Copyright (c) 2012 CLMM. All rights reserved.
-//
+    //
+    //  CServer_Manager.cpp
+    //  SLive
+    //
+    //  Created by Markus Scholl on 10.10.12.
+    //  Copyright (c) 2012 CLMM. All rights reserved.
+    //
 
 #include "CServer_Manager.h"
 #include "CChat_Server.h"

@@ -24,33 +24,6 @@ CDatabase_Connection::CDatabase_Connection()
 	}
 }
 
-    // Parameter-Konstruktor
-CDatabase_Connection::CDatabase_Connection(string user, string password, string DB, string Host, int Port)
-{
-    try
-    {
-        mysql_init(&my);
-        LoadDefaults();
-        setUsername(user);
-        setPassword(password);
-        setDB(DB);
-        setHost(Host);
-        setPort(Port);
-        
-        this->connected = false;
-        this->initialised = false;
-    
-    
-    
-    }
-    catch(...)
-    {
-		cerr << "An unexpected error occured in function 'Default-Constructor'!" << endl;
-    }
-
-
-}
-
     // Destruktor
 CDatabase_Connection::~CDatabase_Connection()
 {
