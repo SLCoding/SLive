@@ -3,10 +3,6 @@
 //  SLive
 //
 //  Created by Marcus Schütte on 17.10.12.
-<<<<<<< HEAD
-//  Copyright (c) 2012 Marcus Schütte. All rights reserved.
-=======
->>>>>>> dev-japortie
 //  Copyright (c) 2012 CLMM. All rights reserved.
 //
 #include "CQueue.h"

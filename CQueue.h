@@ -3,15 +3,7 @@
 //  SLive
 //
 //  Created by Marcus Schütte on 17.10.12.
-<<<<<<< HEAD
-<<<<<<< HEAD
-//  Copyright (c) 2012 Marcus Schütteå. All rights reserved.
-=======
 //  Copyright (c) 2012 CLMM. All rights reserved.
->>>>>>> dev-japortie
-=======
-//  Copyright (c) 2012 CLMM. All rights reserved.
->>>>>>> dev-japortie
 //
 
 #ifndef SLive_CQueue_h

@@ -8,16 +8,6 @@
 
 #include "CConference.h"
 
-<<<<<<< HEAD
-CConference::CConference(CDatabase_Connection p_db_conn)
-{
-        //client_queue = CQueue(8301);
-        //client_queue.set_type(1);
-=======
-
-
->>>>>>> dev-japortie
-
 CConference::CConference(CDatabase_Connection p_db_conn)
 {
     client_queue = CQueue(8301);
@@ -28,11 +18,6 @@ CConference::CConference(CDatabase_Connection p_db_conn)
 
 CConference::CConference(CDatabase_Connection p_db_conn, int p_id)
 {
-<<<<<<< HEAD
-        //client_queue = CQueue(8301);
-        //client_queue.set_type(1);
-=======
->>>>>>> dev-japortie
     client_queue = CQueue(8301);
     client_queue.set_type(1);
     this->db_conn = p_db_conn;
@@ -44,11 +29,6 @@ CConference::CConference(CDatabase_Connection p_db_conn, int p_id)
 
 CConference::CConference(CDatabase_Connection p_db_conn, int p_id, list<int> p_client_list)
 {
-<<<<<<< HEAD
-        //client_queue = CQueue(8301);
-        //client_queue.set_type(1);
-=======
->>>>>>> dev-japortie
     client_queue = CQueue(8301);
     client_queue.set_type(1);
     this->db_conn = p_db_conn;
@@ -80,21 +60,12 @@ bool CConference::remove_client(int p_id)
 
 bool CConference::send_msg(string message)
 {
-    
     list<int>::iterator I;
     
     for(I=this->client_list.begin(); I != this->client_list.end(); ++I)
     {
-<<<<<<< HEAD
-            //client_queue.send_msg(message, true, *I);
-=======
->>>>>>> dev-japortie
         client_queue.send_msg(message, true, *I);
     }
     
     return true;
-<<<<<<< HEAD
-=======
-    
->>>>>>> dev-japortie
 }

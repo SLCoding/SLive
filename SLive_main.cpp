@@ -27,7 +27,6 @@ using namespace std;
 int main()
 {
     CLogger logger;
-<<<<<<< HEAD
     CQueue log(8300);
     log.set_type(3);
     logger.start(NULL, CLogger_run);
@@ -36,20 +35,4 @@ int main()
     logger.join(NULL);
     
     return 0;
-=======
-    
-    int ret4 = logger.start(NULL, CLogger_run);
-    //CServer_Manager manager;
-    
-    CQueue log(8300);
-    getchar();
-    log.set_type(2);
-    log<<"Test";
-    
-    /* hole die Messagetypnummer aus dem ersten Parameter */
-    logger.join(ret4, NULL);
-    
-
-        return 0;
->>>>>>> dev-japortie
 }

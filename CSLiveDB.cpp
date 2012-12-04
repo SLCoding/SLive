@@ -3,10 +3,6 @@
 //  SLive
 //
 //  Created by Marcus Schütte on 14.11.12.
-<<<<<<< HEAD
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
-=======
->>>>>>> dev-japortie
 //  Copyright (c) 2012 CLMM. All rights reserved.
 //
 
@@ -18,12 +14,6 @@ CSLiveDB::CSLiveDB(string user, string password, string DB, string Host, int por
     dbconn.connect();
 }
 
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> dev-japortie
 cUser::cUser(CSLiveDB db)
 {
     this->db = db;
@@ -345,11 +335,6 @@ bool cConference::del_conf()
 
 
 
-
-<<<<<<< HEAD
->>>>>>> dev-japortie
-=======
->>>>>>> dev-japortie
 //"Search in Database" - methods
 bool CSLiveDB::checkUsername(string name)
 {
@@ -361,7 +346,7 @@ bool CSLiveDB::checkUsername(string name)
         return true;
     
 }
-
+/*
 <<<<<<< HEAD
 <<<<<<< HEAD
 map<string, string> CSLiveDB::getUserById(string id)
@@ -444,7 +429,8 @@ list<map<string, string> > CSLiveDB::getConferenceByUser(string id)
     
     return result;
     
-}*/
+}
+ 
 
 list<string> CSLiveDB::getConferenceById(int id)
 {
@@ -474,10 +460,6 @@ list<string> CSLiveDB::getConferenceByUser(string id)
     }
     
     return result;
-<<<<<<< HEAD
->>>>>>> dev-japortie
-=======
->>>>>>> dev-japortie
 }
 
 list<map<string, string> > CSLiveDB::getLogByUser(string id)
@@ -527,3 +509,4 @@ bool CSLiveDB::removeUserConf(string conf_id, string usr_id)
 {
     
 }
+*/

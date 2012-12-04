@@ -376,11 +376,11 @@ void* message_dispatcher(void* param)
                 }
                 else
                 {
-                    map<string, string> bdy_name = chat->database->getUserById(id_sender);
+                        //map<string, string> bdy_name = chat->database->getUserById(id_sender);
                     
                     logger << "Sende Nachricht an " + id_recipient + " von sender " + id_sender + " " + message;
                    
-                    iterator->client->getSocket() << "/conf_send " << id_recipient << " " << bdy_name[id_sender] << " " << message << "\n";
+                    iterator->client->getSocket() << "/conf_send " << id_recipient << " " << id_sender << " " << message << "\n";
                     found = true;
                 }
             }
