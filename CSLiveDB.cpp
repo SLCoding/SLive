@@ -8,11 +8,10 @@
 
 #include "CSLiveDB.h"
 
-CSLiveDB::CSLiveDB(string user, string password, string DB, string Host, int port)
-{
-    this->dbconn = CDatabase_Connection(user, password, DB, Host, port);
-    dbconn.connect();
-}
+
+
+
+
 
 cUser::cUser(CSLiveDB db)
 {
@@ -26,8 +25,6 @@ cUser::cUser(CSLiveDB db, int id, string name, string pwhash, string email)
     this->name = name;
     this->pwhash = pwhash;
     this->email = email;
-    this->conf_list = conf_list;
-    this->bdy_list = bdy_list;
 }
 
 
@@ -295,139 +292,107 @@ bool cConference::del_conf()
 
 
 
-    //"Search in Database" - methods
+
+
+
+CSLiveDB::CSLiveDB()
+{
+
+}
+
+CSLiveDB::CSLiveDB(string user, string password, string DB, string Host, int port)
+{
+    this->dbconn = CDatabase_Connection(user, password, DB, Host, port);
+    dbconn.connect();
+}
+
+
+cConference CSLiveDB::create_conf()
+{
+    return cConference(*this);
+}
+cConference CSLiveDB::create_conf(string id)
+{
+    cConference conf = cConference(*this);
+    conf.set_id(id);
+
+    return conf;
+}
+cConference CSLiveDB::create_conf(string id, list<cUser> usr_list)
+{
+    cConference conf = cConference(*this);
+    conf.set_id(id);
+
+    for(list<cUser>::iterator i = usr_list.begin(); i != usr_list.end(); i++)
+    {
+        conf.usr_list.push_front((*i));
+    }
+
+        //db
+
+    return conf;
+}
+
+cConference CSLiveDB::get_Conf(string id)
+{
+
+}
+
+
+
 bool CSLiveDB::checkUsername(string name)
 {
-    string query = "SELECT * FROM user WHERE name LIKE '" + name + "';";
-    dbconn.query(query, query.length());
-    if(dbconn.affected_rows() > 0)
+    stringstream query;
+
+    query<<"SELECT * FROM user WHERE name LIKE '" << name <<"';";
+    this->dbconn.query(query.str(), query.str().length());
+    if(this->dbconn.affected_rows() > 0)
         return false;
     else
         return true;
 
 }
 
-cUser CSLiveDB::getUserById(string id)
+cUser CSLiveDB::create_User(string name, string pw)
 {
-    string query = "SELECT * FROM user WHERE id = '" + id + "';";
-    dbconn.query(query, query.length());
-    map<string, string> result;
-    result = dbconn.fetch_assoc();
-
-    cUser usr;
-    usr.id = result["id"];
-
-
-    return result;
-}
-map<string, string> CSLiveDB::getUserByName(string name)
-{
-    string query = "SELECT * FROM user WHERE name LIKE '" + name + "';";
-    dbconn.query(query, query.length());
-    map<string, string> result;
-    result = dbconn.fetch_assoc();
-
-    return result;
-}
-
-list<map<string, string> > CSLiveDB::getBdylist(string id)
-{
-    string query = "SELECT * FROM buddy WHERE id = " + id + ";";
-    dbconn.query(query, query.length());
-
-    list<map<string, string > > result;
-    for(int i=0; i<dbconn.affected_rows(); i++)
+    if(this->checkUsername(name))
     {
-        result.push_front(dbconn.fetch_assoc());
+        stringstream query;
+        query<<"INSERT INTO user(name, pwhash, email) VALUES ('"<< name << "', '"<< pw << "', '');";
+        this->dbconn.query(query.str(), query.str().length());
+
+
+        return this->get_User(name);
+
     }
-
-    return result;
+    else
+        throw "Username already in use";
 }
-/*map<string, string> CSLiveDB::getBdyByName(string id, string name)
- {
- string query = "SELECT * FROM user WHERE name LIKE '" + name + "';";
- dbconn.query(query, query.length());
- map<string, string> result;
- result = dbconn.fetch_assoc();
-
- return result;
-
- }*/
-
-list<string> CSLiveDB::getConferenceById(int id)
+cUser CSLiveDB::create_User(string name, string pw, string email)
 {
-    stringstream ss;
-    ss << id;
-    string query = "SELECT * FROM conference WHERE id=" + ss.str() + ";";
-    dbconn.query(query, query.length());
-    list<string> result;
-    for(int i=0; i<dbconn.affected_rows(); i++)
-    {
-        result.push_front(dbconn.fetch_assoc().first());
-    }
-
-    return result;
+    cUser usr = this->create_User(name, pw);
+    usr.set_email(email);
+    return usr;
 }
 
-list<string> CSLiveDB::getConferenceByUser(string id)
+cUser CSLiveDB::get_User(int id)
 {
-    stringstream ss;
-    ss << id;
-    string query = "SELECT * FROM conference WHERE id=" + ss.str() + ";";
-    dbconn.query(query, query.length());
-    list<map<string, string > > result;
-    for(int i=0; i<dbconn.affected_rows(); i++)
-    {
-        result.push_front(dbconn.fetch_assoc());
-    }
+    stringstream query;
+    query << "SELECT * FROM user WHERE id = " << id << ";";
+    this->dbconn.query(query.str(), query.str().length());
 
-    return result;
-}
+    map<string, string> result = this->dbconn.fetch_assoc();
 
-list<map<string, string> > CSLiveDB::getLogByUser(string id)
-{
+    cUser usr = cUser(*this, atoi(result["id"].c_str()), result["name"] , result["pwhash"], result["email"]);
 
-}
-map<string, string> CSLiveDB::getLogById(string id)
-{
+    query.str("");
+    query<<"SELECT * FROM conference WHERE usr_id = " << id << ";";
+    this->dbconn.query(query.str(), query.str().length());
 
-}
-
-
-    //"create entry" - methods
-
-map <string, string> CSLiveDB::createUser(string name, string email, string password)
-{
-
-}
-bool CSLiveDB::createLog(string conf_id, string time, string log)
-{
-
-}
-bool CSLiveDB::createConference()
-{
-
-}
-
-bool CSLiveDB::add_Bdy(string usr_id, string bdy_id)
-{
-
-}
-bool CSLiveDB::add_usr(string conf_id, string usr_id)
-{
 
 
 }
-    //"remove entry" - methods
-bool CSLiveDB::removeUser(string usr_id)
-{
-
-}
-bool CSLiveDB::removeBdy(string usr_id, string bdy_id)
-{
-
-}
-bool CSLiveDB::removeUserConf(string conf_id, string usr_id)
+cUser CSLiveDB::get_User(string name)
 {
     
 }

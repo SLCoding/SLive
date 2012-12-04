@@ -10,7 +10,6 @@
 #define __SLive__CClient__
 
 #include <iostream>
-#include "CServer.h"
 #include "CSocket.h"
 
     // void* CClient_run(void *param);

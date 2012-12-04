@@ -13,7 +13,6 @@
 #include <list>
 #include "CSocket.h"
 #include "CDatabase_Connection.h"
-#include "CServer.h"
 #include "CChat_Server.h"
 #include "CLogger.h"
 

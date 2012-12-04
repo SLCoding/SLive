@@ -10,7 +10,6 @@
 #define __SLive__CChat_Server__
 
 #include <iostream>
-#include "CServer.h"
 #include "CSocket.h"
 #include "CConference.h"
 #include "CThread.h"

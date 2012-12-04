@@ -6,6 +6,20 @@
     //  Copyright (c) 2012 CLMM. All rights reserved.
     //
 
+
+    //login
+    //logging
+    //offline nachrichten
+    //
+
+
+
+
+
+
+
+
+
 #ifndef SLive_CSLiveDB_h
 #define SLive_CSLiveDB_h
 
@@ -14,6 +28,7 @@
 #include <string>
 #include <list>
 #include <sstream>
+#include <stdlib.h>
 #include "CDatabase_Connection.h"
 using namespace std;
 
@@ -55,10 +70,8 @@ public:
 
     bool checkUsername(string name);
 
-    cUser create_User(string name);
-    cUser create_User(string name, string email);
-    cUser create_User(int id, string name);
-    cUser create_User(int id, string name, string email);
+    cUser create_User(string name, string pw);
+    cUser create_User(string name, string pw, string email);
 
     cUser get_User(int id);
     cUser get_User(string name);
@@ -128,7 +141,7 @@ class cConference
 private:
     cConference(CSLiveDB db);
     cConference(CSLiveDB db, string id, list<cUser> usr_list);
-
+    cConference(CSLiveDB db, list<cUser> usr_list);
 
     CSLiveDB db;
 
@@ -150,7 +163,7 @@ public:
 
     bool del_usr(int usr_id);
     bool del_usr(cUser usr);
-
+    
     bool del_conf();
     
 };
