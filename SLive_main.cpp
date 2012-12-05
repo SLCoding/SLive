@@ -11,8 +11,6 @@
 #include "CDatabase_Connection.h"
 #include "CChat_Server.h"
 
-using namespace std;
-
 int main()
 {
     CLogger logger;

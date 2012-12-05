@@ -23,6 +23,7 @@ void* message_dispatcher(void* param);
 void* server_communication_outgoing(void* param);
 void* server_communication_incoming(void* param);
 void* messageForClient(void* param);
+void* logout(void* param);
 
 struct Client_processing
 {
@@ -48,6 +49,7 @@ private:
     pthread_t *message_dispatcher_obj;
     CThread *thread_server_communication_outgoing;
     CThread *thread_server_communication_incoming;
+    CThread *thread_logout;
     CSLiveDB *database;
 
 protected:
@@ -55,6 +57,7 @@ protected:
 public:
     CChat_Server();
     virtual ~CChat_Server();
+    
     friend void* accept_new_Clients(void* param);
     friend void* client_processing(void* param);
     friend void* client_messagequeue_processing(void* param);
@@ -62,7 +65,7 @@ public:
     friend void* server_communication_outgoing(void* param);
     friend void* server_communication_incoming(void* param);
     friend void* messageForClient(void* param);
-    void logout(CClient *client);
+    friend void* logout(void *param);
 };
 
 

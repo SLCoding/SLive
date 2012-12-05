@@ -19,9 +19,11 @@ CChat_Server::CChat_Server()
 
     this->thread_server_communication_incoming = new CThread;
     this->thread_server_communication_outgoing = new CThread;
+    this->thread_logout = new CThread;
 
     this->thread_server_communication_incoming->start(reinterpret_cast<void*>(this), server_communication_incoming);
     this->thread_server_communication_outgoing->start(NULL, server_communication_outgoing);
+    this->thread_logout->start(reinterpret_cast<void*>(this), logout);
 
     message_dispatcher_obj = this->start(reinterpret_cast<void*>(this), message_dispatcher);
     this->start(reinterpret_cast<void*>(this), accept_new_Clients);
@@ -49,15 +51,14 @@ CChat_Server::~CChat_Server()
     delete message_dispatcher_obj;
     delete thread_server_communication_incoming;
     delete thread_server_communication_outgoing;
+    delete thread_logout;
     delete database;
 }
 
 void* accept_new_Clients(void* param)
 {
     CChat_Server *server = reinterpret_cast<CChat_Server*>(param);
-
     CQueue queue(8300);
-
     CSocket sock;
 
     int client_id = 8300;
@@ -625,17 +626,25 @@ void* messageForClient(void* param)
     pthread_exit((void*)0);
 }
 
-void CChat_Server::logout(CClient *client)
+void* logout(void* param)
 {
+    CChat_Server *chat = reinterpret_cast<CChat_Server*>(param);
     CQueue log(8300);
     log.set_type(3);
     list<Client_processing>::const_iterator iterator;
-    for (iterator = this->clients.begin(); iterator != this->clients.end(); ++iterator)
+    while(true)
     {
-        if( iterator->client->getID() == client->getID())
+        log << "Clean up client-list...";
+        for (iterator = chat->clients.begin(); iterator != chat->clients.end(); ++iterator)
         {
-            log << "Client " + std::to_string( client->getID() ) + " hat sich ausgeloggt";
-            this->clients.erase(iterator);
+            if( iterator->db->get_User(iterator->client->getID()).get_server() == "")   // client ist nicht nirgendwo angemeldet
+            {
+                log << "Client " + std::to_string( iterator->client->getID() ) + " hat sich ausgeloggt";
+                chat->clients.erase(iterator);
+            }
+            sleep(1); // zur last und netzwerkreduzierung warte nach jedem client eine sekunde
         }
+        sleep(60); // sleep for 60 seconds
     }
+    pthread_exit((void*)0);
 }
