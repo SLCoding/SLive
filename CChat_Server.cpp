@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include "CSLiveDB.h"
 
-CChat_Server::CChat_Server() /*: CServer()*/
+CChat_Server::CChat_Server()
 {
     this->database = new CSLiveDB("", "", "", "", 0);
 
@@ -22,6 +22,9 @@ CChat_Server::CChat_Server() /*: CServer()*/
 
     this->thread_server_communication_incoming->start(reinterpret_cast<void*>(this), server_communication_incoming);
     this->thread_server_communication_outgoing->start(NULL, server_communication_outgoing);
+
+    message_dispatcher_obj = this->start(reinterpret_cast<void*>(this), message_dispatcher);
+    this->start(reinterpret_cast<void*>(this), accept_new_Clients);
 }
 
 CChat_Server::~CChat_Server()
@@ -47,11 +50,6 @@ CChat_Server::~CChat_Server()
     delete thread_server_communication_incoming;
     delete thread_server_communication_outgoing;
     delete database;
-}
-
-void CChat_Server::start_message_dispatcher()
-{
-    message_dispatcher_obj = this->start(reinterpret_cast<void*>(this), message_dispatcher);
 }
 
 void* accept_new_Clients(void* param)

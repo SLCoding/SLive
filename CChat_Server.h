@@ -62,7 +62,6 @@ public:
     friend void* server_communication_outgoing(void* param);
     friend void* server_communication_incoming(void* param);
     friend void* messageForClient(void* param);
-    void start_message_dispatcher();
     void logout(CClient *client);
 };
 

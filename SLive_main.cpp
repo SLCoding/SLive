@@ -20,15 +20,16 @@ int main()
     CChat_Server *chat;
     CDatabase_Connection *dbconn;
 
+    log.set_type(3);
+    logger.start(NULL, CLogger_run);
+
     chat = new CChat_Server;
     dbconn = new CDatabase_Connection;
 
-    log.set_type(3);
-    logger.start(NULL, CLogger_run);
-         
-    chat->start(reinterpret_cast<void*>(chat), accept_new_Clients);
-    chat->start_message_dispatcher();
-
     logger.join(NULL);
+
+    delete chat;
+    delete dbconn;
+    
     return 0;
 }
