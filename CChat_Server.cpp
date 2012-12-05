@@ -24,6 +24,31 @@ CChat_Server::CChat_Server() /*: CServer()*/
     this->thread_server_communication_outgoing->start(NULL, server_communication_outgoing);
 }
 
+CChat_Server::~CChat_Server()
+{
+    list<Client_processing>::iterator iterator1;
+    for (iterator1 = clients.begin(); iterator1 != clients.end(); ++iterator1)
+    {
+        delete iterator1->client;
+        delete iterator1->db;
+        delete iterator1->thread_processing;
+        clients.erase(iterator1);
+    }
+
+    list<server>::iterator iterator2;
+    for (iterator2 = server_list.begin(); iterator2 != server_list.end(); ++iterator2)
+    {
+        delete iterator2->sock;
+        delete iterator2->thread;
+        server_list.erase(iterator2);
+    }
+
+    delete message_dispatcher_obj;
+    delete thread_server_communication_incoming;
+    delete thread_server_communication_outgoing;
+    delete database;
+}
+
 void CChat_Server::start_message_dispatcher()
 {
     message_dispatcher_obj = this->start(reinterpret_cast<void*>(this), message_dispatcher);
@@ -120,9 +145,9 @@ void* client_processing(void* param)
                             myself->getSocket().closeSocket();
 
                                 // Send a kill-message to his brother thread
-                            CQueue queue(8301);
-                            queue.set_type(myself->getID());
-                            queue << "ENDE!!!";
+                                //CQueue queue(8301);
+                                //queue.set_type(myself->getID());
+                                //queue << "ENDE!!!";
                             myself->setLoginStatus(false);
 
                             user->set_server("");
@@ -146,8 +171,8 @@ void* client_processing(void* param)
                         myself->setID(user->get_id());
                         user->set_server( (myself->getSocket()).getLocalIP() );
                         
-                        myself_struct->thread_messagequeue = new CThread; // create a new thread object for the new client
-                        myself_struct->thread_messagequeue->start((void*)myself, client_messagequeue_processing);// start a seperate thread for listening on the msg
+                            //myself_struct->thread_messagequeue = new CThread; // create a new thread object for the new client
+                            //myself_struct->thread_messagequeue->start((void*)myself, client_messagequeue_processing);// start a seperate thread for listening on the msg
                         
                         myself->getSocket() << "/login 1 " + std::to_string( myself->getID() ) + "\n";
                         myself->setLoginStatus(true);
@@ -346,9 +371,9 @@ void* client_processing(void* param)
         if(e == "Client terminate connection!")
         {
             myself->getSocket().closeSocket();
-            CQueue queue(8301);
-            queue.set_type(myself->getID());
-            queue << "ENDE!!!";
+                //CQueue queue(8301);
+                //queue.set_type(myself->getID());
+                //queue << "ENDE!!!";
             myself->setLoginStatus(false);
             pthread_exit((void*)0);
         }
@@ -356,6 +381,7 @@ void* client_processing(void* param)
     pthread_exit((void*)0);
 }
 
+/*
 void* client_messagequeue_processing(void* param)
 {
     CClient *myself = (CClient*)param;
@@ -381,6 +407,7 @@ void* client_messagequeue_processing(void* param)
         myself->getSocket() << message;
     }
 }
+*/
 
     // verarbeitet die liste von zu sendenden nachrichten und leitet die nachrichten in die entsprechenden sockets weiter oder an einen zielserver
 void* message_dispatcher(void* param)
@@ -393,10 +420,6 @@ void* message_dispatcher(void* param)
 
     string message;
     istringstream ss;
-
-    bool found = false;
-    bool search = true;
-    bool found_db = true;
 
     server2server.set_type(10);
     messages.set_type(5);
@@ -413,49 +436,27 @@ void* message_dispatcher(void* param)
         s >> id_recipient;
         s >> message;
 
-        found = false;
-        found_db = true;
-        search = true;
-
         list<Client_processing>::const_iterator iterator;
         for (iterator = chat->clients.begin(); iterator != chat->clients.end(); ++iterator)
         {
             if( iterator->client->getID() == atoi(id_recipient.c_str()))
             {
-                if(iterator->client->getLoginStatus() == false)
+                cUser temp = chat->database->get_User(iterator->client->getID()); // hole daten für empfänger aus datenbank
+                if(temp.get_server() == (iterator->client->getSocket()).getLocalIP()) //user ist lokal angemeldet
                 {
-                        // todo:
-                        // überprüfe anmeldung wo anders, wenn nicht
-                        // speichere nachricht in datenbank ab für spätere übertragung
-
-                    found_db = true; // oder false, db aufruf abhängig
-                    chat->logout(iterator->client);
-                    search = false; // wenn nicht woanders angemeldet
-                    logger << "Nicht suchen...";
-                    break;
+                    logger << "Sende Nachricht an " + id_recipient + " von sender " + id_sender + " " + message;
+                    iterator->client->getSocket() << "/conf_send " << id_recipient << " " << id_sender << " " << message << "\n";
+                }
+                else if(temp.get_server() != "")    // user ist auf entferntem rechner angemeldet
+                {
+                    logger << "Client nicht lokal angemeldet, kontaktiere Server...leite Nachricht weiter...";
+                    server2server << id_recipient + " " + id_sender + " " + message + " " + temp.get_server();
                 }
                 else
                 {
-                        //map<string, string> bdy_name = chat->database->getUserById(id_sender);
-
-                    logger << "Sende Nachricht an " + id_recipient + " von sender " + id_sender + " " + message;
-
-                    iterator->client->getSocket() << "/conf_send " << id_recipient << " " << id_sender << " " << message << "\n";
-                    found = true;
+                        // TODO nicht angemeldet, daten in db hinterlegen
                 }
             }
-        }
-
-        if(found == true)
-            continue;
-
-        if((found == false) && (search == true) && (found_db == true))
-        {
-                // frage datenbank nach standort von user
-                // bekomme server ip adresse
-
-            logger << "Client nicht gefunden, kontaktiere Server...leite Nachricht weiter...";
-            server2server << id_recipient + " " + id_sender + " " + message + " " + "127.0.0.1"; // + serverip;
         }
     }
     pthread_exit((void*)0);
@@ -504,7 +505,7 @@ void* server_communication_outgoing(void* param)
 
             if(found == false)
             {
-                    // no ip adress found, open a new connection
+                // no ip adress found, open a new connection
                 CSocket newsock;
                 log << "baue verbindung zu server auf...";
                 newsock.connect(ip, 8377);
@@ -554,7 +555,6 @@ void* server_communication_incoming(void* param)
         incoming_server.thread = thread;
         incoming_server.sock = &client_socket;
         incoming_server.chat = reinterpret_cast<void*>( chat );
-            // chat->incoming_messages.push_back(thread);
         chat->server_list.push_back(incoming_server);
         thread->start(reinterpret_cast<void*>(&incoming_server), messageForClient);
     }
@@ -567,13 +567,11 @@ void* messageForClient(void* param)
     CChat_Server *chat = reinterpret_cast<CChat_Server*>(incoming_server->chat);
 
     CQueue log(8300);
-    CQueue client(8301);
 
     string message2recipe;
     string message;
     string recipient;
     string sender;
-    string ip;
 
     bool found = false;
 
@@ -596,14 +594,11 @@ void* messageForClient(void* param)
                 {
                     log << "client gefunden!! ";
                     log << "message " + message + " beim client " + recipient + " angekommen!";
-                    iterator->client->getSocket() << recipient + " " + sender + " " + message;
+                    iterator->client->getSocket() << "/conf_send " + recipient + " " + sender + " " + message;
                     log << "message gesendet";
                     found = true;
                 }
             }
-                //client.set_type( atoi(recipient.c_str()) );
-
-                //client << message;
         }
     }
     catch(string e)
@@ -617,13 +612,13 @@ void* messageForClient(void* param)
             list<server>::const_iterator iterator;
             for (iterator = chat->server_list.begin() ; iterator != chat->server_list.end(); ++iterator)
             {
-                    // if the iterator object and the server object equal
+                // if the iterator object and the server object equal
                 if((memcmp( reinterpret_cast<void*>( &iterator ),reinterpret_cast<void*>( incoming_server ), sizeof(server))) == 0)
                 {
                     incoming_server->sock->closeSocket();
-                        // delete server object in the list
+                    // delete server object in the list
                     chat->server_list.erase(iterator);
-                        // kill thread
+                    // kill thread
                     pthread_exit((void*)0);
                 }
             }    

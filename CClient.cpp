@@ -7,18 +7,6 @@
 //
 
 #include "CClient.h"
-/*
-void* CClient_run(void *param)
-{
-    while(1)
-    {
-        int i = 0;
-        for(i = 0; i < 100; i++)
-             printf("CClient: %d\n", i);
-        i = 0;
-    }
-}
-*/
 
 CClient::CClient(int id, CSocket sock)
 {

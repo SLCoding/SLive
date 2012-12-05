@@ -28,7 +28,7 @@ struct Client_processing
 {
     CClient *client;
     CThread *thread_processing;
-    CThread *thread_messagequeue;
+        //CThread *thread_messagequeue;
     CSLiveDB *db;
 };
 
@@ -54,6 +54,7 @@ protected:
 
 public:
     CChat_Server();
+    virtual ~CChat_Server();
     friend void* accept_new_Clients(void* param);
     friend void* client_processing(void* param);
     friend void* client_messagequeue_processing(void* param);
