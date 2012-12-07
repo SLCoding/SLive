@@ -637,7 +637,7 @@ void* logout(void* param)
         log << "Clean up client-list...";
         for (iterator = chat->clients.begin(); iterator != chat->clients.end(); ++iterator)
         {
-            if( iterator->db->get_User(iterator->client->getID()).get_server() == "")   // client ist nicht nirgendwo angemeldet
+            if( iterator->db->get_User(iterator->client->getID()).get_server() == "")   // client ist nicht irgendwo angemeldet
             {
                 log << "Client " + std::to_string( iterator->client->getID() ) + " hat sich ausgeloggt";
                 chat->clients.erase(iterator);
