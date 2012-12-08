@@ -12,6 +12,7 @@
 #include <sstream>
 #include <stdio.h>
 #include "CSLiveDB.h"
+#include <time.h>
 
 CChat_Server::CChat_Server()
 {
@@ -215,7 +216,12 @@ void* client_processing(void* param)
                 {
                     if(myself->getLoginStatus())
                     {
+                        string user_id;
+                        string answer = "/bdy_info";
+                        s >> user_id;
 
+                        answer += " " + user_id + " " + myself_struct->db->get_User(atoi(user_id.c_str())).get_name() + "\n";
+                        myself->getSocket() << answer;
                     }
                 }
                 if(command == "/bdy_add")
@@ -285,8 +291,14 @@ void* client_processing(void* param)
                 {
                     if(myself->getLoginStatus())
                     {
-                        
-                   
+                        list <cUser> userlist;
+                        string user;
+                        while(s)
+                        {
+                            s >> user;
+                            userlist.push_back(myself_struct->db->get_User(atoi(user.c_str())));
+                        }
+                        myself_struct->db->create_conf("", userlist);   // todo schütte nach id befragen!!
                     }
                 }
                 if(command == "/conf_send")
@@ -304,7 +316,7 @@ void* client_processing(void* param)
                         list<cUser>::iterator iterator;
                         for (iterator = userliste.begin(); iterator != userliste.end(); ++iterator)
                         {
-                            client_queue << std::to_string( iterator->get_id() ) + " " + parameter;
+                            client_queue << conf_id + " " + std::to_string( myself->getID() ) + " " + std::to_string( iterator->get_id() ) + " " + parameter;
                         }
                     }
                 }
@@ -312,14 +324,22 @@ void* client_processing(void* param)
                 {
                     if(myself->getLoginStatus())
                     {
-
+                        string conf_id;
+                        string user_id;
+                        s >> conf_id;
+                        s >> user_id;
+                        myself_struct->db->get_Conf(conf_id).add_usr(atoi(user_id.c_str())); // holt cConference objekt aus der datenbank und fügt user hinzu
                     }
                 }
                 if(command == "/conf_remove")
                 {
                     if(myself->getLoginStatus())
                     {
-
+                        string conf_id;
+                        string user_id;
+                        s >> conf_id;
+                        s >> user_id;
+                        myself_struct->db->get_Conf(conf_id).del_usr(atoi(user_id.c_str())); // holt cConference objekt aus der datenbank und entfernt user
                     }
                 }
                 if(command == "/conf_list")
@@ -333,7 +353,17 @@ void* client_processing(void* param)
                 {
                     if(myself->getLoginStatus())
                     {
-
+                        string conf_id;
+                        string answer = "/conf_get_user";
+                        s >> conf_id;
+                        cConference conference = myself_struct->db->get_Conf(conf_id);
+                        list <cUser> userliste = conference.get_usrList();
+                        list<cUser>::iterator iterator;
+                        for (iterator = userliste.begin(); iterator != userliste.end(); ++iterator)
+                        {
+                            answer += " " + std::to_string(iterator->get_id());
+                        }
+                        myself->getSocket() << answer + "\n";
                     }
                 }
                 if(command == "/conf_getProtocol")
@@ -413,27 +443,33 @@ void* message_dispatcher(void* param)
 {
     CChat_Server *chat = reinterpret_cast<CChat_Server*>(param);
 
+    CQueue logger(8300);
     CQueue messages(8302);
     CQueue server2server(8303);
-    CQueue logger(8300);
 
     string message;
     istringstream ss;
 
-    server2server.set_type(10);
-    messages.set_type(5);
     logger.set_type(3);
+    messages.set_type(5);
+    server2server.set_type(10);
 
     while(true)
     {
         messages >> message;
         std::istringstream s(message);
         string id_sender;
+        string conf_id;
         string id_recipient;
         string message;
+        string zeit;
+
+        s >> conf_id;
         s >> id_sender;
         s >> id_recipient;
         s >> message;
+
+        cUser sender = chat->database->get_User(atoi(id_sender.c_str())); // hole daten für sender aus datenbank
 
         list<Client_processing>::const_iterator iterator;
         for (iterator = chat->clients.begin(); iterator != chat->clients.end(); ++iterator)
@@ -444,12 +480,12 @@ void* message_dispatcher(void* param)
                 if(temp.get_server() == (iterator->client->getSocket()).getLocalIP()) //user ist lokal angemeldet
                 {
                     logger << "Sende Nachricht an " + id_recipient + " von sender " + id_sender + " " + message;
-                    iterator->client->getSocket() << "/conf_send " << id_recipient << " " << id_sender << " " << message << "\n";
+                    iterator->client->getSocket() << "/conf_send " << conf_id << " " << zeit << " " <<  sender.get_name() << " " << message << "\n";
                 }
                 else if(temp.get_server() != "")    // user ist auf entferntem rechner angemeldet
                 {
                     logger << "Client nicht lokal angemeldet, kontaktiere Server...leite Nachricht weiter...";
-                    server2server << id_recipient + " " + id_sender + " " + message + " " + temp.get_server();
+                    server2server << conf_id << " " << id_recipient + " " + id_sender + " " + message + " " + temp.get_server();
                 }
                 else
                 {
@@ -474,6 +510,7 @@ void* server_communication_outgoing(void* param)
     string recipient;
     string sender;
     string ip;
+    string conf_id;
 
     bool found = false;
 
@@ -488,7 +525,7 @@ void* server_communication_outgoing(void* param)
             msg >> message2send;
             log << "server_communication_outgoing hat message empfangen!!";
             std::istringstream ss(message2send);
-            ss >> recipient >> sender >> message >> ip;
+            ss >> conf_id >> recipient >> sender >> message >> ip;
 
             list<CSocket>::const_iterator iterator;
             for (iterator = socks.begin(); iterator != socks.end(); ++iterator)
@@ -509,7 +546,7 @@ void* server_communication_outgoing(void* param)
                 log << "baue verbindung zu server auf...";
                 newsock.connect(ip, 8377);
                 socks.push_back(newsock);
-                newsock << recipient + " " + sender + " " + message;
+                newsock << conf_id << recipient + " " + sender + " " + message;
             }
             found = false;
             recipient = sender = message = "";
@@ -569,8 +606,10 @@ void* messageForClient(void* param)
 
     string message2recipe;
     string message;
-    string recipient;
-    string sender;
+    string id_recipient;
+    string id_sender;
+    string conf_id;
+    string zeit;
 
     bool found = false;
 
@@ -585,15 +624,18 @@ void* messageForClient(void* param)
             log << "message eingegangen";
             std::istringstream ss(message2recipe);
 
-            ss >> recipient >> sender >> message;
+            ss >> conf_id >> id_recipient >> id_sender >> message;
+
+            cUser sender = chat->database->get_User(atoi(id_sender.c_str())); // hole daten für sender aus datenbank
+
             list<Client_processing>::const_iterator iterator;
             for (iterator = chat->clients.begin() ; iterator != chat->clients.end(); ++iterator)
             {
-                if(iterator->client->getID() == atoi( recipient.c_str()) )
+                if(iterator->client->getID() == atoi( id_recipient.c_str()) )
                 {
                     log << "client gefunden!! ";
-                    log << "message " + message + " beim client " + recipient + " angekommen!";
-                    iterator->client->getSocket() << "/conf_send " + recipient + " " + sender + " " + message;
+                    log << "message " + message + " beim client " + id_recipient + " angekommen!";
+                    iterator->client->getSocket() << "/conf_send " << conf_id << " " << zeit << " " <<  sender.get_name() << " " << message << "\n";
                     log << "message gesendet";
                     found = true;
                 }
