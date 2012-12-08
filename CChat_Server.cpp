@@ -1,10 +1,10 @@
-    //
-    //  CChat_Server.cpp
-    //  SLive
-    //
-    //  Created by Markus Scholl on 10.10.12.
-    //  Copyright (c) 2012 CLMM. All rights reserved.
-    //
+//
+//  CChat_Server.cpp
+//  SLive
+//
+//  Created by Markus Scholl on 10.10.12.
+//  Copyright (c) 2012 CLMM. All rights reserved.
+//
 
 #include "CChat_Server.h"
 #include "CQueue.h"
@@ -159,8 +159,7 @@ void* client_processing(void* param)
                 if(command == "/usr_login")
                 {
                     string username, pw;
-                    s >> username;
-                    s >> pw;
+                    s >> username >> pw;
 
                     bool login = myself_struct->db->checkUsername(username);
                         //bool pw = myself_struct->db->
@@ -185,9 +184,7 @@ void* client_processing(void* param)
                     string username, pw, email;
                     bool name_in_use = true;
 
-                    s >> username;
-                    s >> pw;
-                    s >> email;
+                    s >> username >> pw >> email;
 
                     name_in_use = myself_struct->db->checkUsername(username);
                     if(name_in_use)
@@ -464,10 +461,7 @@ void* message_dispatcher(void* param)
         string message;
         string zeit;
 
-        s >> conf_id;
-        s >> id_sender;
-        s >> id_recipient;
-        s >> message;
+        s >> conf_id >> id_sender >> id_recipient >> message;
 
         cUser sender = chat->database->get_User(atoi(id_sender.c_str())); // hole daten für sender aus datenbank
 

@@ -13,7 +13,6 @@ CClient::CClient(int id, CSocket sock)
     this->sock = sock;
     this->id = id;
     this->login = false;
-    this->logout = false;
 }
 
 void CClient::setSocket(CSocket sock)
