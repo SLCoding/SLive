@@ -13,11 +13,6 @@
 
 
 
-
-
-
-
-
 #ifndef SLive_CSLiveDB_h
 #define SLive_CSLiveDB_h
 
@@ -30,9 +25,6 @@
 #include "CDatabase_Connection.h"
 #include "md5.h"
 using namespace std;
-
-
-
 
 
 class cConference;

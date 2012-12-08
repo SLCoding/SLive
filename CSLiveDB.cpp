@@ -147,7 +147,8 @@ bool cUser::logout()
 {
     this->set_server("");
     this->set_status(OFFLINE);
-    return true;    
+    return true;
+    
 }
 
 
@@ -421,7 +422,7 @@ cUser CSLiveDB::create_User(string name, string pw)
     if(this->checkUsername(name))
     {
         stringstream query;
-        query<<"INSERT INTO user(name, pwhash, email) VALUES ('"<< name << "', '"<< pw << "', '');";
+        query<<"INSERT INTO user(name, pwhash, email) VALUES ('"<< name << "', '"<< md5(pw) << "', '');";
         this->dbconn.query(query.str(), query.str().length());
         
         
@@ -478,20 +479,11 @@ cUser CSLiveDB::login(long id, string pw, string server)
         usr.set_server(server);
         usr.set_status(ONLINE);
     }
+    else {
+        throw 1;
+    }
     
     return usr;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
