@@ -7,12 +7,29 @@
 //
 #include "CQueue.h"
 #include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 
 CQueue::CQueue()
 {
+    default_type = 1;
+    //create 2 queues
+    //first for sending messages
+    //second for sending following parts of a message
+    //
+    // this is required for maintaining order of the messages
     
+    srand(time(NULL));
+    long queue_id = rand();
+    queue_ref = msgget(queue_id,  IPC_CREAT | 0666);
+    queue_cont_ref = msgget(1111, IPC_CREAT | 0666);
+    
+    if(queue_ref == -1 || queue_cont_ref == -1)
+        throw "Couldn't create message queue: " + string(strerror(errno));
 }
+
 
 CQueue::CQueue(int queue_id)
 {
