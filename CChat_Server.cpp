@@ -143,6 +143,7 @@ void* client_processing(void* param)
                             logout = true;
                             queue_log << "Client " + std::to_string( myself->getID() ) + " hat sich ausgeloggt!";
                             myself->getSocket().closeSocket();
+                            user->logout();
 
                                 // Send a kill-message to his brother thread
                                 //CQueue queue(8301);
@@ -150,7 +151,7 @@ void* client_processing(void* param)
                                 //queue << "ENDE!!!";
                             myself->setLoginStatus(false);
 
-                            user->set_server("");
+                            //user->set_server("");
 
                             pthread_exit((void*)0);
                         }
@@ -161,14 +162,16 @@ void* client_processing(void* param)
                     string username, pw;
                     s >> username >> pw;
 
-                    bool login = myself_struct->db->checkUsername(username);
-                        //bool pw = myself_struct->db->
-
-                    if(login == true)
+                    //bool login = myself_struct->db->checkUsername(username);
+                    *user = myself_struct->db->login(username, pw, (myself->getSocket()).getLocalIP() );
+                    
+                    
+                    if(user->get_status())
                     {
-                        *user = myself_struct->db->get_User(username);
+                        //*user = myself_struct->db->get_User(username);
+                        
                         myself->setID(user->get_id());
-                        user->set_server( (myself->getSocket()).getLocalIP() );
+                        //user->set_server( (myself->getSocket()).getLocalIP() );
                         
                             //myself_struct->thread_messagequeue = new CThread; // create a new thread object for the new client
                             //myself_struct->thread_messagequeue->start((void*)myself, client_messagequeue_processing);// start a seperate thread for listening on the msg
@@ -281,7 +284,8 @@ void* client_processing(void* param)
                         string userid;
                         s >> userid;
                         cUser temp = myself_struct->db->get_User(atoi(userid.c_str()));
-                            // TODO status funktion hinzufügen!!
+                        user_status status = temp.get_status();
+                        myself->getSocket() << "/bdy_get_status " + std::to_string(status) + " " + "\n";
                     }
                 }
                 if(command == "/conf_create")
@@ -343,7 +347,7 @@ void* client_processing(void* param)
                 {
                     if(myself->getLoginStatus())
                     {
-
+                        
                     }
                 }
                 if(command == "/conf_get_user")
