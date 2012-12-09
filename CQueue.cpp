@@ -14,7 +14,6 @@
 
 CQueue::CQueue()
 {
-<<<<<<< HEAD
     default_type = 1;
     //create 2 queues
     //first for sending messages
@@ -31,10 +30,6 @@ CQueue::CQueue()
         throw "Couldn't create message queue: " + string(strerror(errno));
 }
 
-=======
-    
-}
->>>>>>> dev-3Lu
 
 CQueue::CQueue(int queue_id)
 {
