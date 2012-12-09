@@ -36,11 +36,7 @@ cUser::cUser(CSLiveDB db, long id, string name, string pwhash, string email, lis
     this->pwhash = pwhash;
     this->email = email;
     //this->conf_list = conf_list;
-<<<<<<< HEAD
     //this->bdy_list = bdy_list;
-=======
-    this->bdy_list = bdy_list;
->>>>>>> dev-3Lu
 }
 
 
@@ -99,8 +95,6 @@ list<cUser> cUser::get_bdyList()
 
 
 user_status cUser::get_status()
-<<<<<<< HEAD
-=======
 {
     stringstream query;
     query<<"SELECT status FROM user WHERE user_id = "<<this->id<<";";
@@ -115,31 +109,9 @@ user_status cUser::get_status()
 
 
 
-
-bool cUser::set_id(long id)
->>>>>>> dev-3Lu
-{
-    stringstream query;
-    query<<"SELECT status FROM user WHERE user_id = "<<this->id<<";";
-    
-<<<<<<< HEAD
-    this->db.dbconn.query(query.str(), query.str().length());
-    map<string, string> result = this->db.dbconn.fetch_assoc();
-    return (user_status)atoi(result["status"].c_str());
-    
-}
-
-
-
-
-
-
 bool cUser::set_id(long id)
 {
     stringstream query;
-    
-=======
->>>>>>> dev-3Lu
     query<<"UPDATE user SET user_id = " << id << " WHERE user_id = " << this->id << ";";
     this->db.dbconn.query(query.str(), query.str().length());
     
@@ -182,7 +154,6 @@ bool cUser::set_server(string server)
 }
 
 
-<<<<<<< HEAD
 bool cUser::set_status(user_status status)
 {
     stringstream query;
@@ -218,28 +189,10 @@ bool cUser::add_conf(string conf_id)
     query<<"INSERT INTO conference(conf_id, user_id) VALUES('" << conf_id << "', " << this->id << ");";
     this->db.dbconn.query(query.str(), query.str().length());
     
-=======
-
-bool cUser::logout()
-{
-    this->set_server("");
-    this->set_status(OFFLINE);
     return true;
-    
-}
+} 
 
 
-
-bool cUser::add_conf(string conf_id)
-{
-    stringstream query;
-    
-    query<<"INSERT INTO conference(conf_id, user_id) VALUES('" << conf_id << "', " << this->id << ");";
-    this->db.dbconn.query(query.str(), query.str().length());
-    
->>>>>>> dev-3Lu
-    return true;
-}
 bool cUser::add_conf(cConference conf)
 {
     return this->add_conf(conf.get_id());
@@ -472,15 +425,9 @@ cConference CSLiveDB::get_Conf(string id)
     
     query<<"SELECT * FROM conference WHERE conf_id LIKE '" << id <<"';";
     this->dbconn.query(query.str(), query.str().length());
-<<<<<<< HEAD
     
     cConference conf = cConference(*this, id);
     
-=======
-    
-    cConference conf = cConference(*this, id);
-    
->>>>>>> dev-3Lu
     return conf;
 }
 
@@ -505,11 +452,11 @@ cUser CSLiveDB::create_User(string name, string pw)
     {
         stringstream query;
         query<<"INSERT INTO user(name, pwhash, email) VALUES ('"<< name << "', '"<< md5(pw) << "', '');";
-<<<<<<< HEAD
+
         
         string query_str = query.str();
-=======
->>>>>>> dev-3Lu
+        
+        
         this->dbconn.query(query.str(), query.str().length());
         
         
@@ -544,19 +491,11 @@ cUser CSLiveDB::get_User(string name)
     stringstream query;
     query << "SELECT * FROM user WHERE name LIKE '" << name << "';";
     this->dbconn.query(query.str(), query.str().length());
-<<<<<<< HEAD
     
     map<string, string> result = this->dbconn.fetch_assoc();
     
     cUser usr = cUser(*this, atoi(result["user_id"].c_str()), result["name"] , result["pwhash"], result["email"]);
     
-=======
-    
-    map<string, string> result = this->dbconn.fetch_assoc();
-    
-    cUser usr = cUser(*this, atoi(result["user_id"].c_str()), result["name"] , result["pwhash"], result["email"]);
-    
->>>>>>> dev-3Lu
     return usr;
 }
 
