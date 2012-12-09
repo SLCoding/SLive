@@ -91,7 +91,7 @@ private:
     string email;
     string server;
     //list<cConference> conf_list;
-    list<cUser> bdy_list;    
+    //list<cUser> bdy_list;    
     
 public:
     

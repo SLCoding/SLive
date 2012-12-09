@@ -36,7 +36,7 @@ cUser::cUser(CSLiveDB db, long id, string name, string pwhash, string email, lis
     this->pwhash = pwhash;
     this->email = email;
     //this->conf_list = conf_list;
-    this->bdy_list = bdy_list;
+    //this->bdy_list = bdy_list;
 }
 
 
@@ -75,7 +75,21 @@ list<cConference> cUser::get_confList()
 }
 list<cUser> cUser::get_bdyList()
 {
-    return this->bdy_list;
+    stringstream query;
+    query<<"SELECT * FROM buddy WHERE user_id = "<<this->get_id()<<";";
+    
+    this->db.dbconn.query(query.str(), query.str().length());
+    
+    list<cUser> bdy_list;
+    
+    for(int i = 0; i < this->db.dbconn.affected_rows(); i++)
+    {
+        map<string, string> result = this->db.dbconn.fetch_assoc();
+        bdy_list.push_front(this->db.get_User(result["name"]));
+        
+    }
+    
+    return bdy_list;
 }
 
 
@@ -142,6 +156,19 @@ bool cUser::set_server(string server)
 }
 
 
+bool cUser::set_status(user_status status)
+{
+    stringstream query;
+    
+    query<<"UPDATE user SET status = '" << (int)status << "' WHERE user_id = " << this->id << ";";
+    this->db.dbconn.query(query.str(), query.str().length());
+    
+    
+    return true;
+}
+
+
+
 
 bool cUser::logout()
 {
@@ -150,6 +177,10 @@ bool cUser::logout()
     return true;
     
 }
+
+
+
+
 
 
 
@@ -175,7 +206,6 @@ bool cUser::add_bdy(long bdy_id)
     query<<"INSERT INTO buddy(user_id, bdy_id) VALUES(" << this->id << ", " << bdy_id << ");";
     this->db.dbconn.query(query.str(), query.str().length());
     
-    this->bdy_list.push_front(this->db.get_User(bdy_id));
     
     return true;
 }
@@ -211,7 +241,6 @@ bool cUser::del_bdy(long bdy_id)
     query<<"DELETE FROM buddy WHERE user_id = "<< this->id <<"' AND bdy_id = "<< bdy_id <<";";
     this->db.dbconn.query(query.str(), query.str().length());
     
-    this->bdy_list.remove(this->db.get_User(bdy_id));
     
     return true;
 }
@@ -423,6 +452,8 @@ cUser CSLiveDB::create_User(string name, string pw)
     {
         stringstream query;
         query<<"INSERT INTO user(name, pwhash, email) VALUES ('"<< name << "', '"<< md5(pw) << "', '');";
+        
+        string query_str = query.str();
         this->dbconn.query(query.str(), query.str().length());
         
         
