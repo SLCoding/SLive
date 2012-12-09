@@ -1,10 +1,10 @@
-//
-//  CDatabase_Connection.cpp
-//  SLive
-//
-//  Created by Markus Scholl on 10.10.12.
-//  Copyright (c) 2012 CLMM. All rights reserved.
-//
+    //
+    //  CDatabase_Connection.cpp
+    //  SLive
+    //
+    //  Created by Markus Scholl on 10.10.12.
+    //  Copyright (c) 2012 CLMM. All rights reserved.
+    //
 
 #include "CDatabase_Connection.h"
 
@@ -36,12 +36,12 @@ CDatabase_Connection::CDatabase_Connection(string user, string password, string 
         setDB(DB);
         setHost(Host);
         setPort(Port);
-        
+
         this->connected = false;
         this->initialised = false;
-    
-    
-    
+
+
+
     }
     catch(...)
     {
@@ -62,6 +62,30 @@ CDatabase_Connection::~CDatabase_Connection()
 	catch(...)
 	{
 		cerr << "An unexpected error occured in function 'Destructor'!" << endl;
+	}
+}
+
+CDatabase_Connection:: CDatabase_Connection(const CDatabase_Connection& rhs)
+{
+    try
+	{
+		mysql_init(&this->my);
+            //LoadDefaults();
+        this->setUsername(rhs.username);
+        this->setPassword(rhs.password);
+        this->setHost(rhs.host);
+        this->setPort(rhs.port);
+        this->setSocket(rhs.socket_name);
+
+		this->connected = false;
+		this->initialised = false;
+
+        this->mysql_res = NULL;
+        this->field = NULL;
+	}
+	catch(...)
+	{
+		cerr << "An unexpected error occured in function 'Copy-Constructor'!" << endl;
 	}
 }
 
@@ -199,7 +223,7 @@ bool CDatabase_Connection::query(string sql_query, unsigned int size)
             //cout << "Ungueltige Laenge.\n";
 		return false;
 	}
-    
+
 	if(size > 1000)
 	{
             //cout << "SQL Befehl zu lang.\n";
@@ -208,7 +232,7 @@ bool CDatabase_Connection::query(string sql_query, unsigned int size)
 	try
 	{
 		mysql_real_query(&my, sql_query.c_str(),	strlen(sql_query.c_str()));
-        
+
 		mysql_res = mysql_store_result(&my);
 	}
 	catch(...)
@@ -227,20 +251,20 @@ map<string, string> CDatabase_Connection::fetch_assoc()
 	{
 		if(this->initialised == false)
 			throw "No query found!";
-        
+
 		mysql_field_seek(mysql_res, 0); //!
 		if(mysql_affected_rows(&my) == 0)
 			throw "Nothing found! Is your request right??";
 		if((row = mysql_fetch_row (mysql_res)) != NULL)
 		{
 			mysql_field_seek (mysql_res, 0);
-            
+
 			for (i = 0; i < mysql_num_fields (mysql_res); i++)
 			{
 				field = mysql_fetch_field (mysql_res);
 				if (row[i] == NULL)
                     daten[field->name] = "";
-                
+
 				daten[field->name] = row[i];
 			}
 		}
@@ -254,7 +278,7 @@ map<string, string> CDatabase_Connection::fetch_assoc()
 	{
 		daten["error"] = "true";
 	}
-    
+
 	return daten;
 }
 
@@ -333,10 +357,10 @@ unsigned long CDatabase_Connection::real_escape_string(string to, const string f
 	try
 	{
 		char* zu = new char[to.length()];
-        
+
 		strncpy(zu, to.c_str(), strlen(to.c_str()) );
 		result = mysql_real_escape_string(&my, zu, from.c_str(), length);
-        
+
 		delete [] zu;
 	}
 	catch(...)

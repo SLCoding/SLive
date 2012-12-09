@@ -23,7 +23,7 @@ CSocket::CSocket(int socket)
 
 CSocket::~CSocket()
 {
-    closeSocket();
+   ;
 }
 
 bool CSocket::is_valid() const
@@ -75,6 +75,7 @@ bool CSocket::connect(string address, int port)
     memset( &host, 0, sizeof (host)); // clear memory of structure
     if ((addr = inet_addr( address.c_str() )) != INADDR_NONE)
     {
+        ip = address;
         // address is a numeric ip-address
         memcpy( (char *)&host.sin_addr, &addr, sizeof(addr));
     }
@@ -85,7 +86,9 @@ bool CSocket::connect(string address, int port)
         if (NULL == host_info)
             throw string("Unknown Server");
         // save server-ip-address in structure
+        
         memcpy( (char *)&host.sin_addr, host_info->h_addr, host_info->h_length );
+        ip = host_info->h_addr;
     }
     host.sin_family = AF_INET;      // use IPv4
     host.sin_port = htons(port);    // change port number in host-to-network-syntax
@@ -183,9 +186,14 @@ void CSocket::setBuffer(int buffer_size)
     buffer = buffer_size;
 }
 
-int CSocket::getBuffer()
+const int CSocket::getBuffer() const
 {
     return buffer;
+}
+
+const string CSocket::getIP() const
+{
+    return this->ip;
 }
 
 const CSocket& CSocket::operator<<(const string& s) const
@@ -204,4 +212,21 @@ const CSocket& CSocket::operator>>(string &s)
 {
     s = this->recv();
     return *this;
+}
+
+const int CSocket::getSocket() const
+{
+    return socket_handle;
+}
+
+const string CSocket::getLocalIP() const
+{
+    char hostname[1024];
+    hostname[1023] = '\0';
+    gethostname(hostname, 1023);
+    
+    struct hostent *_host;
+    _host = gethostbyname(hostname);
+    memcpy( (char *)&host.sin_addr, _host->h_addr, _host->h_length );
+    return std::string( _host->h_addr );
 }

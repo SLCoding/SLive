@@ -9,29 +9,23 @@
 #ifndef __SLive__CThread__
 #define __SLive__CThread__
 
-#include <iostream>
 #include <pthread.h>
 #include <list>
-
-struct Thread
-{
-    pthread_t *thread;
-    int thread_handle;
-};
-
-using namespace std;
 
 class CThread
 {
 private:
-    list<Thread> threads;
+    pthread_t *thread;
 protected:
     
 public:
     CThread();
-    int start(void*, void * (*start_routine)(void *));
-    int join(int id, void **thread_return);
-    // void exit(void *ret);
+    ~CThread();
+    pthread_t* start(void*, void * (*start_routine)(void *));
+    int join(void **thread_return);
+    int cancel();
+    int cancel(pthread_t *thread);
+    pthread_t* getThreadHandle() { return thread; }
 };
 
 #endif /* defined(__SLive__CThread__) */
