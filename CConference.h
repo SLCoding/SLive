@@ -5,7 +5,7 @@
     //  Created by Markus Scholl on 10.10.12.
     //  Copyright (c) 2012 CLMM. All rights reserved.
     //
-
+/*
 #ifndef __SLive__CConference__
 #define __SLive__CConference__
 
@@ -36,5 +36,5 @@ public:
     bool remove_client(int p_id);
     bool send_msg(string message);
 };
-
+*/
 #endif /* defined(__SLive__CConference__) */

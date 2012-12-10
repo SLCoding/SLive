@@ -20,12 +20,21 @@ CQueue::CQueue()
     //second for sending following parts of a message
     //
     // this is required for maintaining order of the messages
+<<<<<<< HEAD
     
     srand(time(NULL));
     long queue_id = rand();
     queue_ref = msgget(queue_id,  IPC_CREAT | 0666);
     queue_cont_ref = msgget(1111, IPC_CREAT | 0666);
     
+=======
+    
+    srand((uint)time(NULL));
+    uint queue_id = rand();
+    queue_ref = msgget(queue_id,  IPC_CREAT | 0666);
+    queue_cont_ref = msgget(1111, IPC_CREAT | 0666);
+    
+>>>>>>> origin/dev-3Lu
     if(queue_ref == -1 || queue_cont_ref == -1)
         throw "Couldn't create message queue: " + string(strerror(errno));
 }
@@ -75,7 +84,7 @@ bool CQueue::send_msg(string msg, bool use_p_type, long type) const
     //calculate random type number for following parts
     //
     //required for identifying message
-    srand(time(NULL));
+    srand((uint)time(NULL));
     int cont_type = rand() %8000 +1;
     
     

@@ -94,7 +94,7 @@ private:
     //list<cUser> bdy_list;    
     
 public:
-    
+    cUser() {;}
     
     
     long get_id();
