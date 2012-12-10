@@ -7,6 +7,8 @@
 //
 
 #include "CSLiveDB.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 
 
@@ -86,8 +88,7 @@ list<cUser> cUser::get_bdyList()
     for(int i = 0; i < this->db.dbconn.affected_rows(); i++)
     {
         map<string, string> result = this->db.dbconn.fetch_assoc();
-        bdy_list.push_front(this->db.get_User(result["name"]));
-        
+        bdy_list.push_front(this->db.get_User(atoi((result["bdy_id"]).c_str())));
     }
     
     return bdy_list;

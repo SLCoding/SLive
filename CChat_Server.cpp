@@ -183,6 +183,7 @@ void* client_processing(void* param)
                     }
                     catch(string e)
                     {
+                        queue_log << "Loginversuch fehlgeschlagen...";
                         if(e == "wrong username or password")
                             myself->getSocket() << "/usr_login 0 0\n";
                     }
@@ -203,11 +204,12 @@ void* client_processing(void* param)
                     name_available = myself_struct->db->checkUsername(username);
                     if(!name_available)
                     {
+                        queue_log << "Registrierung fehlgeschlagen...Username in use!";
                         myself->getSocket() << "/usr_register name_already_in_use\n";
                     }
                     else
                     {
-
+                        queue_log << "Registrierung erfolgreich!";
                         user = myself_struct->db->create_User(username, pw, email); // noch zu aktualisieren
                         myself->getSocket() << "/usr_register 1\n";
                     }
@@ -216,18 +218,15 @@ void* client_processing(void* param)
                 {
                     if(user.get_status() != OFFLINE)
                     {
-                        string param;
+                        
                         
                     }
                 }
-                /* if(command == "/bdy_send")
-                 {
-
-                 }*/
                 if(command == "/bdy_info")
                 {
                     if(user.get_status() != OFFLINE)
                     {
+                        queue_log << "bdy_info";
                         string user_id;
                         string answer = "/bdy_info";
                         s >> user_id;
@@ -240,16 +239,19 @@ void* client_processing(void* param)
                 {
                     if(user.get_status() != OFFLINE)
                     {
+                        queue_log << "bdy_add";
                         bool bodyadd = false;
                         string userid;
                         s >> userid;
                         bodyadd = user.add_bdy( atoi( userid.c_str() ) );
                         if(bodyadd)
                         {
+                            queue_log << "hinzufuegen erfolgreich!";
                             myself->getSocket() << "/bdy_add 1\n";
                         }
                         else
                         {
+                            queue_log << "hinzufuegen fehlgeschlagen...";
                             myself->getSocket() << "/bdy_add 0\n";
                         }
                     }
@@ -258,16 +260,19 @@ void* client_processing(void* param)
                 {
                     if(user.get_status() != OFFLINE)
                     {
+                        queue_log << "bdy_remove";
                         bool bodyadd = false;
                         string userid;
                         s >> userid;
                         bodyadd = user.del_bdy( atoi( userid.c_str() ) );
                         if(bodyadd)
                         {
+                            queue_log << "entfernen erfolgreich";
                             myself->getSocket() << "/bdy_remove 1\n";
                         }
                         else
                         {
+                            queue_log << "entfernen fehlgeschlagen!";
                             myself->getSocket() << "/bdy_remove 0\n";
                         }
                     }
@@ -287,6 +292,7 @@ void* client_processing(void* param)
                             answer << iterator->get_id() << " ";
                         }
                         answer << "\n";
+                        queue_log << answer.str();
                         myself->getSocket() << answer.str();
                     }
                 }
@@ -300,6 +306,7 @@ void* client_processing(void* param)
                         cUser temp = myself_struct->db->get_User(atoi(userid.c_str()));
                         user_status status = temp.get_status();
                         buffer << command << " " << status << "\n";
+                        queue_log << buffer.str();
                         myself->getSocket() << buffer.str();
                     }
                 }
@@ -314,6 +321,7 @@ void* client_processing(void* param)
                             s >> user;
                             userlist.push_back(myself_struct->db->get_User(atoi(user.c_str())));
                         }
+                        queue_log << command;
                         myself_struct->db->create_conf("", userlist);   // todo schütte nach id befragen!!
                     }
                 }
@@ -328,12 +336,14 @@ void* client_processing(void* param)
                         stringstream ausgabe;
                         ausgabe << "Client " << myself->getID() << " sendet " << parameter;
                         queue_log << ausgabe.str();
-
+                        stringstream log;
                         stringstream buffer;
                         list <cUser> userliste = temp.get_usrList();
                         list<cUser>::iterator iterator;
                         for (iterator = userliste.begin(); iterator != userliste.end(); ++iterator)
                         {
+                            log << "Sende Nachricht an " << iterator->get_id();
+                            queue_log << log.str();
                             buffer << conf_id << " " << myself->getID() << " " << iterator->get_id() << " " << parameter;
                             client_queue << buffer.str();
                         }
@@ -343,6 +353,7 @@ void* client_processing(void* param)
                 {
                     if(user.get_status() != OFFLINE)
                     {
+                        queue_log << command;
                         string conf_id;
                         string user_id;
                         s >> conf_id;
@@ -354,6 +365,7 @@ void* client_processing(void* param)
                 {
                     if(user.get_status() != OFFLINE)
                     {
+                        queue_log << command;
                         string conf_id;
                         string user_id;
                         s >> conf_id;
@@ -365,7 +377,7 @@ void* client_processing(void* param)
                 {
                     if(user.get_status() != OFFLINE)
                     {
-                        
+                        queue_log << command;
                     }
                 }
                 if(command == "/conf_get_user")
@@ -384,6 +396,7 @@ void* client_processing(void* param)
                             answer << " " << iterator->get_id();
                         }
                         answer << "\n";
+                        queue_log << answer.str();
                         myself->getSocket() << answer.str();
                     }
                 }
