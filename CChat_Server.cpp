@@ -688,7 +688,7 @@ void* messageForClient(void* param)
 
 void* logout(void* param)
 {
-    CChat_Server *chat = reinterpret_cast<CChat_Server*>(param);
+  /*  CChat_Server *chat = reinterpret_cast<CChat_Server*>(param);
     CQueue log(8300);
     log.set_type(3);
     list<Client_processing>::iterator iterator;
@@ -707,5 +707,5 @@ void* logout(void* param)
         }
         sleep(60); // sleep for 60 seconds
     }
-    pthread_exit((void*)0);
+    pthread_exit((void*)0);*/
 }
