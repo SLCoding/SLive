@@ -63,7 +63,7 @@ list<cConference> cUser::get_confList()
 {
     
     stringstream query;
-    query << "SELECT * FROM conference WHERE user_id LIKE " << this->id << ";";
+    query << "SELECT * FROM conf_user WHERE user_id LIKE " << this->id << ";";
     this->db.dbconn.query(query.str(), query.str().length());
     
     list<cConference> conf_list;
@@ -188,7 +188,7 @@ bool cUser::add_conf(string conf_id)
 {
     stringstream query;
     
-    query<<"INSERT INTO conference(conf_id, user_id) VALUES('" << conf_id << "', " << this->id << ");";
+    query<<"INSERT INTO conf_user(conf_id, user_id) VALUES('" << conf_id << "', " << this->id << ");";
     this->db.dbconn.query(query.str(), query.str().length());
     
     return true;
@@ -222,7 +222,7 @@ bool cUser::del_conf(string conf_id)
 {    
     stringstream query;
     
-    query<<"DELETE FROM conference WHERE conf_id LIKE '"<< conf_id <<"'* AND user_id = "<< this->id <<";";
+    query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< conf_id <<"'* AND user_id = "<< this->id <<";";
     this->db.dbconn.query(query.str(), query.str().length());
     
     return true;
@@ -254,7 +254,7 @@ bool cUser::del_bdy(cUser bdy)
 bool cUser::del_user()
 {
     stringstream query;
-    query<<"DELETE FROM conference WHERE user_id = "<< this->id <<";";
+    query<<"DELETE FROM conf_user WHERE user_id = "<< this->id <<";";
     this->db.dbconn.query(query.str(), query.str().length());
     
     query<<"DELETE FROM buddy WHERE user_id = "<< this->id <<";";
@@ -301,7 +301,7 @@ list<cUser> cConference::get_usrList()
     
     stringstream query;
     
-    query<<"SELECT * FROM conference WHERE conf_id = '"<<this->id<<"'";
+    query<<"SELECT * FROM conf_user WHERE conf_id = '"<<this->id<<"'";
     
     list<cUser> usr_list;
     
@@ -320,7 +320,7 @@ bool cConference::set_id(string id)
 {
     stringstream query;
     
-    query<<"UPDATE conference SET conf_id = '" << id << "' WHERE conf_id LIKE '" << this->id << "';";
+    query<<"UPDATE conf_user SET conf_id = '" << id << "' WHERE conf_id LIKE '" << this->id << "';";
     this->db.dbconn.query(query.str(), query.str().length());
     
     this->id = id;
@@ -337,7 +337,7 @@ bool cConference::add_usr(long usr_id)
 {
     stringstream query;
     
-    query<<"INSERT INTO conference(conf_id, user_id) VALUES('" << this->id << "', " << usr_id << ");";
+    query<<"INSERT INTO conf_user(conf_id, user_id) VALUES('" << this->id << "', " << usr_id << ");";
     this->db.dbconn.query(query.str(), query.str().length());
     
     
@@ -352,7 +352,7 @@ bool cConference::del_usr(long usr_id)
 {
     stringstream query;
     
-    query<<"DELETE FROM conference WHERE conf_id LIKE '"<< this->id <<"'* AND user_id = "<< usr_id <<";";
+    query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< this->id <<"'* AND user_id = "<< usr_id <<";";
     this->db.dbconn.query(query.str(), query.str().length());
     
     
@@ -368,7 +368,7 @@ bool cConference::del_conf()
 {
     stringstream query;
     
-    query<<"DELETE FROM conference WHERE conf_id LIKE '"<< this->id <<"';";
+    query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< this->id <<"';";
     this->db.dbconn.query(query.str(), query.str().length());
     
     return true;
@@ -391,18 +391,40 @@ CSLiveDB::CSLiveDB(string user, string password, string DB, string Host, int por
 }
 
 
-cConference CSLiveDB::create_conf()
+/*cConference CSLiveDB::create_conf()
 {
+    
     return cConference(*this);
-}
-cConference CSLiveDB::create_conf(string id)
+}*/
+cConference CSLiveDB::create_conf(string name)
 {
-    cConference conf = cConference(*this);
-    conf.set_id(id);
+    stringstream query;
+    query<<"SELECT uuid() AS id;";
+    
+    this->dbconn.query(query.str(), query.str().length());
+    map<string, string> result = this->dbconn.fetch_assoc();
+    
+    query.str("");
+    query<<"INSERT INTO conference (conf_id, name) VALUES('"<<result["id"]<<"', '"<< name <<"');";
+    
+    return this->get_Conf(result["id"]);
+    
+}
+cConference CSLiveDB::create_conf(list<cUser> usr_list, string name)
+{
+    cConference conf = this->create_conf("");
+    
+    list<cUser>::iterator it;
+    
+    for(it = usr_list.begin(); it != usr_list.end(); it++)
+    {
+        conf.add_usr(*it);
+    }
     
     return conf;
 }
-cConference CSLiveDB::create_conf(string id, list<cUser> usr_list)
+/*
+cConference CSLiveDB::create_conf(string name, list<cUser> usr_list)
 {
     cConference conf = cConference(*this);
     conf.set_id(id);
@@ -411,7 +433,7 @@ cConference CSLiveDB::create_conf(string id, list<cUser> usr_list)
     {
         stringstream query;
         
-        query<<"INSERT INTO conference(conf_id, user_id) VALUES('"<<id<<"', "<<i->get_id()<<");";
+        query<<"INSERT INTO conf_user(conf_id, user_id) VALUES('"<<id<<"', "<<i->get_id()<<");";
         this->dbconn.query(query.str(), query.str().length());
         
         
@@ -420,12 +442,12 @@ cConference CSLiveDB::create_conf(string id, list<cUser> usr_list)
     
     return conf;
 }
-
+*/
 cConference CSLiveDB::get_Conf(string id)
 {
     stringstream query;
     
-    query<<"SELECT * FROM conference WHERE conf_id LIKE '" << id <<"';";
+    query<<"SELECT * FROM conf_user WHERE conf_id LIKE '" << id <<"';";
     this->dbconn.query(query.str(), query.str().length());
     
     cConference conf = cConference(*this, id);
