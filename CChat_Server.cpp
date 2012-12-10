@@ -226,12 +226,12 @@ void* client_processing(void* param)
                 {
                     if(user.get_status() != OFFLINE)
                     {
-                        queue_log << "bdy_info";
                         string user_id;
                         string answer = "/bdy_info";
                         s >> user_id;
 
                         answer += " " + user_id + " " + myself_struct->db->get_User(atoi(user_id.c_str())).get_name() + "\n";
+                        queue_log << answer;
                         myself->getSocket() << answer;
                     }
                 }
