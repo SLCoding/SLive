@@ -219,7 +219,7 @@ bool CDatabase_Connection::close()
 	return true;
 }
 
-bool CDatabase_Connection::query(string sql_query, unsigned int size)
+bool CDatabase_Connection::query(string sql_query, unsigned long size)
 {
 	if(connected == false)
 		return false;

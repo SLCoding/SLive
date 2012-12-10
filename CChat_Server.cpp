@@ -168,16 +168,13 @@ void* client_processing(void* param)
                     queue_log << "LOGIN";
                     queue_log << "Username " + username;
                     queue_log << "pw " + pw;
-                    //bool login = myself_struct->db->checkUsername(username);
                     try
                     {
                         user = myself_struct->db->login(username, pw, (myself->getSocket()).getLocalIP() );
 
                         queue_log << "User " + username + " eingeloggt";
-                        //queue_log << "Setze id auf " + std::to_string(user.get_id());
-                        myself->setID(user.get_id());
-                        //user->set_server( (myself->getSocket()).getLocalIP() );
-
+                        myself->setID((int)user.get_id());
+                    
                         //myself_struct->thread_messagequeue = new CThread; // create a new thread object for the new client
                         //myself_struct->thread_messagequeue->start((void*)myself, client_messagequeue_processing);// start a seperate thread for listening on the msg
                         stringstream buffer;

@@ -68,7 +68,7 @@ public:
         // Datenbank-Funktionen
     bool connect(void);					// Baut Verbindung zur Datenbank auf
     bool close(void);					// Beendet Verbindung mit der Datenbank
-    bool query(string,unsigned int);	// Sendet SQL Befehl an die Datenbank
+    bool query(string,unsigned long);	// Sendet SQL Befehl an die Datenbank
     void LoadDefaults();				// Setzt alle Einstellungen zur¸ck
     bool UseDB(string);					// Wechselt die aktuelle Datenbank
     map<string, string> fetch_assoc();	// Liefert die aktuelle Datenzeile zurück
