@@ -25,7 +25,7 @@ CChat_Server::CChat_Server()
 
     this->thread_server_communication_incoming->start(reinterpret_cast<void*>(this), server_communication_incoming);
     this->thread_server_communication_outgoing->start(NULL, server_communication_outgoing);
-    // this->thread_logout->start(reinterpret_cast<void*>(this), logout);
+    //this->thread_logout->start(reinterpret_cast<void*>(this), logout);
 
     message_dispatcher_obj = this->start(reinterpret_cast<void*>(this), message_dispatcher);
     this->start(reinterpret_cast<void*>(this), accept_new_Clients);
@@ -62,7 +62,6 @@ void* accept_new_Clients(void* param)
     CChat_Server *server = reinterpret_cast<CChat_Server*>(param);
     CQueue queue(8300);
     CSocket sock;
-    string test;
 
     int client_id = 8300;
 
@@ -80,7 +79,7 @@ void* accept_new_Clients(void* param)
 
         Client_processing client_obj;
         client_obj.client = new CClient(++client_id, client_socket); // Create a new client
-
+        
         client_obj.db = server->database;
 
         client_obj.thread_processing = new CThread;
@@ -106,339 +105,339 @@ void* client_processing(void* param)
     string message;
     string command;
     string parameter = "";
+    string buffer;
 
     client_queue.set_type(5);
     queue_log.set_type(3);
-
-    try
+    while(true)
     {
-        while(!logout)
+        try
         {
-
-            myself->getSocket() >> message;
-                // parse message
-            std::istringstream s(message);
-            do
+            while(!logout)
             {
-                string sub;
-                s >> sub;
-                if(sub.substr(0,1) == "/")
+                myself->getSocket() >> message;
+                do
                 {
-                    command = sub;
-                    s >> sub;
-                    while( ((sub.substr(0,1)) != "/") && (s))
-                    {
-                        parameter += sub + " ";
-                        s >> sub;
-                    }
-                }
-
+                    // parse message
+                    buffer = message.substr((message).find_first_of("/"), message.find_first_of("\n")); // parsed einen ganzen befehlssatz
+                    std::istringstream s(buffer);
+                    s >> command; // filtert den eigentlichen befehl
+                    message.replace(0, buffer.length() + 1, ""); // löscht den aktuellen datensatz aus dem gesamtstring
+                    parameter = buffer.substr(buffer.find_first_of(" ") + 1, buffer.find_first_of("\n")); // parsed die parameter aus dem datensatz
                     // execute parsed message
-                std::istringstream s(parameter);
+                    if(parameter.substr(0, 1) != "/")   // gibt es parameter?
+                        std::istringstream s(parameter);
+                    else
+                        parameter = "";
 
-                if(command == "/usr_logout")
-                {
-                    if(user.get_status() != OFFLINE)
+                    if(command == "/usr_logout")
                     {
-                        if(parameter == "true")
+                        if(user.get_status() != OFFLINE)
                         {
-                            logout = true;
-                            stringstream buffer;
-                            buffer << "Client " << myself->getID() << " hat sich ausgeloggt!";
-                            queue_log << buffer.str();
-                            myself->getSocket().closeSocket();
-                            user.logout();
+                            if(parameter == "true")
+                            {
+                                logout = true;
+                                stringstream buffer;
+                                buffer << "Client " << myself->getID() << " hat sich ausgeloggt!";
+                                queue_log << buffer.str();
+                                myself->getSocket().closeSocket();
+                                user.logout();
 
                                 // Send a kill-message to his brother thread
                                 //CQueue queue(8301);
                                 //queue.set_type(myself->getID());
                                 //queue << "ENDE!!!";
-                            myself->setLoginStatus(false);
+                                myself->setLoginStatus(false);
 
-                            //user->set_server("");
+                                //user->set_server("");
 
-                            pthread_exit((void*)0);
+                                pthread_exit((void*)0);
+                            }
                         }
                     }
-                }
-                if(command == "/usr_login")
-                {
-                    string username, pw;
-                    s >> username >> pw;
-                    queue_log << "LOGIN";
-                    queue_log << "Username " + username;
-                    queue_log << "pw " + pw;
-                    try
+                    if(command == "/usr_login")
                     {
-                        user = myself_struct->db->login(username, pw, (myself->getSocket()).getLocalIP() );
+                        string username, pw;
+                        s >> username >> pw;
+                        queue_log << "LOGIN";
+                        queue_log << "Username " + username;
+                        queue_log << "pw " + pw;
+                        try
+                        {
+                            user = myself_struct->db->login(username, pw, (myself->getSocket()).getLocalIP() );
 
-                        queue_log << "User " + username + " eingeloggt";
-                        myself->setID((int)user.get_id());
-                    
-                        //myself_struct->thread_messagequeue = new CThread; // create a new thread object for the new client
-                        //myself_struct->thread_messagequeue->start((void*)myself, client_messagequeue_processing);// start a seperate thread for listening on the msg
-                        stringstream buffer;
-                        buffer << "/usr_login 1 " << myself->getID() << "\n";
-                        myself->getSocket() << buffer.str();
-                    }
-                    catch(string e)
-                    {
-                        queue_log << "Loginversuch fehlgeschlagen...";
-                        if(e == "wrong username or password")
+                            queue_log << "User " + username + " eingeloggt";
+                            myself->setID((int)user.get_id());
+
+                            //myself_struct->thread_messagequeue = new CThread; // create a new thread object for the new client
+                            //myself_struct->thread_messagequeue->start((void*)myself, client_messagequeue_processing);// start a seperate thread for listening on the msg
+                            stringstream buffer;
+                            buffer << "/usr_login 1 " << myself->getID() << "\n";
+                            myself->getSocket() << buffer.str();
+                        }
+                        catch(string e)
+                        {
+                            queue_log << "Loginversuch fehlgeschlagen...";
+                            if(e == "wrong username or password")
+                                myself->getSocket() << "/usr_login 0 0\n";
+                        }
+                        catch(...)
+                        {
                             myself->getSocket() << "/usr_login 0 0\n";
+                        }
                     }
-                    catch(...)
+                    if(command == "/usr_register")
                     {
-                        myself->getSocket() << "/usr_login 0 0\n";
-                    }
-                }
-                if(command == "/usr_register")
-                {
-                    string username, pw, email;
-                    bool name_available = true;
+                        string username, pw, email;
+                        bool name_available = true;
 
-                    s >> username >> pw >> email;
-                    queue_log << "User-Registrierung";
-                    queue_log << "Username " + username << "Passwort " + pw << "Email " + email;
+                        s >> username >> pw >> email;
+                        queue_log << "User-Registrierung";
+                        queue_log << "Username " + username << "Passwort " + pw << "Email " + email;
 
-                    name_available = myself_struct->db->checkUsername(username);
-                    if(!name_available)
-                    {
-                        queue_log << "Registrierung fehlgeschlagen...Username in use!";
-                        myself->getSocket() << "/usr_register name_already_in_use\n";
-                    }
-                    else
-                    {
-                        queue_log << "Registrierung erfolgreich!";
-                        user = myself_struct->db->create_User(username, pw, email); // noch zu aktualisieren
-                        myself->getSocket() << "/usr_register 1\n";
-                    }
-                }
-                if(command == "/bdy_search")
-                {
-                    if(user.get_status() != OFFLINE)
-                    {
-                        
-                        
-                    }
-                }
-                if(command == "/bdy_info")
-                {
-                    if(user.get_status() != OFFLINE)
-                    {
-                        string user_id;
-                        string answer = "/bdy_info";
-                        s >> user_id;
-
-                        answer += " " + user_id + " " + myself_struct->db->get_User(atoi(user_id.c_str())).get_name() + "\n";
-                        queue_log << answer;
-                        myself->getSocket() << answer;
-                    }
-                }
-                if(command == "/bdy_add")
-                {
-                    if(user.get_status() != OFFLINE)
-                    {
-                        queue_log << "bdy_add";
-                        bool bodyadd = false;
-                        string userid;
-                        s >> userid;
-                        bodyadd = user.add_bdy( atoi( userid.c_str() ) );
-                        if(bodyadd)
+                        name_available = myself_struct->db->checkUsername(username);
+                        if(!name_available)
                         {
-                            queue_log << "hinzufuegen erfolgreich!";
-                            myself->getSocket() << "/bdy_add 1\n";
+                            queue_log << "Registrierung fehlgeschlagen...Username in use!";
+                            myself->getSocket() << "/usr_register name_already_in_use\n";
                         }
                         else
                         {
-                            queue_log << "hinzufuegen fehlgeschlagen...";
-                            myself->getSocket() << "/bdy_add 0\n";
+                            queue_log << "Registrierung erfolgreich!";
+                            user = myself_struct->db->create_User(username, pw, email);
+                            myself->getSocket() << "/usr_register 1\n";
                         }
                     }
-                }
-                if(command == "/bdy_remove")
-                {
-                    if(user.get_status() != OFFLINE)
+                    if(command == "/bdy_search")
                     {
-                        queue_log << "bdy_remove";
-                        bool bodyadd = false;
-                        string userid;
-                        s >> userid;
-                        bodyadd = user.del_bdy( atoi( userid.c_str() ) );
-                        if(bodyadd)
+                        if(user.get_status() != OFFLINE)
                         {
-                            queue_log << "entfernen erfolgreich";
-                            myself->getSocket() << "/bdy_remove 1\n";
-                        }
-                        else
-                        {
-                            queue_log << "entfernen fehlgeschlagen!";
-                            myself->getSocket() << "/bdy_remove 0\n";
-                        }
-                    }
-                }
-                if(command == "/bdy_list")
-                {
-                    if(user.get_status() != OFFLINE)
-                    {
-                        list<cUser> userliste;
-                        userliste = user.get_bdyList();
-                        stringstream answer;
-                        answer << command << " ";
-                        
-                        list<cUser>::iterator iterator;
-                        for (iterator = userliste.begin(); iterator != userliste.end(); ++iterator)
-                        {
-                            answer << iterator->get_id() << " ";
-                        }
-                        answer << "\n";
-                        queue_log << answer.str();
-                        myself->getSocket() << answer.str();
-                    }
-                }
-                if(command == "/bdy_get_status")
-                {
-                    if(user.get_status() != OFFLINE)
-                    {
-                        string userid;
-                        stringstream buffer;
-                        s >> userid;
-                        cUser temp = myself_struct->db->get_User(atoi(userid.c_str()));
-                        user_status status = temp.get_status();
-                        buffer << command << " " << status << "\n";
-                        queue_log << buffer.str();
-                        myself->getSocket() << buffer.str();
-                    }
-                }
-                if(command == "/conf_create")
-                {
-                    if(user.get_status() != OFFLINE)
-                    {
-                        list <cUser> userlist;
-                        string user;
-                        while(s)
-                        {
-                            s >> user;
-                            userlist.push_back(myself_struct->db->get_User(atoi(user.c_str())));
-                        }
-                        queue_log << command;
-                        myself_struct->db->create_conf("", userlist);   // todo schütte nach id befragen!!
-                    }
-                }
-                if(command == "/conf_send")
-                {
-                    if(user.get_status() != OFFLINE)
-                    {
-                        string conf_id;
-                        s >> conf_id;
 
-                        cConference temp = myself_struct->db->get_Conf(conf_id);
-                        stringstream ausgabe;
-                        ausgabe << "Client " << myself->getID() << " sendet " << parameter;
-                        queue_log << ausgabe.str();
-                        stringstream log;
-                        stringstream buffer;
-                        list <cUser> userliste = temp.get_usrList();
-                        list<cUser>::iterator iterator;
-                        for (iterator = userliste.begin(); iterator != userliste.end(); ++iterator)
-                        {
-                            log << "Sende Nachricht an " << iterator->get_id();
-                            queue_log << log.str();
-                            buffer << conf_id << " " << myself->getID() << " " << iterator->get_id() << " " << parameter;
-                            client_queue << buffer.str();
+
                         }
                     }
-                }
-                if(command == "/conf_add")
-                {
-                    if(user.get_status() != OFFLINE)
+                    if(command == "/bdy_info")
                     {
-                        queue_log << command;
-                        string conf_id;
-                        string user_id;
-                        s >> conf_id;
-                        s >> user_id;
-                        myself_struct->db->get_Conf(conf_id).add_usr(atoi(user_id.c_str())); // holt cConference objekt aus der datenbank und fügt user hinzu
-                    }
-                }
-                if(command == "/conf_remove")
-                {
-                    if(user.get_status() != OFFLINE)
-                    {
-                        queue_log << command;
-                        string conf_id;
-                        string user_id;
-                        s >> conf_id;
-                        s >> user_id;
-                        myself_struct->db->get_Conf(conf_id).del_usr(atoi(user_id.c_str())); // holt cConference objekt aus der datenbank und entfernt user
-                    }
-                }
-                if(command == "/conf_list")
-                {
-                    if(user.get_status() != OFFLINE)
-                    {
-                        queue_log << command;
-                    }
-                }
-                if(command == "/conf_get_user")
-                {
-                    if(user.get_status() != OFFLINE)
-                    {
-                        string conf_id;
-                        stringstream answer;
-                        answer << command << " ";
-                        s >> conf_id;
-                        cConference conference = myself_struct->db->get_Conf(conf_id);
-                        list <cUser> userliste = conference.get_usrList();
-                        list<cUser>::iterator iterator;
-                        for (iterator = userliste.begin(); iterator != userliste.end(); ++iterator)
+                        if(user.get_status() != OFFLINE)
                         {
-                            answer << " " << iterator->get_id();
+                            string user_id;
+                            string answer = "/bdy_info";
+                            s >> user_id;
+
+                            answer += " " + user_id + " " + myself_struct->db->get_User(atoi(user_id.c_str())).get_name() + "\n";
+                            queue_log << answer;
+                            myself->getSocket() << answer;
                         }
-                        answer << "\n";
-                        queue_log << answer.str();
-                        myself->getSocket() << answer.str();
                     }
-                }
-                if(command == "/conf_getProtocol")
-                {
-                    if(user.get_status() != OFFLINE)
+                    if(command == "/bdy_add")
                     {
-
+                        if(user.get_status() != OFFLINE)
+                        {
+                            queue_log << "bdy_add";
+                            bool bodyadd = false;
+                            string userid;
+                            s >> userid;
+                            bodyadd = user.add_bdy( atoi( userid.c_str() ) );
+                            if(bodyadd)
+                            {
+                                queue_log << "hinzufuegen erfolgreich!";
+                                myself->getSocket() << "/bdy_add 1\n";
+                            }
+                            else
+                            {
+                                queue_log << "hinzufuegen fehlgeschlagen...";
+                                myself->getSocket() << "/bdy_add 0\n";
+                            }
+                        }
                     }
-                }
-                if(command == "/srv_serverdown")
-                {
-                    if(user.get_status() != OFFLINE)
+                    if(command == "/bdy_remove")
                     {
-
+                        if(user.get_status() != OFFLINE)
+                        {
+                            queue_log << "bdy_remove";
+                            bool bodyadd = false;
+                            string userid;
+                            s >> userid;
+                            bodyadd = user.del_bdy( atoi( userid.c_str() ) );
+                            if(bodyadd)
+                            {
+                                queue_log << "entfernen erfolgreich";
+                                myself->getSocket() << "/bdy_remove 1\n";
+                            }
+                            else
+                            {
+                                queue_log << "entfernen fehlgeschlagen!";
+                                myself->getSocket() << "/bdy_remove 0\n";
+                            }
+                        }
                     }
-                }
-                if(command == "/srv_getList")
-                {
-                    if(user.get_status() != OFFLINE)
+                    if(command == "/bdy_list")
                     {
-
+                        if(user.get_status() != OFFLINE)
+                        {
+                            list<cUser> userliste;
+                            userliste = user.get_bdyList();
+                            stringstream answer;
+                            answer << command << " ";
+                            list<cUser>::iterator iterator;
+                            for (iterator = userliste.begin(); iterator != userliste.end(); ++iterator)
+                            {
+                                answer << iterator->get_id() << " ";
+                            }
+                            answer << "\n";
+                            queue_log << answer.str();
+                            myself->getSocket() << answer.str();
+                        }
                     }
+                    if(command == "/bdy_get_status")
+                    {
+                        if(user.get_status() != OFFLINE)
+                        {
+                            string userid;
+                            stringstream buffer;
+                            s >> userid;
+                            cUser temp = myself_struct->db->get_User(atoi(userid.c_str()));
+                            user_status status = temp.get_status();
+                            buffer << command << " " << status << "\n";
+                            queue_log << buffer.str();
+                            myself->getSocket() << buffer.str();
+                        }
+                    }
+                    if(command == "/conf_create")
+                    {
+                        if(user.get_status() != OFFLINE)
+                        {
+                            list <cUser> userlist;
+                            string user;
+                            while(s)
+                            {
+                                s >> user;
+                                userlist.push_back(myself_struct->db->get_User(atoi(user.c_str())));
+                            }
+                            queue_log << command;
+                            myself_struct->db->create_conf("", userlist);   // todo schütte nach id befragen!!
+                        }
+                    }
+                    if(command == "/conf_send")
+                    {
+                        if(user.get_status() != OFFLINE)
+                        {
+                            string conf_id;
+                            s >> conf_id;
+
+                            cConference temp = myself_struct->db->get_Conf(conf_id);
+                            stringstream ausgabe;
+                            ausgabe << "Client " << myself->getID() << " sendet " << parameter;
+                            queue_log << ausgabe.str();
+                            stringstream log;
+                            stringstream buffer;
+                            list <cUser> userliste = temp.get_usrList();
+                            list<cUser>::iterator iterator;
+                            for (iterator = userliste.begin(); iterator != userliste.end(); ++iterator)
+                            {
+                                log << "Sende Nachricht an " << iterator->get_id();
+                                queue_log << log.str();
+                                buffer << conf_id << " " << myself->getID() << " " << iterator->get_id() << " " << parameter;
+                                client_queue << buffer.str();
+                            }
+                        }
+                    }
+                    if(command == "/conf_add")
+                    {
+                        if(user.get_status() != OFFLINE)
+                        {
+                            queue_log << command;
+                            string conf_id;
+                            string user_id;
+                            s >> conf_id;
+                            s >> user_id;
+                            myself_struct->db->get_Conf(conf_id).add_usr(atoi(user_id.c_str())); // holt cConference objekt aus der datenbank und fügt user hinzu
+                        }
+                    }
+                    if(command == "/conf_remove")
+                    {
+                        if(user.get_status() != OFFLINE)
+                        {
+                            queue_log << command;
+                            string conf_id;
+                            string user_id;
+                            s >> conf_id;
+                            s >> user_id;
+                            myself_struct->db->get_Conf(conf_id).del_usr(atoi(user_id.c_str())); // holt cConference objekt aus der datenbank und entfernt user
+                        }
+                    }
+                    if(command == "/conf_list")
+                    {
+                        if(user.get_status() != OFFLINE)
+                        {
+                            queue_log << command;
+                        }
+                    }
+                    if(command == "/conf_get_user")
+                    {
+                        if(user.get_status() != OFFLINE)
+                        {
+                            string conf_id;
+                            stringstream answer;
+                            answer << command << " ";
+                            s >> conf_id;
+                            cConference conference = myself_struct->db->get_Conf(conf_id);
+                            list <cUser> userliste = conference.get_usrList();
+                            list<cUser>::iterator iterator;
+                            for (iterator = userliste.begin(); iterator != userliste.end(); ++iterator)
+                            {
+                                answer << " " << iterator->get_id();
+                            }
+                            answer << "\n";
+                            queue_log << answer.str();
+                            myself->getSocket() << answer.str();
+                        }
+                    }
+                    if(command == "/conf_getProtocol")
+                    {
+                        if(user.get_status() != OFFLINE)
+                        {
+
+                        }
+                    }
+                    if(command == "/srv_serverdown")
+                    {
+                        if(user.get_status() != OFFLINE)
+                        {
+
+                        }
+                    }
+                    if(command == "/srv_getList")
+                    {
+                        if(user.get_status() != OFFLINE)
+                        {
+
+                        }
+                    }
+                    command = "";
+                    parameter = "";
                 }
-                command = "";
-                parameter = "";
+                while(message.length() > 0);
             }
-            while (s);
         }
-    }
-    catch(string e)
-    {
-        queue_log.set_type(2);
-        queue_log << e;
-        if(e == "Client terminate connection!")
+        catch(string e)
         {
-            myself->getSocket().closeSocket();
+            queue_log.set_type(2);
+            queue_log << e;
+            if(e == "Client terminate connection!")
+            {
+                myself->getSocket().closeSocket();
                 //CQueue queue(8301);
                 //queue.set_type(myself->getID());
                 //queue << "ENDE!!!";
-            myself->setLoginStatus(false);
-            pthread_exit((void*)0);
+                myself->setLoginStatus(false);
+                pthread_exit((void*)0);
+            }
+            if(e == "An error occured while receiving the message")
+            {
+                queue_log << "restart endlosschleife...";
+                continue;
+            }
         }
     }
     pthread_exit((void*)0);
@@ -701,24 +700,29 @@ void* messageForClient(void* param)
 
 void* logout(void* param)
 {
-  /*  CChat_Server *chat = reinterpret_cast<CChat_Server*>(param);
+    CChat_Server *chat = reinterpret_cast<CChat_Server*>(param);
     CQueue log(8300);
+    stringstream buffer;
     log.set_type(3);
     list<Client_processing>::iterator iterator;
+    sleep(60*10); // sleep for 10 Minuten
     while(true)
     {
         log << "Clean up client-list...";
         for (iterator = chat->clients.begin(); iterator != chat->clients.end(); ++iterator)
         {
             //if( iterator->db->get_User(iterator->client->getID()).get_server() == "")   // client ist nicht irgendwo angemeldet
-            if( (iterator->db->get_User(iterator->client->getID()).get_status() == 0 ))
+            if( (iterator->db->get_User(iterator->client->getID()).get_status() == OFFLINE ))
             {
-                log << "Client " + std::to_string( iterator->client->getID() ) + " hat sich ausgeloggt";
+                buffer << "Client " << iterator->client->getID() << " hat sich ausgeloggt";
+                log << buffer.str();
                 chat->clients.erase(iterator);
+                break;
             }
             sleep(1); // zur last und netzwerkreduzierung warte nach jedem client eine sekunde
+            buffer.clear();
         }
-        sleep(60); // sleep for 60 seconds
+        sleep(60*10); // sleep for 10 Minuten
     }
-    pthread_exit((void*)0);*/
+    pthread_exit((void*)0);
 }
