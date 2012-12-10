@@ -223,10 +223,16 @@ const string CSocket::getLocalIP() const
 {
     char hostname[1024];
     hostname[1023] = '\0';
-    gethostname(hostname, 1023);
-    
+    char *szIPAddress;
     struct hostent *_host;
-    _host = gethostbyname(hostname);
-    memcpy( (char *)&host.sin_addr, _host->h_addr, _host->h_length );
-    return std::string( _host->h_addr );
+    if( gethostname(hostname, sizeof(hostname)) == 0)
+    {
+        if((_host = gethostbyname(hostname)) != NULL)
+        {
+            szIPAddress = inet_ntoa (*(struct in_addr *)*_host->h_addr_list);
+            return szIPAddress;
+        }
+    }
+
+    return "";
 }

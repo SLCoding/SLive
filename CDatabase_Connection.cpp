@@ -73,12 +73,17 @@ CDatabase_Connection:: CDatabase_Connection(const CDatabase_Connection& rhs)
             //LoadDefaults();
         this->setUsername(rhs.username);
         this->setPassword(rhs.password);
+        this->setDB(rhs.db);
         this->setHost(rhs.host);
         this->setPort(rhs.port);
         this->setSocket(rhs.socket_name);
 
+
 		this->connected = false;
 		this->initialised = false;
+        
+        if(rhs.connected)
+            this->connect();
 
         this->mysql_res = NULL;
         this->field = NULL;
@@ -264,8 +269,8 @@ map<string, string> CDatabase_Connection::fetch_assoc()
 				field = mysql_fetch_field (mysql_res);
 				if (row[i] == NULL)
                     daten[field->name] = "";
-
-				daten[field->name] = row[i];
+                else
+                    daten[field->name] = row[i];
 			}
 		}
 	}

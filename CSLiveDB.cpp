@@ -26,11 +26,12 @@ cUser::cUser(CSLiveDB db, long id, string name, string pwhash, string email)
     this->pwhash = pwhash;
     this->email = email;
 }
-
+/*
 
 cUser::cUser(CSLiveDB db, long id, string name, string pwhash, string email, list<cConference> conf_list, list<cUser> bdy_list)
 {
     this->db = db;
+    this->db.dbconn.connect();
     this->id = id;
     this->name = name;
     this->pwhash = pwhash;
@@ -38,7 +39,7 @@ cUser::cUser(CSLiveDB db, long id, string name, string pwhash, string email, lis
     //this->conf_list = conf_list;
     //this->bdy_list = bdy_list;
 }
-
+*/
 
 long cUser::get_id()
 {
@@ -468,6 +469,7 @@ cUser CSLiveDB::create_User(string name, string pw)
 }
 cUser CSLiveDB::create_User(string name, string pw, string email)
 {
+    string name_test = name;
     cUser usr = this->create_User(name, pw);
     usr.set_email(email);
     return usr;
@@ -514,7 +516,7 @@ cUser CSLiveDB::login(long id, string pw, string server)
         usr.set_status(ONLINE);
     }
     else {
-        throw 1;
+        throw string("wrong username or password");
     }
     
     return usr;
