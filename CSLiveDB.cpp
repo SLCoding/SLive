@@ -57,7 +57,16 @@ string cUser::get_email()
 }
 string cUser::get_server()
 {
-    return this->server;
+    stringstream query;
+    query<<"SELECT server FROM user WHERE user_id = "<<this->id<<";";
+    
+    this->db.dbconn.query(query.str(), query.str().length());
+    
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
+    
+    map<string, string> result = this->db.dbconn.fetch_assoc();
+    return result["server"].c_str();
 }
 list<cConference> cUser::get_confList()
 {
