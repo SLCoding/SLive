@@ -45,7 +45,7 @@ cUser::cUser(CSLiveDB db, long id, string name, string pwhash, string email, lis
 
 cUser::~cUser()
 {
-    this->db.dbconn.close();
+    //this->db.dbconn.close();
        
 }
 
@@ -79,7 +79,7 @@ list<cConference> cUser::get_confList()
 {
     CDatabase_Connection db;
     db.setDB("SLive2");
-    db.setHost("10.12.45.253");
+    db.setHost("127.0.0.1");
     db.setPassword("SLive2");
     db.setUsername("SLive2");
     db.connect();
@@ -105,7 +105,7 @@ list<cUser> cUser::get_bdyList()
 {
     CDatabase_Connection db;
     db.setDB("SLive2");
-    db.setHost("10.12.45.253");
+    db.setHost("127.0.0.1");
     db.setPassword("SLive2");
     db.setUsername("SLive2");
     db.connect();
@@ -382,7 +382,7 @@ cConference::cConference(CSLiveDB db, string id)
 
 cConference::~cConference()
 {
-    this->db.dbconn.close();
+    //this->db.dbconn.close();
     
 }
 
@@ -396,7 +396,7 @@ list<cUser> cConference::get_usrList()
     
     CDatabase_Connection db;
     db.setDB("SLive2");
-    db.setHost("10.12.45.253");
+    db.setHost("127.0.0.1");
     db.setPassword("SLive2");
     db.setUsername("SLive2");
     db.connect();
@@ -523,7 +523,7 @@ CSLiveDB::CSLiveDB(string user, string password, string DB, string Host, int por
 
 CSLiveDB::~CSLiveDB()
 {
-    this->dbconn.close();
+    //this->dbconn.close();
     
 }
 

@@ -57,7 +57,7 @@ CDatabase_Connection::~CDatabase_Connection()
 	try
 	{
 		//if(this->initialised == true)
-		//	mysql_free_result(mysql_res);
+        //		mysql_free_result(mysql_res);
         //this->close();
 	}
 	catch(...)
@@ -187,6 +187,7 @@ bool CDatabase_Connection::connect()
 	try
 	{
         //cout << "Baue Verbindung zur Datenbank auf ...\n\n";
+        mysql_init(&this->my);
 		mysql_real_connect (&my, host.c_str(), username.c_str(), password.c_str(), db.c_str(), port, socket_name.c_str(), flag);
         if(this->errnum() == 0)
             this->connected = true;
@@ -237,9 +238,12 @@ bool CDatabase_Connection::query(string sql_query, unsigned long size)
 	}
 	try
 	{
-		mysql_real_query(&my, sql_query.c_str(),	strlen(sql_query.c_str()));
+        
+        //cout << "ausgabe: " << this->my.net.last_error << endl;
+        mysql_real_query(&my, sql_query.c_str(), strlen(sql_query.c_str()));
 
-		mysql_res = mysql_store_result(&my);
+        mysql_res = mysql_store_result(&my);
+
 	}
 	catch(...)
 	{
