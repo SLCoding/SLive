@@ -48,7 +48,7 @@ protected:
 public:
     CSLiveDB();
     CSLiveDB(string user, string password, string DB, string Host = "127.0.0.1", int port = 3306);
-    
+    ~CSLiveDB();
     
     
     cConference create_conf(string name);
@@ -97,7 +97,7 @@ private:
     
 public:
     cUser() {;}
-    
+    ~cUser();
     
     long get_id();
     string get_name();
@@ -151,6 +151,8 @@ private:
     
     
 public:
+    ~cConference();
+    
     string get_id();
     list<cUser> get_usrList();
     
