@@ -51,9 +51,9 @@ public:
     
     
     
-    cConference create_conf();
-    cConference create_conf(string id);
-    cConference create_conf(string id, list<cUser> usr_list);
+    cConference create_conf(string name);
+    cConference create_conf(list<cUser> usr_list, string name = "");
+    //cConference create_conf(string name, list<cUser> usr_list);
     
     cConference get_Conf(string id);
     
