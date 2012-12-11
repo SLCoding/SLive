@@ -509,6 +509,7 @@ void* message_dispatcher(void* param)
 {
     CChat_Server *chat = reinterpret_cast<CChat_Server*>(param);
 
+    
     CQueue logger(8300);
     CQueue messages(8302);
     CQueue server2server(8303);
@@ -534,27 +535,26 @@ void* message_dispatcher(void* param)
         s >> conf_id >> id_sender >> id_recipient >> message;
 
         cUser sender = chat->database->get_User(atoi(id_sender.c_str())); // hole daten für sender aus datenbank
-
+        cUser recipient = chat->database->get_User(atoi(id_recipient.c_str())); // hole daten für empfänger aus datenbank
         list<Client_processing>::iterator iterator;
         for (iterator = chat->clients.begin(); iterator != chat->clients.end(); ++iterator)
         {
-            if( iterator->client->getID() == atoi(id_recipient.c_str()))
+            if(sender.get_server() == recipient.get_server()) //user ist lokal angemeldet
             {
-                cUser temp = chat->database->get_User(iterator->client->getID()); // hole daten für empfänger aus datenbank
-                if(temp.get_server() == (iterator->client->getSocket()).getLocalIP()) //user ist lokal angemeldet
+                if( iterator->client->getID() == atoi(id_recipient.c_str()))
                 {
                     logger << "Sende Nachricht an " + id_recipient + " von sender " + id_sender + " " + message;
                     iterator->client->getSocket() << "/conf_send " << conf_id << " " << zeit << " " <<  sender.get_name() << " " << message << "\n";
                 }
-                else if((temp.get_server() != (iterator->client->getSocket()).getLocalIP()) && (temp.get_server() != ""))    // user ist auf entferntem rechner angemeldet
-                {
-                    logger << "Client nicht lokal angemeldet, kontaktiere Server...leite Nachricht weiter...";
-                    server2server << conf_id << " " << id_recipient + " " + id_sender + " " + message + " " + temp.get_server();
-                }
-                else
-                {
-                    logger << "Keinen Server gefunden...";// TODO nicht angemeldet, daten in db hinterlegen
-                }
+            }
+            else if((sender.get_server() != recipient.get_server()) && (recipient.get_server() != ""))    // user ist auf entferntem rechner angemeldet
+            {
+                logger << "Client nicht lokal angemeldet, kontaktiere Server...leite Nachricht weiter...";
+                server2server << conf_id << " " << id_recipient + " " + id_sender + " " + message + " " + recipient.get_server();
+            }
+            else
+            {
+                logger << "Keinen Server gefunden...";// TODO nicht angemeldet, daten in db hinterlegen
             }
         }
     }
