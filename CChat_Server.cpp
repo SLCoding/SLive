@@ -118,18 +118,22 @@ void* client_processing(void* param)
                 myself->getSocket() >> message;
                 do
                 {
-                    // parse message
-                    buffer = message.substr((message).find_first_of("/"), message.find_first_of("\n")); // parsed einen ganzen befehlssatz
+                    // parsed einen ganzen befehlssatz
+                    buffer = message.substr((message).find_first_of("/"), message.find_first_of("\n")); 
                     std::istringstream s(buffer);
-                    s >> command; // filtert den eigentlichen befehl
-                    message.replace(0, buffer.length() + 1, ""); // löscht den aktuellen datensatz aus dem gesamtstring
-                    parameter = buffer.substr(buffer.find_first_of(" ") + 1, buffer.find_first_of("\n")); // parsed die parameter aus dem datensatz
-                    // execute parsed message
+                    // filtert den eigentlichen befehl
+                    s >> command;
+                    // löscht den aktuellen datensatz aus dem gesamtstring
+                    message.replace(0, buffer.length() + 1, "");
+                    // parsed die parameter aus dem datensatz
+                    parameter = buffer.substr(buffer.find_first_of(" ") + 1, buffer.find_first_of("\n")); 
+                    
                     if(parameter.substr(0, 1) != "/")   // gibt es parameter?
                         std::istringstream s(parameter);
                     else
                         parameter = "";
-
+                    
+                    // execute parsed message
                     if(command == "/usr_logout")
                     {
                         if(user.get_status() != OFFLINE)
