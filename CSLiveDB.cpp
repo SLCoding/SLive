@@ -63,7 +63,7 @@ list<cConference> cUser::get_confList()
 {
     CDatabase_Connection db;
     db.setDB("SLive2");
-    db.setHost("88.152.154.122");
+    db.setHost("127.0.0.1");
     db.setPassword("SLive2");
     db.setUsername("SLive2");
     db.connect();
@@ -87,22 +87,35 @@ list<cConference> cUser::get_confList()
 }
 list<cUser> cUser::get_bdyList()
 {
+    CDatabase_Connection db;
+    db.setDB("SLive2");
+    db.setHost("127.0.0.1");
+    db.setPassword("SLive2");
+    db.setUsername("SLive2");
+    db.connect();
+    
     stringstream query;
     query<<"SELECT * FROM buddy WHERE user_id = "<<this->get_id()<<";";
     
-    this->db.dbconn.query(query.str(), query.str().length());
-    
-    if(db.dbconn.errnum() != 0)
+    //this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
+    /*if(db.dbconn.errnum() != 0)
         throw db.dbconn.error();
-    
+    */
     list<cUser> bdy_list;
-    
+    /*
     for(int i = 0; i < this->db.dbconn.affected_rows(); i++)
     {
         map<string, string> result = this->db.dbconn.fetch_assoc();
         bdy_list.push_front(this->db.get_User(atoi((result["bdy_id"]).c_str())));
     }
-    
+*/
+    for(int i = 0; i < db.affected_rows(); i++)
+    {
+        map<string, string> result = db.fetch_assoc();
+        bdy_list.push_front(this->db.get_User(atoi((result["bdy_id"]).c_str())));
+    }
+    db.close();
     return bdy_list;
 }
 
@@ -358,9 +371,10 @@ string cConference::get_id()
 }
 list<cUser> cConference::get_usrList()
 {
+    
     CDatabase_Connection db;
     db.setDB("SLive2");
-    db.setHost("88.152.154.122");
+    db.setHost("127.0.0.1");
     db.setPassword("SLive2");
     db.setUsername("SLive2");
     db.connect();
@@ -369,30 +383,30 @@ list<cUser> cConference::get_usrList()
     
     query<<"SELECT * FROM conf_user WHERE conf_id LIKE '"<<this->id<<"';";
     
-    this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
+    /*
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();*/
     
-    /*if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
-    */
     if(db.errnum() != 0)
         throw db.error();
+     
     list<cUser> usr_list;
     /*
     for(int i = 0; i < this->db.dbconn.affected_rows(); i++)
     {
         map<string, string> result = this->db.dbconn.fetch_assoc();
         usr_list.push_front(this->db.get_User(atoi(result["user_id"].c_str())));
-    }
-    */
+    }*/
+    
     for(int i = 0; i < db.affected_rows(); i++)
     {
         map<string, string> result = db.fetch_assoc();
         usr_list.push_front(this->db.get_User(atoi(result["user_id"].c_str())));
     }
     db.close();
+    
     return usr_list;
-    
-    
 }
   
 bool cConference::set_id(string id)

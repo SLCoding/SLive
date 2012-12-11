@@ -17,7 +17,7 @@
 
 CChat_Server::CChat_Server()
 {
-    this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "88.152.154.122", 3306);
+    this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "127.0.0.1", 3306);
 
     this->thread_server_communication_incoming = new CThread;
     this->thread_server_communication_outgoing = new CThread;
@@ -405,6 +405,7 @@ void* client_processing(void* param)
                             stringstream answer;
                             answer << command << " ";
                             s >> conf_id;
+                            answer << conf_id << " ";
                             cConference conference = myself_struct->db->get_Conf(conf_id);
                             list <cUser> userliste = conference.get_usrList();
                             list<cUser>::iterator iterator;
