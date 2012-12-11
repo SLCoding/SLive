@@ -118,19 +118,20 @@ void* client_processing(void* param)
                 myself->getSocket() >> message;
                 do
                 {
+                    //queue_log << "MESSAGE: " + message;
                     // parsed einen ganzen befehlssatz
                     buffer = message.substr((message).find_first_of("/"), message.find_first_of("\n")); 
                     std::istringstream ss(buffer);
                     // filtert den eigentlichen befehl
                     ss >> command;
                     // löscht den aktuellen datensatz aus dem gesamtstring
-                    message.replace(0, buffer.length() + 1, "");
+                    message.replace(0, buffer.length()+1, "");
                     // parsed die parameter aus dem datensatz
                     parameter = buffer.substr(buffer.find_first_of(" ") + 1, buffer.find_first_of("\n"));
 
                     std::istringstream s(parameter);
 
-                    if(parameter.substr(0, 1) == "/")   // gibt es parameter?
+                    if(parameter.substr(0, 1) == "/") 
                         parameter = "";
 
                     queue_log.set_type(3);
@@ -186,8 +187,9 @@ void* client_processing(void* param)
                         catch(string e)
                         {
                             queue_log << "Loginversuch fehlgeschlagen...";
-                            if(e == "wrong username or password")
-                                myself->getSocket() << "/usr_login 0 0\n";
+                            //if(e == "wrong username or password")
+
+                            myself->getSocket() << "/usr_login 0 0\n";
                         }
                         catch(...)
                         {
@@ -341,10 +343,10 @@ void* client_processing(void* param)
                             s >> conf_id;
                             while(s)
                                 s >> nachricht;
-
+                            
                             cConference temp = myself_struct->db->get_Conf(conf_id);
                             stringstream ausgabe;
-                            ausgabe << "Client " << myself->getID() << " sendet " << parameter;
+                            ausgabe << "Client " << myself->getID() << " sendet " << nachricht;
                             queue_log << ausgabe.str();
                             stringstream log;
                             stringstream buffer;
@@ -358,8 +360,9 @@ void* client_processing(void* param)
                                     queue_log << log.str();
                                     buffer << conf_id << " " << myself->getID() << " " << iterator->get_id() << " " << nachricht;
                                     client_queue << buffer.str();
-                                    log.clear();
+                                    buffer.clear();
                                 }
+                                log.clear();
                             }
                         }
                     }
@@ -448,7 +451,6 @@ void* client_processing(void* param)
                     }
                     command = "";
                     parameter = "";
-                    message = "";
                 }
                 while(message.length() > 0);
             }
@@ -598,7 +600,7 @@ void* server_communication_outgoing(void* param)
                 if(iterator->getIP() == ip)
                 {
                     log << "socket gefunden!! ";
-                    iterator->send(recipient + " " + sender + " " + message);
+                    iterator->send(conf_id + " " + recipient + " " + sender + " " + message);
                     found = true;
                 }
             }
@@ -607,10 +609,10 @@ void* server_communication_outgoing(void* param)
             {
                 // no ip adress found, open a new connection
                 CSocket newsock;
-                log << "baue verbindung zu server auf...";
+                log << "baue verbindung zu server auf...ip_adresse:" + ip;
                 newsock.connect(ip, 8377);
                 socks.push_back(newsock);
-                newsock << conf_id << recipient + " " + sender + " " + message;
+                newsock << conf_id + " " + recipient + " " + sender + " " + message;
             }
             found = false;
             recipient = sender = message = "";
