@@ -58,6 +58,7 @@ CDatabase_Connection::~CDatabase_Connection()
 	{
 		if(this->initialised == true)
 			mysql_free_result(mysql_res);
+        this->close();
 	}
 	catch(...)
 	{
