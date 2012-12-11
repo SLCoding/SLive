@@ -61,22 +61,28 @@ string cUser::get_server()
 }
 list<cConference> cUser::get_confList()
 {
-    
+    CDatabase_Connection db;
+    db.setDB("SLive2");
+    db.setHost("88.152.154.122");
+    db.setPassword("SLive2");
+    db.setUsername("SLive2");
+    db.connect();
     stringstream query;
     query << "SELECT * FROM conf_user WHERE user_id = " << this->id << ";";
-    this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
     list<cConference> conf_list;
-    
-    for(int i = 0; i < this->db.dbconn.affected_rows(); i++)
+    map<string, string> result;
+    int rows = db.affected_rows();
+    for(int i = 0; i < db.affected_rows(); i++)
     {
-        map<string, string> result = this->db.dbconn.fetch_assoc();
+        result = db.fetch_assoc();
         conf_list.push_front(this->db.get_Conf(result["conf_id"]));
     }
-    
+    db.close();
     return conf_list;
 }
 list<cUser> cUser::get_bdyList()
@@ -352,24 +358,38 @@ string cConference::get_id()
 }
 list<cUser> cConference::get_usrList()
 {
+    CDatabase_Connection db;
+    db.setDB("SLive2");
+    db.setHost("88.152.154.122");
+    db.setPassword("SLive2");
+    db.setUsername("SLive2");
+    db.connect();
     
     stringstream query;
     
-    query<<"SELECT * FROM conf_user WHERE conf_id LIKE '"<<this->id<<"'";
+    query<<"SELECT * FROM conf_user WHERE conf_id LIKE '"<<this->id<<"';";
     
     this->db.dbconn.query(query.str(), query.str().length());
     
-    if(db.dbconn.errnum() != 0)
+    /*if(db.dbconn.errnum() != 0)
         throw db.dbconn.error();
-    
+    */
+    if(db.errnum() != 0)
+        throw db.error();
     list<cUser> usr_list;
-    
+    /*
     for(int i = 0; i < this->db.dbconn.affected_rows(); i++)
     {
         map<string, string> result = this->db.dbconn.fetch_assoc();
         usr_list.push_front(this->db.get_User(atoi(result["user_id"].c_str())));
     }
-    
+    */
+    for(int i = 0; i < db.affected_rows(); i++)
+    {
+        map<string, string> result = db.fetch_assoc();
+        usr_list.push_front(this->db.get_User(atoi(result["user_id"].c_str())));
+    }
+    db.close();
     return usr_list;
     
     

@@ -17,7 +17,6 @@
 
 CChat_Server::CChat_Server()
 {
-    //this->database = new CSLiveDB("root", "SLp4ss", "SLive2", "88.152.154.122", 3306);
     this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "88.152.154.122", 3306);
 
     this->thread_server_communication_incoming = new CThread;

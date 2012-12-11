@@ -1,14 +1,14 @@
-    //
-    //  CDatabase_Connection.cpp
-    //  SLive
-    //
-    //  Created by Markus Scholl on 10.10.12.
-    //  Copyright (c) 2012 CLMM. All rights reserved.
-    //
+//
+//  CDatabase_Connection.cpp
+//  SLive
+//
+//  Created by Markus Scholl on 10.10.12.
+//  Copyright (c) 2012 CLMM. All rights reserved.
+//
 
 #include "CDatabase_Connection.h"
 
-    // Konstruktor
+// Konstruktor
 CDatabase_Connection::CDatabase_Connection()
 {
 	try
@@ -24,7 +24,7 @@ CDatabase_Connection::CDatabase_Connection()
 	}
 }
 
-    // Parameter-Konstruktor
+// Parameter-Konstruktor
 CDatabase_Connection::CDatabase_Connection(string user, string password, string DB, string Host, int Port)
 {
     try
@@ -51,14 +51,14 @@ CDatabase_Connection::CDatabase_Connection(string user, string password, string 
 
 }
 
-    // Destruktor
+// Destruktor
 CDatabase_Connection::~CDatabase_Connection()
 {
 	try
 	{
-		if(this->initialised == true)
-			mysql_free_result(mysql_res);
-        this->close();
+		//if(this->initialised == true)
+		//	mysql_free_result(mysql_res);
+        //this->close();
 	}
 	catch(...)
 	{
@@ -71,18 +71,18 @@ CDatabase_Connection:: CDatabase_Connection(const CDatabase_Connection& rhs)
     try
 	{
 		mysql_init(&this->my);
-            //LoadDefaults();
+        //LoadDefaults();
         this->setUsername(rhs.username);
         this->setPassword(rhs.password);
         this->setDB(rhs.db);
         this->setHost(rhs.host);
         this->setPort(rhs.port);
         this->setSocket(rhs.socket_name);
-
+        
 
 		this->connected = false;
 		this->initialised = false;
-        
+
         if(rhs.connected)
             this->connect();
 
@@ -95,7 +95,7 @@ CDatabase_Connection:: CDatabase_Connection(const CDatabase_Connection& rhs)
 	}
 }
 
-    // Speichernde Elementfunktionen
+// Speichernde Elementfunktionen
 void CDatabase_Connection::setUsername(string name)
 {
 	username = name;
@@ -131,7 +131,7 @@ void CDatabase_Connection::setFlag(int flag_num)
 	flag = flag_num;
 }
 
-    // Wertzur¸ckgebende Elementfunktion
+// Wertzur¸ckgebende Elementfunktion
 string CDatabase_Connection::GetUsername()
 {
 	if( username != "" )
@@ -186,18 +186,15 @@ bool CDatabase_Connection::connect()
 {
 	try
 	{
-            //cout << "Baue Verbindung zur Datenbank auf ...\n\n";
+        //cout << "Baue Verbindung zur Datenbank auf ...\n\n";
 		mysql_real_connect (&my, host.c_str(), username.c_str(), password.c_str(), db.c_str(), port, socket_name.c_str(), flag);
         if(this->errnum() == 0)
             this->connected = true;
         else
-        {
-            throw "";
-        }
+            return false;
 	}
 	catch(...)
 	{
-        //cout << "Database-Connect-Error: " << this->error() << endl;
 		return false;
 	}
 	return true;
@@ -207,7 +204,7 @@ bool CDatabase_Connection::close()
 {
 	try
 	{
-            //cout << "Verbindung wird beendet....\n\n";
+        //cout << "Verbindung wird beendet....\n\n";
 		if((this->connected)&&(this->initialised))
 		{
 			mysql_free_result(mysql_res);
@@ -229,18 +226,18 @@ bool CDatabase_Connection::query(string sql_query, unsigned long size)
 		return false;
 	if(sql_query.length() != size)
 	{
-            //cout << "Ungueltige Laenge.\n";
+        //cout << "Ungueltige Laenge.\n";
 		return false;
 	}
 
 	if(size > 1000)
 	{
-            //cout << "SQL Befehl zu lang.\n";
+        //cout << "SQL Befehl zu lang.\n";
 		return false;
 	}
 	try
 	{
-		mysql_real_query(&my, sql_query.c_str(), strlen(sql_query.c_str()));
+		mysql_real_query(&my, sql_query.c_str(),	strlen(sql_query.c_str()));
 
 		mysql_res = mysql_store_result(&my);
 	}
@@ -251,7 +248,6 @@ bool CDatabase_Connection::query(string sql_query, unsigned long size)
 	this->initialised = true;
 	return true;
 }
-
 map<string, string> CDatabase_Connection::fetch_assoc()
 {
 	map<string, string> daten;
@@ -260,8 +256,8 @@ map<string, string> CDatabase_Connection::fetch_assoc()
 	{
 		if(this->initialised == false)
 			throw "No query found!";
-        if(mysql_res == nullptr)
-            throw "ERROR: Query wrong?";
+        if(mysql_res == NULL)
+            throw "Query failed!";
 		mysql_field_seek(mysql_res, 0); //!
 		if(mysql_affected_rows(&my) == 0)
 			throw "Nothing found! Is your request right??";
