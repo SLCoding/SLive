@@ -337,7 +337,10 @@ void* client_processing(void* param)
                         if(user.get_status() != OFFLINE)
                         {
                             string conf_id;
+                            string nachricht;
                             s >> conf_id;
+                            while(s)
+                                s >> nachricht;
 
                             cConference temp = myself_struct->db->get_Conf(conf_id);
                             stringstream ausgabe;
@@ -349,10 +352,14 @@ void* client_processing(void* param)
                             list<cUser>::iterator iterator;
                             for (iterator = userliste.begin(); iterator != userliste.end(); ++iterator)
                             {
-                                log << "Sende Nachricht an " << iterator->get_id();
-                                queue_log << log.str();
-                                buffer << conf_id << " " << myself->getID() << " " << iterator->get_id() << " " << parameter;
-                                client_queue << buffer.str();
+                                if(iterator->get_id() != user.get_id())
+                                {
+                                    log << "Sende Nachricht an " << iterator->get_id();
+                                    queue_log << log.str();
+                                    buffer << conf_id << " " << myself->getID() << " " << iterator->get_id() << " " << nachricht;
+                                    client_queue << buffer.str();
+                                    log.clear();
+                                }
                             }
                         }
                     }
@@ -516,6 +523,7 @@ void* message_dispatcher(void* param)
     while(true)
     {
         messages >> message;
+        logger << "MESSAGE BEI DISPATCHER ANGEKOMMEN: " + message;
         std::istringstream s(message);
         string id_sender;
         string conf_id;
@@ -533,6 +541,10 @@ void* message_dispatcher(void* param)
             if( iterator->client->getID() == atoi(id_recipient.c_str()))
             {
                 cUser temp = chat->database->get_User(iterator->client->getID()); // hole daten für empfänger aus datenbank
+                logger << "Ueberpruefe Anmeldepunkt...";
+                logger << "zielserver " + temp.get_server();
+                logger << "zielclient " + temp.get_name();
+                logger << "lokale adresse: " + (iterator->client->getSocket()).getLocalIP();
                 if(temp.get_server() == (iterator->client->getSocket()).getLocalIP()) //user ist lokal angemeldet
                 {
                     logger << "Sende Nachricht an " + id_recipient + " von sender " + id_sender + " " + message;
@@ -545,7 +557,7 @@ void* message_dispatcher(void* param)
                 }
                 else
                 {
-                        // TODO nicht angemeldet, daten in db hinterlegen
+                    logger << "Keinen Server gefunden...";// TODO nicht angemeldet, daten in db hinterlegen
                 }
             }
         }
