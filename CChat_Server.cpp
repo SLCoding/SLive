@@ -523,7 +523,6 @@ void* message_dispatcher(void* param)
     while(true)
     {
         messages >> message;
-        logger << "MESSAGE BEI DISPATCHER ANGEKOMMEN: " + message;
         std::istringstream s(message);
         string id_sender;
         string conf_id;
@@ -541,10 +540,6 @@ void* message_dispatcher(void* param)
             if( iterator->client->getID() == atoi(id_recipient.c_str()))
             {
                 cUser temp = chat->database->get_User(iterator->client->getID()); // hole daten für empfänger aus datenbank
-                logger << "Ueberpruefe Anmeldepunkt...";
-                logger << "zielserver " + temp.get_server();
-                logger << "zielclient " + temp.get_name();
-                logger << "lokale adresse: " + (iterator->client->getSocket()).getLocalIP();
                 if(temp.get_server() == (iterator->client->getSocket()).getLocalIP()) //user ist lokal angemeldet
                 {
                     logger << "Sende Nachricht an " + id_recipient + " von sender " + id_sender + " " + message;
