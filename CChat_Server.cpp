@@ -134,6 +134,7 @@ void* client_processing(void* param)
                     if(parameter.substr(0, 1) == "/")   // gibt es parameter?
                         parameter = "";
 
+                    queue_log.set_type(3);
                     queue_log << "BEFEHL: " + command;
                     queue_log << "PARAM: " + parameter;
                     //queue_log << "ISTRINGSTREAM: " + s.str();
