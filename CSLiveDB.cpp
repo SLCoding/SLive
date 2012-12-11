@@ -63,7 +63,7 @@ list<cConference> cUser::get_confList()
 {
     
     stringstream query;
-    query << "SELECT * FROM conf_user WHERE user_id LIKE " << this->id << ";";
+    query << "SELECT * FROM conf_user WHERE user_id = " << this->id << ";";
     this->db.dbconn.query(query.str(), query.str().length());
     
     if(db.dbconn.errnum() != 0)
@@ -355,7 +355,7 @@ list<cUser> cConference::get_usrList()
     
     stringstream query;
     
-    query<<"SELECT * FROM conf_user WHERE conf_id = '"<<this->id<<"'";
+    query<<"SELECT * FROM conf_user WHERE conf_id LIKE '"<<this->id<<"'";
     
     this->db.dbconn.query(query.str(), query.str().length());
     
