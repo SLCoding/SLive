@@ -523,6 +523,7 @@ void* message_dispatcher(void* param)
     while(true)
     {
         messages >> message;
+
         std::istringstream s(message);
         string id_sender;
         string conf_id;
@@ -545,7 +546,7 @@ void* message_dispatcher(void* param)
                     logger << "Sende Nachricht an " + id_recipient + " von sender " + id_sender + " " + message;
                     iterator->client->getSocket() << "/conf_send " << conf_id << " " << zeit << " " <<  sender.get_name() << " " << message << "\n";
                 }
-                else if(temp.get_server() != "")    // user ist auf entferntem rechner angemeldet
+                else if((temp.get_server() != (iterator->client->getSocket()).getLocalIP()) && (temp.get_server() != ""))    // user ist auf entferntem rechner angemeldet
                 {
                     logger << "Client nicht lokal angemeldet, kontaktiere Server...leite Nachricht weiter...";
                     server2server << conf_id << " " << id_recipient + " " + id_sender + " " + message + " " + temp.get_server();
