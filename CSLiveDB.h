@@ -66,6 +66,8 @@ public:
     
     cUser get_User(long id);
     cUser get_User(string name);
+    list<cUser> search_User(string name);
+    
     cUser login(string name, string pw, string server);
     cUser login(long id, string pw, string server);
 };

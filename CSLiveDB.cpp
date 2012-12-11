@@ -63,8 +63,11 @@ list<cConference> cUser::get_confList()
 {
     
     stringstream query;
-    query << "SELECT * FROM conf_user WHERE user_id LIKE " << this->id << ";";
+    query << "SELECT * FROM conf_user WHERE user_id = " << this->id << ";";
     this->db.dbconn.query(query.str(), query.str().length());
+    
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
     
     list<cConference> conf_list;
     
@@ -82,6 +85,9 @@ list<cUser> cUser::get_bdyList()
     query<<"SELECT * FROM buddy WHERE user_id = "<<this->get_id()<<";";
     
     this->db.dbconn.query(query.str(), query.str().length());
+    
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
     
     list<cUser> bdy_list;
     
@@ -102,6 +108,10 @@ user_status cUser::get_status()
     query<<"SELECT status FROM user WHERE user_id = "<<this->id<<";";
     
     this->db.dbconn.query(query.str(), query.str().length());
+    
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
+    
     map<string, string> result = this->db.dbconn.fetch_assoc();
     return (user_status)atoi(result["status"].c_str());
     
@@ -117,6 +127,9 @@ bool cUser::set_id(long id)
     query<<"UPDATE user SET user_id = " << id << " WHERE user_id = " << this->id << ";";
     this->db.dbconn.query(query.str(), query.str().length());
     
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
+    
     this->id = id;
     return true;
 }
@@ -126,6 +139,9 @@ bool cUser::set_name(string name)
     
     query<<"UPDATE user SET name = '" << name << "' WHERE user_id = " << this->id << ";";
     this->db.dbconn.query(query.str(), query.str().length());
+    
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
     
     this->name = name;
     
@@ -138,6 +154,9 @@ bool cUser::set_email(string email)
     query<<"UPDATE user SET email = '" << email << "' WHERE user_id = " << this->id << ";";
     this->db.dbconn.query(query.str(), query.str().length());
     
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
+    
     this->email = email;
     
     return true;
@@ -148,6 +167,9 @@ bool cUser::set_server(string server)
     
     query<<"UPDATE user SET server = '" << server << "' WHERE user_id = " << this->id << ";";
     this->db.dbconn.query(query.str(), query.str().length());
+    
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
     
     
     this->server = server;
@@ -162,6 +184,9 @@ bool cUser::set_status(user_status status)
     
     query<<"UPDATE user SET status = '" << (int)status << "' WHERE user_id = " << this->id << ";";
     this->db.dbconn.query(query.str(), query.str().length());
+    
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
     
     
     return true;
@@ -191,6 +216,10 @@ bool cUser::add_conf(string conf_id)
     query<<"INSERT INTO conf_user(conf_id, user_id) VALUES('" << conf_id << "', " << this->id << ");";
     this->db.dbconn.query(query.str(), query.str().length());
     
+    
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
+    
     return true;
 } 
 
@@ -209,6 +238,10 @@ bool cUser::add_bdy(long bdy_id)
     this->db.dbconn.query(query.str(), query.str().length());
     
     
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
+    
+    
     return true;
 }
 bool cUser::add_bdy(cUser bdy)
@@ -225,10 +258,12 @@ bool cUser::del_conf(string conf_id)
     query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< conf_id <<"'* AND user_id = "<< this->id <<";";
     this->db.dbconn.query(query.str(), query.str().length());
     
+    
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
+    
+    
     return true;
-    
-    
-    
     
 }
 bool cUser::del_conf(cConference conf)
@@ -244,6 +279,9 @@ bool cUser::del_bdy(long bdy_id)
     this->db.dbconn.query(query.str(), query.str().length());
     
     
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
+    
     return true;
 }
 bool cUser::del_bdy(cUser bdy)
@@ -257,11 +295,27 @@ bool cUser::del_user()
     query<<"DELETE FROM conf_user WHERE user_id = "<< this->id <<";";
     this->db.dbconn.query(query.str(), query.str().length());
     
+    
+    
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
+    
+    
     query<<"DELETE FROM buddy WHERE user_id = "<< this->id <<";";
     this->db.dbconn.query(query.str(), query.str().length());    
     
+    
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
+    
+    
     query<<"DELETE FROM user WHERE user_id = "<< this->id <<";";
     this->db.dbconn.query(query.str(), query.str().length());
+    
+    
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
+    
     
     return true;
 }
@@ -301,7 +355,12 @@ list<cUser> cConference::get_usrList()
     
     stringstream query;
     
-    query<<"SELECT * FROM conf_user WHERE conf_id = '"<<this->id<<"'";
+    query<<"SELECT * FROM conf_user WHERE conf_id LIKE '"<<this->id<<"'";
+    
+    this->db.dbconn.query(query.str(), query.str().length());
+    
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
     
     list<cUser> usr_list;
     
@@ -323,6 +382,10 @@ bool cConference::set_id(string id)
     query<<"UPDATE conf_user SET conf_id = '" << id << "' WHERE conf_id LIKE '" << this->id << "';";
     this->db.dbconn.query(query.str(), query.str().length());
     
+    
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
+    
     this->id = id;
     return true;
 
@@ -341,6 +404,10 @@ bool cConference::add_usr(long usr_id)
     this->db.dbconn.query(query.str(), query.str().length());
     
     
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
+    
+    
     return true;
 }
 bool cConference::add_usr(cUser usr)
@@ -355,6 +422,8 @@ bool cConference::del_usr(long usr_id)
     query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< this->id <<"'* AND user_id = "<< usr_id <<";";
     this->db.dbconn.query(query.str(), query.str().length());
     
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
     
     return true;
 
@@ -370,7 +439,8 @@ bool cConference::del_conf()
     
     query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< this->id <<"';";
     this->db.dbconn.query(query.str(), query.str().length());
-    
+    if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
     return true;
 }
     
@@ -388,6 +458,8 @@ CSLiveDB::CSLiveDB(string user, string password, string DB, string Host, int por
 {
     this->dbconn = CDatabase_Connection(user, password, DB, Host, port);
     dbconn.connect();
+    if(dbconn.errnum() != 0)
+        throw dbconn.error();
 }
 
 
@@ -402,10 +474,18 @@ cConference CSLiveDB::create_conf(string name)
     query<<"SELECT uuid() AS id;";
     
     this->dbconn.query(query.str(), query.str().length());
+    
+    if(dbconn.errnum() != 0)
+        throw dbconn.error();
+    
     map<string, string> result = this->dbconn.fetch_assoc();
     
     query.str("");
     query<<"INSERT INTO conference (conf_id, name) VALUES('"<<result["id"]<<"', '"<< name <<"');";
+    this->dbconn.query(query.str(), query.str().length());
+    
+    if(dbconn.errnum() != 0)
+        throw dbconn.error();
     
     return this->get_Conf(result["id"]);
     
@@ -449,7 +529,8 @@ cConference CSLiveDB::get_Conf(string id)
     
     query<<"SELECT * FROM conf_user WHERE conf_id LIKE '" << id <<"';";
     this->dbconn.query(query.str(), query.str().length());
-    
+    if(dbconn.errnum() != 0)
+        throw dbconn.error();
     cConference conf = cConference(*this, id);
     
     return conf;
@@ -463,6 +544,8 @@ bool CSLiveDB::checkUsername(string name)
     
     query<<"SELECT * FROM user WHERE name LIKE '" << name <<"';";
     this->dbconn.query(query.str(), query.str().length());
+    if(dbconn.errnum() != 0)
+        throw dbconn.error();
     if(this->dbconn.affected_rows() > 0)
         return false;
     else 
@@ -476,13 +559,14 @@ cUser CSLiveDB::create_User(string name, string pw)
     {
         stringstream query;
         query<<"INSERT INTO user(name, pwhash, email) VALUES ('"<< name << "', '"<< md5(pw) << "', '');";
-
+        
         
         string query_str = query.str();
         
         
         this->dbconn.query(query.str(), query.str().length());
-        
+        if(dbconn.errnum() != 0)
+            throw dbconn.error();
         
         return this->get_User(name);
         
