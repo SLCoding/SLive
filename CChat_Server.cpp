@@ -17,7 +17,8 @@
 
 CChat_Server::CChat_Server()
 {
-    this->database = new CSLiveDB("SLive", "SLive", "SLive", "88.152.154.122", 3306);
+    //this->database = new CSLiveDB("root", "SLp4ss", "SLive2", "88.152.154.122", 3306);
+    this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "88.152.154.122", 3306);
 
     this->thread_server_communication_incoming = new CThread;
     this->thread_server_communication_outgoing = new CThread;
@@ -120,19 +121,22 @@ void* client_processing(void* param)
                 {
                     // parsed einen ganzen befehlssatz
                     buffer = message.substr((message).find_first_of("/"), message.find_first_of("\n")); 
-                    std::istringstream s(buffer);
+                    std::istringstream ss(buffer);
                     // filtert den eigentlichen befehl
-                    s >> command;
+                    ss >> command;
                     // löscht den aktuellen datensatz aus dem gesamtstring
                     message.replace(0, buffer.length() + 1, "");
                     // parsed die parameter aus dem datensatz
-                    parameter = buffer.substr(buffer.find_first_of(" ") + 1, buffer.find_first_of("\n")); 
-                    
-                    if(parameter.substr(0, 1) != "/")   // gibt es parameter?
-                        std::istringstream s(parameter);
-                    else
+                    parameter = buffer.substr(buffer.find_first_of(" ") + 1, buffer.find_first_of("\n"));
+
+                    std::istringstream s(parameter);
+
+                    if(parameter.substr(0, 1) == "/")   // gibt es parameter?
                         parameter = "";
-                    
+
+                    queue_log << "BEFEHL: " + command;
+                    queue_log << "PARAM: " + parameter;
+                    //queue_log << "ISTRINGSTREAM: " + s.str();
                     // execute parsed message
                     if(command == "/usr_logout")
                     {
@@ -227,7 +231,6 @@ void* client_processing(void* param)
                             string user_id;
                             string answer = "/bdy_info";
                             s >> user_id;
-
                             answer += " " + user_id + " " + myself_struct->db->get_User(atoi(user_id.c_str())).get_name() + "\n";
                             queue_log << answer;
                             myself->getSocket() << answer;
@@ -313,13 +316,20 @@ void* client_processing(void* param)
                         {
                             list <cUser> userlist;
                             string user;
+                            stringstream userliste;
+                            userliste << command << " ";
                             while(s)
                             {
                                 s >> user;
-                                userlist.push_back(myself_struct->db->get_User(atoi(user.c_str())));
+                                if(user != "")
+                                {
+                                    userliste << user;
+                                    userlist.push_back(myself_struct->db->get_User(atoi(user.c_str())));
+                                }
+                                user = "";
                             }
-                            queue_log << command;
-                            myself_struct->db->create_conf("", userlist);   // todo schütte nach id befragen!!
+                            queue_log << userliste.str();
+                            myself_struct->db->create_conf(userlist);
                         }
                     }
                     if(command == "/conf_send")
@@ -374,7 +384,17 @@ void* client_processing(void* param)
                     {
                         if(user.get_status() != OFFLINE)
                         {
-                            queue_log << command;
+                            list<cConference> conf_list = user.get_confList();
+                            stringstream answer;
+                            answer << command << " ";
+                            list<cConference>::iterator iterator;
+                            for (iterator = conf_list.begin(); iterator != conf_list.end(); ++iterator)
+                            {
+                                answer << iterator->get_id() << " ";
+                            }
+                            answer << "\n";
+                            queue_log << answer.str();
+                            myself->getSocket() << answer.str();
                         }
                     }
                     if(command == "/conf_get_user")
@@ -420,6 +440,7 @@ void* client_processing(void* param)
                     }
                     command = "";
                     parameter = "";
+                    message = "";
                 }
                 while(message.length() > 0);
             }

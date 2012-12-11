@@ -190,10 +190,13 @@ bool CDatabase_Connection::connect()
         if(this->errnum() == 0)
             this->connected = true;
         else
-            return false;
+        {
+            throw "";
+        }
 	}
 	catch(...)
 	{
+        //cout << "Database-Connect-Error: " << this->error() << endl;
 		return false;
 	}
 	return true;
@@ -236,7 +239,7 @@ bool CDatabase_Connection::query(string sql_query, unsigned long size)
 	}
 	try
 	{
-		mysql_real_query(&my, sql_query.c_str(),	strlen(sql_query.c_str()));
+		mysql_real_query(&my, sql_query.c_str(), strlen(sql_query.c_str()));
 
 		mysql_res = mysql_store_result(&my);
 	}
@@ -256,7 +259,8 @@ map<string, string> CDatabase_Connection::fetch_assoc()
 	{
 		if(this->initialised == false)
 			throw "No query found!";
-
+        if(mysql_res == nullptr)
+            throw "ERROR: Query wrong?";
 		mysql_field_seek(mysql_res, 0); //!
 		if(mysql_affected_rows(&my) == 0)
 			throw "Nothing found! Is your request right??";
