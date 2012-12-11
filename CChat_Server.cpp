@@ -356,13 +356,13 @@ void* client_processing(void* param)
                             {
                                 if(iterator->get_id() != user.get_id())
                                 {
-                                    log << "Sende Nachricht an " << iterator->get_id();
-                                    queue_log << log.str();
+                                    //log << "Sende Nachricht an " << iterator->get_id();
+                                    //queue_log << log.str();
                                     buffer << conf_id << " " << myself->getID() << " " << iterator->get_id() << " " << nachricht;
                                     client_queue << buffer.str();
                                     buffer.clear();
                                 }
-                                log.clear();
+                                //log.clear();
                             }
                         }
                     }
@@ -546,13 +546,13 @@ void* message_dispatcher(void* param)
                 if( iterator->client->getID() == atoi(id_recipient.c_str()))
                 {
                     logger << "Sende Nachricht an " + id_recipient + " von sender " + id_sender + " " + message;
-                    iterator->client->getSocket() << "/conf_send " << conf_id << " " << zeit << " " <<  sender.get_name() << " " << message << "\n";
+                    iterator->client->getSocket() << "/conf_send " + conf_id + " " + zeit + " " +  sender.get_name() + " " + message + "\n";
                 }
             }
             else if((sender.get_server() != recipient.get_server()) && (recipient.get_server() != ""))    // user ist auf entferntem rechner angemeldet
             {
                 logger << "Client nicht lokal angemeldet, kontaktiere Server...leite Nachricht weiter...";
-                server2server << conf_id << " " << id_recipient + " " + id_sender + " " + message + " " + recipient.get_server();
+                server2server << conf_id + " " + id_recipient + " " + id_sender + " " + message + " " + recipient.get_server();
             }
             else
             {
