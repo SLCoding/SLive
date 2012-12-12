@@ -374,7 +374,7 @@ void* client_processing(void* param)
                             string nachricht;
                             string buffer_message;
                             s >> conf_id;
-                            
+                            cout << "/conf_send...." << endl;
                             while(s.good())
                             {
                                 s >> buffer_message;
@@ -735,7 +735,7 @@ void* server_communication_incoming(void* param)
     {
         queue << "warte auf Server-Anfrage...";
         CSocket client_socket = sock.accept();
-        client_socket.setBuffer(8192);
+        //client_socket.setBuffer(8192);
 
         server incoming_server;
 

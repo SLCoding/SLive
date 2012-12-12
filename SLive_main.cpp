@@ -23,7 +23,7 @@ int main()
     chat = new CChat_Server;
     //pthread_join(thread, NULL);
     while(true)
-        sleep(2);
+        sleep(10000);
     //  logger.start(NULL, CLogger_run);
   /*  while(true)
     {
