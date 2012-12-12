@@ -17,12 +17,12 @@
 
 cUser::cUser(CSLiveDB db)
 {
-    this->db  = CSLiveDB(db.dbconn.GetUsername(), db.dbconn.GetPassword(), db.dbconn.GetDB(), db.dbconn.GetHost(), db.dbconn.GetPort());
+    this->db = db;
 }
 
 cUser::cUser(CSLiveDB db, long id, string name, string pwhash, string email)
 {
-    this->db  = CSLiveDB(db.dbconn.GetUsername(), db.dbconn.GetPassword(), db.dbconn.GetDB(), db.dbconn.GetHost(), db.dbconn.GetPort());
+    this->db = db;
     this->id = id;
     this->name = name;
     this->pwhash = pwhash;
@@ -103,28 +103,21 @@ list<cConference> cUser::get_confList()
 }
 list<cUser> cUser::get_bdyList()
 {
-    int error, n=0;
     CDatabase_Connection db;
-    do
-    {        
-        db.setDB("SLive2");
-        db.setHost("127.0.0.1");
-        db.setPassword("SLive2");
-        db.setUsername("SLive2");
-        db.connect();
-        
-        stringstream query;
-        query<<"SELECT * FROM buddy WHERE user_id = "<<this->get_id()<<";";
-        
-        //this->db.dbconn.query(query.str(), query.str().length());
-        db.query(query.str(), query.str().length());
-        error = db.errnum();
-        
-        n++;
-        
-    }while(error == 2006 && n <10);
+    db.setDB("SLive2");
+    db.setHost("127.0.0.1");
+    db.setPassword("SLive2");
+    db.setUsername("SLive2");
+    db.connect();
     
+    stringstream query;
+    query<<"SELECT * FROM buddy WHERE user_id = "<<this->get_id()<<";";
     
+    //this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
+    /*if(db.dbconn.errnum() != 0)
+        throw db.dbconn.error();
+    */
     list<cUser> bdy_list;
     /*
     for(int i = 0; i < this->db.dbconn.affected_rows(); i++)
@@ -379,11 +372,11 @@ bool cUser::del_user()
 
 cConference::cConference(CSLiveDB db)
 {
-    this->db  = CSLiveDB(db.dbconn.GetUsername(), db.dbconn.GetPassword(), db.dbconn.GetDB(), db.dbconn.GetHost(), db.dbconn.GetPort());
+    this->db = db;
 }
 cConference::cConference(CSLiveDB db, string id)
 {
-    this->db  = CSLiveDB(db.dbconn.GetUsername(), db.dbconn.GetPassword(), db.dbconn.GetDB(), db.dbconn.GetHost(), db.dbconn.GetPort());
+    this->db  = db;
     this->id = id;
 }
 
