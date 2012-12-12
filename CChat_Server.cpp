@@ -347,6 +347,7 @@ void* client_processing(void* param)
                             {
                                 s >> buffer_message;
                                 nachricht += buffer_message + " ";
+                                buffer_message = "";
                             }
                             
                             cConference temp = myself_struct->db->get_Conf(conf_id);
@@ -363,14 +364,11 @@ void* client_processing(void* param)
                                 {
                                     if(iterator->get_status() != OFFLINE)
                                     {
-                                        //log << "Sende Nachricht an " << iterator->get_id();
-                                        //queue_log << log.str();
                                         buffer << conf_id << " " << myself->getID() << " " << iterator->get_id() << " " << nachricht;
                                         client_queue << buffer.str();
-                                        buffer.clear();
+                                        buffer.str("");
                                     }
                                 }
-                                //log.clear();
                             }
                         }
                     }
@@ -473,6 +471,7 @@ void* client_processing(void* param)
                 //CQueue queue(8301);
                 //queue.set_type(myself->getID());
                 //queue << "ENDE!!!";
+                user.logout();
                 myself->setLoginStatus(false);
                 pthread_exit((void*)0);
             }
@@ -549,7 +548,10 @@ void* message_dispatcher(void* param)
         {
             s >> buffer;
             nachricht += buffer + " ";
+            buffer = "";
         }
+
+        
         
         cUser sender = chat->database->get_User(atoi(id_sender.c_str())); // hole daten für sender aus datenbank
         cUser recipient = chat->database->get_User(atoi(id_recipient.c_str())); // hole daten für empfänger aus datenbank
@@ -613,6 +615,7 @@ void* server_communication_outgoing(void* param)
             {
                 ss >> message;
                 nachricht += message + " ";
+                message = "";
             }
 
             list<CSocket>::iterator iterator;
@@ -718,6 +721,7 @@ void* messageForClient(void* param)
             {
                 ss >> message;
                 nachricht += message + " ";
+                message = "";
             }
             
 
