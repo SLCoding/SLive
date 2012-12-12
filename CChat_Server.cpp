@@ -32,7 +32,7 @@ CChat_Server::CChat_Server()
         message_dispatcher_obj = this->start(reinterpret_cast<void*>(this), message_dispatcher);
         this->start(reinterpret_cast<void*>(this), accept_new_Clients);
         
-        this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "127.0.0.1", "127.0.0.1", 3306, 3306);
+        this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "10.12.47.27", "10.12.34.198", 3306, 3306);
     }
     catch(string e)
     {
@@ -241,7 +241,7 @@ void* client_processing(void* param)
                     {
                         if(user.get_status() != OFFLINE)
                         {
-
+                            // myself_struct->db->
 
                         }
                     }
@@ -253,7 +253,7 @@ void* client_processing(void* param)
                             string answer = "/bdy_info";
                             s >> user_id;
                             answer += " " + user_id + " " + myself_struct->db->get_User(atoi(user_id.c_str())).get_name() + "\n";
-                            queue_log << answer;
+                            //queue_log << answer;
                             myself->getSocket() << answer;
                         }
                     }
@@ -266,7 +266,7 @@ void* client_processing(void* param)
                             string answer = "/conf_bdy_info";
                             s >> conf_id >> user_id;
                             answer += " " + conf_id + " " + user_id + " " + myself_struct->db->get_User(atoi(user_id.c_str())).get_name() + "\n";
-                            queue_log << answer;
+                            //queue_log << answer;
                             myself->getSocket() << answer;
                         }
                     }
@@ -326,7 +326,7 @@ void* client_processing(void* param)
                                 answer << iterator->get_id() << " ";
                             }
                             answer << "\n";
-                            queue_log << answer.str();
+                            //queue_log << answer.str();
                             myself->getSocket() << answer.str();
                         }
                     }
@@ -340,7 +340,7 @@ void* client_processing(void* param)
                             cUser temp = myself_struct->db->get_User(atoi(userid.c_str()));
                             user_status status = temp.get_status();
                             buffer << command << " " << userid << " " << status << "\n";
-                            queue_log << buffer.str();
+                            //queue_log << buffer.str();
                             myself->getSocket() << buffer.str();
                         }
                     }
@@ -385,7 +385,8 @@ void* client_processing(void* param)
                             cConference temp = myself_struct->db->get_Conf(conf_id);
                             stringstream ausgabe;
                             ausgabe << "Client " << myself->getID() << " sendet " << nachricht;
-                            queue_log << ausgabe.str();
+                            //queue_log << ausgabe.str();
+                            cout << ausgabe.str() << endl;
                             stringstream log;
                             stringstream buffer;
                             list <cUser> userliste = temp.get_usrList();
@@ -408,7 +409,7 @@ void* client_processing(void* param)
                     {
                         if(user.get_status() != OFFLINE)
                         {
-                            queue_log << command;
+                            //queue_log << command;
                             string conf_id;
                             string user_id;
                             s >> conf_id;
@@ -420,7 +421,7 @@ void* client_processing(void* param)
                     {
                         if(user.get_status() != OFFLINE)
                         {
-                            queue_log << command;
+                            //queue_log << command;
                             string conf_id;
                             string user_id;
                             s >> conf_id;
@@ -441,7 +442,7 @@ void* client_processing(void* param)
                                 answer << iterator->get_id() << " ";
                             }
                             answer << "\n";
-                            queue_log << answer.str();
+                            //queue_log << answer.str();
                             myself->getSocket() << answer.str();
                         }
                     }
@@ -462,7 +463,7 @@ void* client_processing(void* param)
                                 answer << " " << iterator->get_id();
                             }
                             answer << "\n";
-                            queue_log << answer.str();
+                            //queue_log << answer.str();
                             myself->getSocket() << answer.str();
                         }
                     }
@@ -566,7 +567,8 @@ void* message_dispatcher(void* param)
     while(true)
     {
         messages >> message;
-        logger << "MESSAGEDISPATCHER: " + message;
+        //logger << "MESSAGEDISPATCHER: " + message;
+        cout << "MESSAGEDISPATCHER: " + message << endl;
         std::istringstream s(message);
         string id_sender;
         string conf_id;
@@ -591,7 +593,8 @@ void* message_dispatcher(void* param)
             {
                 if(sender.get_server() == recipient.get_server()) //user ist lokal angemeldet
                 {
-                    logger << "User " + id_recipient + " ist lokal angemeldet!";
+                    //logger << "User " + iterator->client->getID() + " ist lokal angemeldet!";
+                    cout << "User " << iterator->client->getID() << " ist lokal angemeldet!" << endl;
                     if( iterator->client->getID() == atoi(id_recipient.c_str()))
                     {
                         logger << "Sende Nachricht an " + id_recipient + " von sender " + id_sender + " " + nachricht;
@@ -603,7 +606,6 @@ void* message_dispatcher(void* param)
                         catch(string e)
                         {
                             logger << "Senden fehlgeschlagen...";
-                            (iterator->client->getSocket());
                             (iterator->client->getSocket()).send("/conf_send " + conf_id + " " +  sender.get_name() + " " + nachricht + "\n");
                             break;
                         }
@@ -689,7 +691,7 @@ void* server_communication_outgoing(void* param)
                     // no ip adress found, open a new connection
                     log << "baue verbindung zu server auf...ip_adresse:" + ip;
                     newsock.connect(ip, 8377);
-                    newsock << conf_id + " " + recipient + " " + sender + " " + nachricht;
+                    newsock.send(conf_id + " " + recipient + " " + sender + " " + nachricht);
                 }
                 catch(string e)
                 {
