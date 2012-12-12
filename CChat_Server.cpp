@@ -335,7 +335,7 @@ void* client_processing(void* param)
                             s >> userid;
                             cUser temp = myself_struct->db->get_User(atoi(userid.c_str()));
                             user_status status = temp.get_status();
-                            buffer << command << " " << status << "\n";
+                            buffer << command << " " << userid << " " << status << "\n";
                             queue_log << buffer.str();
                             myself->getSocket() << buffer.str();
                         }
