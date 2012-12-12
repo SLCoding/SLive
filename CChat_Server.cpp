@@ -17,18 +17,30 @@
 
 CChat_Server::CChat_Server()
 {
-    this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "127.0.0.1", 3306);
+    CQueue logger(8300);
+    logger.set_type(2);
+    try
+    {
+        this->thread_server_communication_incoming = new CThread;
+        this->thread_server_communication_outgoing = new CThread;
+        this->thread_logout = new CThread;
 
-    this->thread_server_communication_incoming = new CThread;
-    this->thread_server_communication_outgoing = new CThread;
-    this->thread_logout = new CThread;
+        this->thread_server_communication_incoming->start(reinterpret_cast<void*>(this), server_communication_incoming);
+        this->thread_server_communication_outgoing->start(NULL, server_communication_outgoing);
+        //this->thread_logout->start(reinterpret_cast<void*>(this), logout);
 
-    this->thread_server_communication_incoming->start(reinterpret_cast<void*>(this), server_communication_incoming);
-    this->thread_server_communication_outgoing->start(NULL, server_communication_outgoing);
-    //this->thread_logout->start(reinterpret_cast<void*>(this), logout);
-
-    message_dispatcher_obj = this->start(reinterpret_cast<void*>(this), message_dispatcher);
-    this->start(reinterpret_cast<void*>(this), accept_new_Clients);
+        message_dispatcher_obj = this->start(reinterpret_cast<void*>(this), message_dispatcher);
+        this->start(reinterpret_cast<void*>(this), accept_new_Clients);
+        
+        this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "127.0.0.1", 3306);
+    }
+    catch(string e)
+    {
+        logger << e;
+        logger << "Server shutdown...";
+        logger.destroy();
+        this->~CChat_Server();
+    }
 }
 
 CChat_Server::~CChat_Server()
@@ -50,6 +62,9 @@ CChat_Server::~CChat_Server()
         server_list.erase(iterator2);
     }
 
+    thread_server_communication_incoming->cancel();
+    thread_server_communication_outgoing->cancel();
+    this->cancel();
     delete message_dispatcher_obj;
     delete thread_server_communication_incoming;
     delete thread_server_communication_outgoing;
