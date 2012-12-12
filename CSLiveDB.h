@@ -39,7 +39,7 @@ class CSLiveDB
     friend class cConference;
     
 private:
-    CDatabase_Connection dbconn;
+    //CDatabase_Connection dbconn;
     
     
 protected:
@@ -49,6 +49,13 @@ public:
     CSLiveDB();
     CSLiveDB(string user, string password, string DB, string Host = "127.0.0.1", int port = 3306);
     ~CSLiveDB();
+    
+    
+    string user;
+    string password;
+    string DB;
+    string Host;
+    int port;
     
     
     cConference create_conf(string name);

@@ -64,25 +64,27 @@ string cUser::get_email()
 }
 string cUser::get_server()
 {
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+    db.connect();
+    
     stringstream query;
     query<<"SELECT server FROM user WHERE user_id = "<<this->id<<";";
     
-    this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
-    map<string, string> result = this->db.dbconn.fetch_assoc();
+    map<string, string> result = db.fetch_assoc();
+    
+    db.close();
     return result["server"].c_str();
 }
 list<cConference> cUser::get_confList()
 {
-    CDatabase_Connection db;
-    db.setDB("SLive2");
-    db.setHost("127.0.0.1");
-    db.setPassword("SLive2");
-    db.setUsername("SLive2");
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
     db.connect();
+    
     stringstream query;
     query << "SELECT * FROM conf_user WHERE user_id = " << this->id << ";";
     db.query(query.str(), query.str().length());
@@ -103,11 +105,7 @@ list<cConference> cUser::get_confList()
 }
 list<cUser> cUser::get_bdyList()
 {
-    CDatabase_Connection db;
-    db.setDB("SLive2");
-    db.setHost("127.0.0.1");
-    db.setPassword("SLive2");
-    db.setUsername("SLive2");
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
     db.connect();
     
     stringstream query;
@@ -139,15 +137,19 @@ list<cUser> cUser::get_bdyList()
 
 user_status cUser::get_status()
 {
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+    db.connect();
+    
     stringstream query;
     query<<"SELECT status FROM user WHERE user_id = "<<this->id<<";";
     
-    this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
-    map<string, string> result = this->db.dbconn.fetch_assoc();
+    map<string, string> result = db.fetch_assoc();
+    db.close();
     return (user_status)atoi(result["status"].c_str());
     
 }
@@ -158,72 +160,88 @@ user_status cUser::get_status()
 
 bool cUser::set_id(long id)
 {
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+    db.connect();
+    
     stringstream query;
     query<<"UPDATE user SET user_id = " << id << " WHERE user_id = " << this->id << ";";
-    this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
+    db.close();
     this->id = id;
     return true;
 }
 bool cUser::set_name(string name)
 {
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+    db.connect();
+    
     stringstream query;
     
     query<<"UPDATE user SET name = '" << name << "' WHERE user_id = " << this->id << ";";
-    this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
     this->name = name;
-    
+    db.close();
     return true;
 }
 bool cUser::set_email(string email)
 {
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+    db.connect();
+    
     stringstream query;
     
     query<<"UPDATE user SET email = '" << email << "' WHERE user_id = " << this->id << ";";
-    this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
     this->email = email;
-    
+    db.close();
     return true;
 }
 bool cUser::set_server(string server)
 {
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+    db.connect();
+    
     stringstream query;
     
     query<<"UPDATE user SET server = '" << server << "' WHERE user_id = " << this->id << ";";
-    this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
     
     this->server = server;
-    
+    db.close();
     return true;
 }
 
 
 bool cUser::set_status(user_status status)
 {
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+    db.connect();
+    
     stringstream query;
     
     query<<"UPDATE user SET status = '" << (int)status << "' WHERE user_id = " << this->id << ";";
-    this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
-    
+    db.close();
     return true;
 }
 
@@ -246,15 +264,19 @@ bool cUser::logout()
 
 bool cUser::add_conf(string conf_id)
 {
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+    db.connect();
+    
     stringstream query;
     
     query<<"INSERT INTO conf_user(conf_id, user_id) VALUES('" << conf_id << "', " << this->id << ");";
-    this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
     
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
+    db.close();
     return true;
 } 
 
@@ -267,16 +289,19 @@ bool cUser::add_conf(cConference conf)
 
 bool cUser::add_bdy(long bdy_id)
 {
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+    db.connect();
+    
     stringstream query;
     
     query<<"INSERT INTO buddy(user_id, bdy_id) VALUES(" << this->id << ", " << bdy_id << ");";
-    this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
     
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
-    
+    db.close();
     return true;
 }
 bool cUser::add_bdy(cUser bdy)
@@ -287,17 +312,19 @@ bool cUser::add_bdy(cUser bdy)
 
 
 bool cUser::del_conf(string conf_id)
-{    
+{        
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+    db.connect();
     stringstream query;
     
     query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< conf_id <<"'* AND user_id = "<< this->id <<";";
-    this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
     
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
-    
+    db.close();
     return true;
     
 }
@@ -308,15 +335,19 @@ bool cUser::del_conf(cConference conf)
 
 bool cUser::del_bdy(long bdy_id)
 {
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+    db.connect();
+    
     stringstream query;
     
     query<<"DELETE FROM buddy WHERE user_id = "<< this->id <<"' AND bdy_id = "<< bdy_id <<";";
-    this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
     
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
+    db.close();
     return true;
 }
 bool cUser::del_bdy(cUser bdy)
@@ -326,32 +357,35 @@ bool cUser::del_bdy(cUser bdy)
 
 bool cUser::del_user()
 {
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+    db.connect();
+    
     stringstream query;
     query<<"DELETE FROM conf_user WHERE user_id = "<< this->id <<";";
-    this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
     
     
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
     
     query<<"DELETE FROM buddy WHERE user_id = "<< this->id <<";";
-    this->db.dbconn.query(query.str(), query.str().length());    
+    db.query(query.str(), query.str().length());    
     
     
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
     
     query<<"DELETE FROM user WHERE user_id = "<< this->id <<";";
-    this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
     
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
-    
+    db.close();
     return true;
 }
 
@@ -393,12 +427,7 @@ string cConference::get_id()
 }
 list<cUser> cConference::get_usrList()
 {
-    
-    CDatabase_Connection db;
-    db.setDB("SLive2");
-    db.setHost("127.0.0.1");
-    db.setPassword("SLive2");
-    db.setUsername("SLive2");
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
     db.connect();
     
     stringstream query;
@@ -433,15 +462,19 @@ list<cUser> cConference::get_usrList()
   
 bool cConference::set_id(string id)
 {
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+    db.connect();
+    
     stringstream query;
     
     query<<"UPDATE conf_user SET conf_id = '" << id << "' WHERE conf_id LIKE '" << this->id << "';";
-    this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
     
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
+    db.close();
     this->id = id;
     return true;
 
@@ -454,16 +487,19 @@ bool cConference::set_id(string id)
     
 bool cConference::add_usr(long usr_id)
 {
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+    db.connect();
+    
     stringstream query;
     
     query<<"INSERT INTO conf_user(conf_id, user_id) VALUES('" << this->id << "', " << usr_id << ");";
-    this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
     
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
-    
+    db.close();
     return true;
 }
 bool cConference::add_usr(cUser usr)
@@ -473,13 +509,18 @@ bool cConference::add_usr(cUser usr)
     
 bool cConference::del_usr(long usr_id)
 {
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+    db.connect();
+    
     stringstream query;
     
     query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< this->id <<"'* AND user_id = "<< usr_id <<";";
-    this->db.dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
+    
+    db.close();
     
     return true;
 
@@ -491,12 +532,15 @@ bool cConference::del_usr(cUser usr)
   
 bool cConference::del_conf()
 {
+    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+    db.connect();
     stringstream query;
     
     query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< this->id <<"';";
-    this->db.dbconn.query(query.str(), query.str().length());
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
+    db.query(query.str(), query.str().length());
+    if(db.errnum() != 0)
+        throw db.error();
+    db.close();
     return true;
 }
     
@@ -512,10 +556,17 @@ CSLiveDB::CSLiveDB()
 
 CSLiveDB::CSLiveDB(string user, string password, string DB, string Host, int port)
 {
+    /*
     this->dbconn = CDatabase_Connection(user, password, DB, Host, port);
     dbconn.connect();
     if(dbconn.errnum() != 0)
-        throw dbconn.error();
+        throw dbconn.error();*/
+    
+    this->user = user;
+    this->password = password;
+    this->DB = DB;
+    this->Host = Host;
+    this->port = port;
 }
 
 
@@ -535,28 +586,35 @@ CSLiveDB::~CSLiveDB()
 }*/
 cConference CSLiveDB::create_conf(string name)
 {
+    CDatabase_Connection db(this->user, this->password, this->DB, this->Host, this->port);
+    db.connect();
+    
     stringstream query;
     query<<"SELECT uuid() AS id;";
     
-    this->dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
-    if(dbconn.errnum() != 0)
-        throw dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
-    map<string, string> result = this->dbconn.fetch_assoc();
+    map<string, string> result = db.fetch_assoc();
     
     query.str("");
     query<<"INSERT INTO conference (conf_id, name) VALUES('"<<result["id"]<<"', '"<< name <<"');";
-    this->dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
-    if(dbconn.errnum() != 0)
-        throw dbconn.error();
+    if(db.errnum() != 0)
+        throw db.error();
     
+    db.close();
     return this->get_Conf(result["id"]);
     
 }
 cConference CSLiveDB::create_conf(list<cUser> usr_list, string name)
 {
+    CDatabase_Connection db(this->user, this->password, this->DB, this->Host, this->port);
+    db.connect();
+    
     cConference conf = this->create_conf("");
     
     list<cUser>::iterator it;
@@ -566,6 +624,7 @@ cConference CSLiveDB::create_conf(list<cUser> usr_list, string name)
         conf.add_usr(*it);
     }
     
+    db.close();
     return conf;
 }
 /*
@@ -590,14 +649,18 @@ cConference CSLiveDB::create_conf(string name, list<cUser> usr_list)
 */
 cConference CSLiveDB::get_Conf(string id)
 {
+    CDatabase_Connection db(this->user, this->password, this->DB, this->Host, this->port);
+    db.connect();
+    
     stringstream query;
     
     query<<"SELECT * FROM conf_user WHERE conf_id LIKE '" << id <<"';";
-    this->dbconn.query(query.str(), query.str().length());
-    if(dbconn.errnum() != 0)
-        throw dbconn.error();
+    db.query(query.str(), query.str().length());
+    if(db.errnum() != 0)
+        throw db.error();
     cConference conf = cConference(*this, id);
     
+    db.close();
     return conf;
 }
 
@@ -605,23 +668,33 @@ cConference CSLiveDB::get_Conf(string id)
 
 bool CSLiveDB::checkUsername(string name)
 {
+    CDatabase_Connection db(this->user, this->password, this->DB, this->Host, this->port);
+    db.connect();
+    
     stringstream query;
     
     query<<"SELECT * FROM user WHERE name LIKE '" << name <<"';";
-    this->dbconn.query(query.str(), query.str().length());
-    if(dbconn.errnum() != 0)
-        throw dbconn.error();
-    if(this->dbconn.affected_rows() > 0)
+    db.query(query.str(), query.str().length());
+    if(db.errnum() != 0)
+        throw db.error();
+    if(db.affected_rows() > 0)
+    {
+        db.close();
         return false;
-    else 
+    }
+    else
+    {
+        db.close();
         return true;
-
+    }
 }
 
 cUser CSLiveDB::create_User(string name, string pw)
 {
     if(this->checkUsername(name))
     {
+        CDatabase_Connection db(this->user, this->password, this->DB, this->Host, this->port);
+        db.connect();
         stringstream query;
         query<<"INSERT INTO user(name, pwhash, email) VALUES ('"<< name << "', '"<< md5(pw) << "', '');";
         
@@ -629,10 +702,11 @@ cUser CSLiveDB::create_User(string name, string pw)
         string query_str = query.str();
         
         
-        this->dbconn.query(query.str(), query.str().length());
-        if(dbconn.errnum() != 0)
-            throw dbconn.error();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+            throw db.error();
         
+        db.close();
         return this->get_User(name);
         
     }
@@ -649,27 +723,33 @@ cUser CSLiveDB::create_User(string name, string pw, string email)
 
 cUser CSLiveDB::get_User(long id)
 {
+    CDatabase_Connection db(this->user, this->password, this->DB, this->Host, this->port);
+    db.connect();
+    
     stringstream query;
     query << "SELECT * FROM user WHERE user_id = " << id << ";";
-    this->dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
-    map<string, string> result = this->dbconn.fetch_assoc();
+    map<string, string> result = db.fetch_assoc();
     
     cUser usr = cUser(*this, atoi(result["user_id"].c_str()), result["name"] , result["pwhash"], result["email"]);
-    
+    db.close();
     return usr;
     
 }
 cUser CSLiveDB::get_User(string name)
 {
+    CDatabase_Connection db(this->user, this->password, this->DB, this->Host, this->port);
+    db.connect();
+    
     stringstream query;
     query << "SELECT * FROM user WHERE name LIKE '" << name << "';";
-    this->dbconn.query(query.str(), query.str().length());
+    db.query(query.str(), query.str().length());
     
-    map<string, string> result = this->dbconn.fetch_assoc();
+    map<string, string> result = db.fetch_assoc();
     
     cUser usr = cUser(*this, atoi(result["user_id"].c_str()), result["name"] , result["pwhash"], result["email"]);
-    
+    db.close();
     return usr;
 }
 

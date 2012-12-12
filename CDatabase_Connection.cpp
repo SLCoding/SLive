@@ -187,7 +187,7 @@ bool CDatabase_Connection::connect()
 	try
 	{
         //cout << "Baue Verbindung zur Datenbank auf ...\n\n";
-        mysql_init(&this->my);
+        //mysql_init(&this->my);
 		mysql_real_connect (&my, host.c_str(), username.c_str(), password.c_str(), db.c_str(), port, socket_name.c_str(), flag);
         if(this->errnum() == 0)
             this->connected = true;
