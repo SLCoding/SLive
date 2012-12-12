@@ -30,7 +30,11 @@ using namespace std;
 class cConference;
 class cUser;
 
-
+struct dbError
+{
+    int errnum;
+    string errstr;
+};
 
 
 class CSLiveDB
@@ -47,7 +51,7 @@ protected:
     
 public:
     CSLiveDB();
-    CSLiveDB(string user, string password, string DB, string Host = "127.0.0.1", int port = 3306);
+    CSLiveDB(string user, string password, string DB, string Host = "127.0.0.1", string Host2 = "127.0.0.1", int port = 3306, int port2 = 3306);
     ~CSLiveDB();
     
     
@@ -55,7 +59,9 @@ public:
     string password;
     string DB;
     string Host;
+    string Host2;
     int port;
+    int port2;
     
     
     cConference create_conf(string name);

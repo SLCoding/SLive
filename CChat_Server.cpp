@@ -32,7 +32,7 @@ CChat_Server::CChat_Server()
         message_dispatcher_obj = this->start(reinterpret_cast<void*>(this), message_dispatcher);
         this->start(reinterpret_cast<void*>(this), accept_new_Clients);
         
-        this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "127.0.0.1", 3306);
+        this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "127.0.0.1", "10.12.45.253", 3306, 3306);
     }
     catch(string e)
     {

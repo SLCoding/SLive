@@ -64,37 +64,104 @@ string cUser::get_email()
 }
 string cUser::get_server()
 {
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
     
     stringstream query;
     query<<"SELECT server FROM user WHERE user_id = "<<this->id<<";";
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    db.query(query.str(), query.str().length());
+    catch (dbError err1)
+    {
+            try
+            {
+                db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+                db.connect();
+                db.query(query.str(), query.str().length());
+                if(db.errnum() != 0)
+                {
+                    dbError err;
+                    err.errnum = db.errnum();
+                    err.errstr = db.error();
+                    throw err;
+                }
+            }
+            catch (dbError err2)
+            {
+                cout<<"Unhandled DB Exception on Both Databases"<<endl;
+                cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+                cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+            }
+         
+    }
+        
     
-    if(db.errnum() != 0)
-        throw db.error();
+    
+
     
     map<string, string> result = db.fetch_assoc();
     
     db.close();
+
     return result["server"].c_str();
 }
 list<cConference> cUser::get_confList()
 {
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
-    
     stringstream query;
-    query << "SELECT * FROM conf_user WHERE user_id = " << this->id << ";";
-    db.query(query.str(), query.str().length());
+    query<<"SELECT * FROM conf_user WHERE user_id = "<<this->id<<";";
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    if(db.errnum() != 0)
-        throw db.error();
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
     
     list<cConference> conf_list;
     map<string, string> result;
-    int rows = db.affected_rows();
+    
     for(int i = 0; i < db.affected_rows(); i++)
     {
         result = db.fetch_assoc();
@@ -105,14 +172,50 @@ list<cConference> cUser::get_confList()
 }
 list<cUser> cUser::get_bdyList()
 {
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
+    
     
     stringstream query;
     query<<"SELECT * FROM buddy WHERE user_id = "<<this->get_id()<<";";
     
-    //this->db.dbconn.query(query.str(), query.str().length());
-    db.query(query.str(), query.str().length());
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
+    
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
+
     /*if(db.dbconn.errnum() != 0)
         throw db.dbconn.error();
     */
@@ -137,16 +240,49 @@ list<cUser> cUser::get_bdyList()
 
 user_status cUser::get_status()
 {
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
-    
+        
     stringstream query;
     query<<"SELECT status FROM user WHERE user_id = "<<this->id<<";";
     
-    db.query(query.str(), query.str().length());
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    if(db.errnum() != 0)
-        throw db.error();
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
+
     
     map<string, string> result = db.fetch_assoc();
     db.close();
@@ -160,32 +296,100 @@ user_status cUser::get_status()
 
 bool cUser::set_id(long id)
 {
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
-    
+   
     stringstream query;
     query<<"UPDATE user SET user_id = " << id << " WHERE user_id = " << this->id << ";";
-    db.query(query.str(), query.str().length());
     
-    if(db.errnum() != 0)
-        throw db.error();
     
+    
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
+    
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
+
     db.close();
     this->id = id;
     return true;
 }
 bool cUser::set_name(string name)
 {
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
+
     
     stringstream query;
     
     query<<"UPDATE user SET name = '" << name << "' WHERE user_id = " << this->id << ";";
-    db.query(query.str(), query.str().length());
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    if(db.errnum() != 0)
-        throw db.error();
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
     
     this->name = name;
     db.close();
@@ -193,16 +397,47 @@ bool cUser::set_name(string name)
 }
 bool cUser::set_email(string email)
 {
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
-    
     stringstream query;
     
     query<<"UPDATE user SET email = '" << email << "' WHERE user_id = " << this->id << ";";
-    db.query(query.str(), query.str().length());
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    if(db.errnum() != 0)
-        throw db.error();
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
     
     this->email = email;
     db.close();
@@ -210,17 +445,50 @@ bool cUser::set_email(string email)
 }
 bool cUser::set_server(string server)
 {
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
+
     
     stringstream query;
     
     query<<"UPDATE user SET server = '" << server << "' WHERE user_id = " << this->id << ";";
-    db.query(query.str(), query.str().length());
+
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    if(db.errnum() != 0)
-        throw db.error();
-    
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
     
     this->server = server;
     db.close();
@@ -230,16 +498,47 @@ bool cUser::set_server(string server)
 
 bool cUser::set_status(user_status status)
 {
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
-    
     stringstream query;
     
     query<<"UPDATE user SET status = '" << (int)status << "' WHERE user_id = " << this->id << ";";
-    db.query(query.str(), query.str().length());
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    if(db.errnum() != 0)
-        throw db.error();
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
     
     db.close();
     return true;
@@ -264,17 +563,47 @@ bool cUser::logout()
 
 bool cUser::add_conf(string conf_id)
 {
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
-    
     stringstream query;
     
     query<<"INSERT INTO conf_user(conf_id, user_id) VALUES('" << conf_id << "', " << this->id << ");";
-    db.query(query.str(), query.str().length());
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    
-    if(db.errnum() != 0)
-        throw db.error();
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
     
     db.close();
     return true;
@@ -289,17 +618,47 @@ bool cUser::add_conf(cConference conf)
 
 bool cUser::add_bdy(long bdy_id)
 {
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
-    
     stringstream query;
     
     query<<"INSERT INTO buddy(user_id, bdy_id) VALUES(" << this->id << ", " << bdy_id << ");";
-    db.query(query.str(), query.str().length());
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    
-    if(db.errnum() != 0)
-        throw db.error();
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
     
     db.close();
     return true;
@@ -313,16 +672,47 @@ bool cUser::add_bdy(cUser bdy)
 
 bool cUser::del_conf(string conf_id)
 {        
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
     stringstream query;
     
     query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< conf_id <<"'* AND user_id = "<< this->id <<";";
-    db.query(query.str(), query.str().length());
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    
-    if(db.errnum() != 0)
-        throw db.error();
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
     
     db.close();
     return true;
@@ -334,18 +724,50 @@ bool cUser::del_conf(cConference conf)
 }
 
 bool cUser::del_bdy(long bdy_id)
-{
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
-    
+{    
     stringstream query;
     
     query<<"DELETE FROM buddy WHERE user_id = "<< this->id <<"' AND bdy_id = "<< bdy_id <<";";
-    db.query(query.str(), query.str().length());
+
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    
-    if(db.errnum() != 0)
-        throw db.error();
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
+
     
     db.close();
     return true;
@@ -357,34 +779,126 @@ bool cUser::del_bdy(cUser bdy)
 
 bool cUser::del_user()
 {
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
-    
     stringstream query;
     query<<"DELETE FROM conf_user WHERE user_id = "<< this->id <<";";
-    db.query(query.str(), query.str().length());
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    
-    
-    if(db.errnum() != 0)
-        throw db.error();
-    
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
+    db.close();
     
     query<<"DELETE FROM buddy WHERE user_id = "<< this->id <<";";
-    db.query(query.str(), query.str().length());    
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    
-    if(db.errnum() != 0)
-        throw db.error();
-    
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
+    db.close();
     
     query<<"DELETE FROM user WHERE user_id = "<< this->id <<";";
-    db.query(query.str(), query.str().length());
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    
-    if(db.errnum() != 0)
-        throw db.error();
-    
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
     db.close();
     return true;
 }
@@ -427,21 +941,47 @@ string cConference::get_id()
 }
 list<cUser> cConference::get_usrList()
 {
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
-    
     stringstream query;
     
     query<<"SELECT * FROM conf_user WHERE conf_id LIKE '"<<this->id<<"';";
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    db.query(query.str(), query.str().length());
-    /*
-    if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();*/
-    
-    if(db.errnum() != 0)
-        throw db.error();
-     
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
     list<cUser> usr_list;
     /*
     for(int i = 0; i < this->db.dbconn.affected_rows(); i++)
@@ -462,18 +1002,47 @@ list<cUser> cConference::get_usrList()
   
 bool cConference::set_id(string id)
 {
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
-    
     stringstream query;
     
     query<<"UPDATE conf_user SET conf_id = '" << id << "' WHERE conf_id LIKE '" << this->id << "';";
-    db.query(query.str(), query.str().length());
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    
-    if(db.errnum() != 0)
-        throw db.error();
-    
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
     db.close();
     this->id = id;
     return true;
@@ -487,17 +1056,47 @@ bool cConference::set_id(string id)
     
 bool cConference::add_usr(long usr_id)
 {
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
-    
     stringstream query;
     
     query<<"INSERT INTO conf_user(conf_id, user_id) VALUES('" << this->id << "', " << usr_id << ");";
-    db.query(query.str(), query.str().length());
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    
-    if(db.errnum() != 0)
-        throw db.error();
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
     
     db.close();
     return true;
@@ -509,16 +1108,47 @@ bool cConference::add_usr(cUser usr)
     
 bool cConference::del_usr(long usr_id)
 {
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
-    
     stringstream query;
     
     query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< this->id <<"'* AND user_id = "<< usr_id <<";";
-    db.query(query.str(), query.str().length());
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    if(db.errnum() != 0)
-        throw db.error();
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
     
     db.close();
     
@@ -532,14 +1162,47 @@ bool cConference::del_usr(cUser usr)
   
 bool cConference::del_conf()
 {
-    CDatabase_Connection db(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
-    db.connect();
     stringstream query;
     
     query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< this->id <<"';";
-    db.query(query.str(), query.str().length());
-    if(db.errnum() != 0)
-        throw db.error();
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
+    
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
     db.close();
     return true;
 }
@@ -554,7 +1217,7 @@ CSLiveDB::CSLiveDB()
     
 }
 
-CSLiveDB::CSLiveDB(string user, string password, string DB, string Host, int port)
+CSLiveDB::CSLiveDB(string user, string password, string DB, string Host, string Host2, int port, int port2)
 {
     /*
     this->dbconn = CDatabase_Connection(user, password, DB, Host, port);
@@ -566,7 +1229,9 @@ CSLiveDB::CSLiveDB(string user, string password, string DB, string Host, int por
     this->password = password;
     this->DB = DB;
     this->Host = Host;
+    this->Host2 = Host2;
     this->port = port;
+    this->port2 = port2;
 }
 
 
@@ -586,26 +1251,90 @@ CSLiveDB::~CSLiveDB()
 }*/
 cConference CSLiveDB::create_conf(string name)
 {
-    CDatabase_Connection db(this->user, this->password, this->DB, this->Host, this->port);
-    db.connect();
-    
     stringstream query;
     query<<"SELECT uuid() AS id;";
     
-    db.query(query.str(), query.str().length());
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->user, this->password, this->DB, this->Host, this->port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    if(db.errnum() != 0)
-        throw db.error();
-    
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->user, this->password, this->DB, this->Host2, this->port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
+    db.close();
     map<string, string> result = db.fetch_assoc();
     
     query.str("");
     query<<"INSERT INTO conference (conf_id, name) VALUES('"<<result["id"]<<"', '"<< name <<"');";
-    db.query(query.str(), query.str().length());
+    try 
+    {
+        db = CDatabase_Connection(this->user, this->password, this->DB, this->Host, this->port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
-    if(db.errnum() != 0)
-        throw db.error();
-    
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->user, this->password, this->DB, this->Host2, this->port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
+
     db.close();
     return this->get_Conf(result["id"]);
     
@@ -649,15 +1378,48 @@ cConference CSLiveDB::create_conf(string name, list<cUser> usr_list)
 */
 cConference CSLiveDB::get_Conf(string id)
 {
-    CDatabase_Connection db(this->user, this->password, this->DB, this->Host, this->port);
-    db.connect();
-    
     stringstream query;
     
     query<<"SELECT * FROM conf_user WHERE conf_id LIKE '" << id <<"';";
-    db.query(query.str(), query.str().length());
-    if(db.errnum() != 0)
-        throw db.error();
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->user, this->password, this->DB, this->Host, this->port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
+    
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->user, this->password, this->DB, this->Host2, this->port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
+
     cConference conf = cConference(*this, id);
     
     db.close();
@@ -667,16 +1429,48 @@ cConference CSLiveDB::get_Conf(string id)
 
 
 bool CSLiveDB::checkUsername(string name)
-{
-    CDatabase_Connection db(this->user, this->password, this->DB, this->Host, this->port);
-    db.connect();
-    
+{    
     stringstream query;
     
     query<<"SELECT * FROM user WHERE name LIKE '" << name <<"';";
-    db.query(query.str(), query.str().length());
-    if(db.errnum() != 0)
-        throw db.error();
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->user, this->password, this->DB, this->Host, this->port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
+    
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->user, this->password, this->DB, this->Host2, this->port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
     if(db.affected_rows() > 0)
     {
         db.close();
@@ -693,13 +1487,46 @@ cUser CSLiveDB::create_User(string name, string pw)
 {
     if(this->checkUsername(name))
     {
-        CDatabase_Connection db(this->user, this->password, this->DB, this->Host, this->port);
-        db.connect();
         stringstream query;
         query<<"INSERT INTO user(name, pwhash, email) VALUES ('"<< name << "', '"<< md5(pw) << "', '');";
+        CDatabase_Connection db;
+        try 
+        {
+            db = CDatabase_Connection(this->user, this->password, this->DB, this->Host, this->port);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
         
-        
-        string query_str = query.str();
+        catch (dbError err1)
+        {
+            try
+            {
+                db = CDatabase_Connection(this->user, this->password, this->DB, this->Host2, this->port2);
+                db.connect();
+                db.query(query.str(), query.str().length());
+                if(db.errnum() != 0)
+                {
+                    dbError err;
+                    err.errnum = db.errnum();
+                    err.errstr = db.error();
+                    throw err;
+                }
+            }
+            catch (dbError err2)
+            {
+                cout<<"Unhandled DB Exception on Both Databases"<<endl;
+                cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+                cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+            }
+            
+        }
         
         
         db.query(query.str(), query.str().length());
@@ -723,13 +1550,46 @@ cUser CSLiveDB::create_User(string name, string pw, string email)
 
 cUser CSLiveDB::get_User(long id)
 {
-    CDatabase_Connection db(this->user, this->password, this->DB, this->Host, this->port);
-    db.connect();
-    
     stringstream query;
     query << "SELECT * FROM user WHERE user_id = " << id << ";";
-    db.query(query.str(), query.str().length());
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->user, this->password, this->DB, this->Host, this->port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->user, this->password, this->DB, this->Host2, this->port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
     map<string, string> result = db.fetch_assoc();
     
     cUser usr = cUser(*this, atoi(result["user_id"].c_str()), result["name"] , result["pwhash"], result["email"]);
@@ -739,13 +1599,47 @@ cUser CSLiveDB::get_User(long id)
 }
 cUser CSLiveDB::get_User(string name)
 {
-    CDatabase_Connection db(this->user, this->password, this->DB, this->Host, this->port);
-    db.connect();
-    
     stringstream query;
     query << "SELECT * FROM user WHERE name LIKE '" << name << "';";
-    db.query(query.str(), query.str().length());
+    CDatabase_Connection db;
+    try 
+    {
+        db = CDatabase_Connection(this->user, this->password, this->DB, this->Host, this->port);
+        db.connect();
+        db.query(query.str(), query.str().length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
     
+    catch (dbError err1)
+    {
+        try
+        {
+            db = CDatabase_Connection(this->user, this->password, this->DB, this->Host2, this->port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
+            {
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
+            }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
+        
+    }
+
     map<string, string> result = db.fetch_assoc();
     
     cUser usr = cUser(*this, atoi(result["user_id"].c_str()), result["name"] , result["pwhash"], result["email"]);
