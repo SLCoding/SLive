@@ -46,7 +46,7 @@ private:
     list<Client_processing> clients;
     list<server> server_list;
         //list<CThread*> incoming_messages;
-    pthread_t *message_dispatcher_obj;
+    pthread_t message_dispatcher_obj;
     CThread *thread_server_communication_outgoing;
     CThread *thread_server_communication_incoming;
     CThread *thread_logout;

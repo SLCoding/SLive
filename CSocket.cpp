@@ -144,19 +144,19 @@ bool CSocket::send(string message) const
         return false;
     char *char_message = new char[message.length()];
     strncpy(char_message, message.c_str(), message.length());
-        // long transmitted_data = 0;
+         long transmitted_data = 0;
     long send_return = 0;
     // send the data, if something goes wrong and some data could not be send, send the remainder until all of data are transmitted
-        // while(transmitted_data != message.length())
-        //  {
+         while(transmitted_data != message.length())
+          {
         send_return = ::write(socket_handle, char_message, message.length()/* - transmitted_data*/);
         if(send_return == -1)
         {
             delete [] char_message;
             throw string("An error occured while sending the message");
         }
-        //  transmitted_data = transmitted_data + send_return;
-        //    }
+          transmitted_data = transmitted_data + send_return;
+        }
     delete [] char_message;
     return true;
 }

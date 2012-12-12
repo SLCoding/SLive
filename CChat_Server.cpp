@@ -32,7 +32,7 @@ CChat_Server::CChat_Server()
         message_dispatcher_obj = this->start(reinterpret_cast<void*>(this), message_dispatcher);
         this->start(reinterpret_cast<void*>(this), accept_new_Clients);
         
-        this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "127.0.0.1", "10.12.45.253", 3306, 3306);
+        this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "127.0.0.1", "127.0.0.1", 3306, 3306);
     }
     catch(string e)
     {
@@ -103,6 +103,7 @@ void* accept_new_Clients(void* param)
         queue << "Thread gestartet!";
         server->clients.push_back(client_obj); // add the client to the list
     }
+    queue << "UNEXPECTED ERROR: Server shutting down...";
     pthread_exit((void*)0);
 }
 
@@ -135,7 +136,10 @@ void* client_processing(void* param)
                 {
                     //queue_log << "MESSAGE: " + message;
                     // parsed einen ganzen befehlssatz
-                    buffer = message.substr((message).find_first_of("/"), message.find_first_of("\n")); 
+                    if(message.length() < 2)
+                        continue;
+                        
+                    buffer = message.substr((message).find_first_of("/"), message.find_first_of("\n"));
                     std::istringstream ss(buffer);
                     // filtert den eigentlichen befehl
                     ss >> command;
@@ -150,8 +154,8 @@ void* client_processing(void* param)
                         parameter = "";
 
                     queue_log.set_type(3);
-                    queue_log << "BEFEHL: " + command;
-                    queue_log << "PARAM: " + parameter;
+                    //queue_log << "BEFEHL: " + command;
+                    //queue_log << "PARAM: " + parameter;
                     //queue_log << "ISTRINGSTREAM: " + s.str();
                     // execute parsed message
                     if(command == "/usr_logout")
@@ -569,7 +573,6 @@ void* message_dispatcher(void* param)
         string id_recipient;
         string message;
         string buffer;
-        string zeit;
 
         s >> conf_id >> id_sender >> id_recipient;
         while(s.good())
@@ -588,11 +591,22 @@ void* message_dispatcher(void* param)
             {
                 if(sender.get_server() == recipient.get_server()) //user ist lokal angemeldet
                 {
+                    logger << "User " + id_recipient + " ist lokal angemeldet!";
                     if( iterator->client->getID() == atoi(id_recipient.c_str()))
                     {
                         logger << "Sende Nachricht an " + id_recipient + " von sender " + id_sender + " " + nachricht;
-                        iterator->client->getSocket() << "/conf_send " + conf_id + " " + zeit + " " +  sender.get_name() + " " + nachricht + "\n";
-                        break;
+                        try
+                        {
+                            (iterator->client->getSocket()).send("/conf_send " + conf_id + " " +  sender.get_name() + " " + nachricht + "\n");
+                            break;
+                        }
+                        catch(string e)
+                        {
+                            logger << "Senden fehlgeschlagen...";
+                            (iterator->client->getSocket());
+                            (iterator->client->getSocket()).send("/conf_send " + conf_id + " " +  sender.get_name() + " " + nachricht + "\n");
+                            break;
+                        }
                     }
                 }
                 else if((sender.get_server() != recipient.get_server()) && (recipient.get_server() != ""))    // user ist auf entferntem rechner angemeldet
@@ -669,12 +683,21 @@ void* server_communication_outgoing(void* param)
 
             if(found == false)
             {
-                // no ip adress found, open a new connection
                 CSocket newsock;
-                log << "baue verbindung zu server auf...ip_adresse:" + ip;
-                newsock.connect(ip, 8377);
+                try
+                {
+                    // no ip adress found, open a new connection
+                    log << "baue verbindung zu server auf...ip_adresse:" + ip;
+                    newsock.connect(ip, 8377);
+                    newsock << conf_id + " " + recipient + " " + sender + " " + nachricht;
+                }
+                catch(string e)
+                {
+                    log.set_type(1);
+                    log << e;
+                    log.set_type(3);
+                }
                 socks.push_back(newsock);
-                newsock << conf_id + " " + recipient + " " + sender + " " + nachricht;
             }
             found = false;
             recipient = sender = message = message2send = "";

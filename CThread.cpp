@@ -18,12 +18,11 @@ CThread::~CThread()
     delete thread;
 }
 
-pthread_t* CThread::start(void *param, void * (*start_routine)(void *))
+pthread_t CThread::start(void *param, void * (*start_routine)(void *))
 {
     try
     {
-        thread = new pthread_t;
-        pthread_create( thread , NULL, start_routine, (void*) param);
+        pthread_create( &thread , NULL, start_routine, (void*) param);
 
         return thread;
     }
@@ -38,7 +37,7 @@ int CThread::join(void **thread_return)
     try
     {
 
-        return pthread_join(*thread, thread_return);
+        return pthread_join(thread, thread_return);
     }
     catch(std::exception e)
     {
@@ -48,11 +47,11 @@ int CThread::join(void **thread_return)
     return -1;
 }
 
-int CThread::cancel(pthread_t *thread)
+int CThread::cancel(pthread_t thread)
 {
     try
     {
-        return pthread_cancel(*thread);
+        return pthread_cancel(thread);
     }
     catch(std::exception e)
     {
@@ -66,7 +65,7 @@ int CThread::cancel()
 {
     try
     {
-        return pthread_cancel(*thread);
+        return pthread_cancel(thread);
     }
     catch(std::exception e)
     {
