@@ -41,7 +41,7 @@ bool CSocket::createSocket()
     setsockopt(socket_handle, SOL_SOCKET, SO_REUSEADDR, &i, sizeof(i));
     if (socket_handle < 0)
     {
-        throw string("Can't create a socket!");
+        throw "SOCKET: " + string(strerror(errno));
     }
     return true;
 }
@@ -58,7 +58,7 @@ bool CSocket::bind(int port)
     host.sin_port = htons( port );
     if ( ::bind( socket_handle, (struct sockaddr*)&host, sizeof(host)) < 0)
     {
-        throw string("Can't bind address to socket!");
+        throw "SOCKET: " + string(strerror(errno));
     }
     return true;
 }
@@ -96,7 +96,7 @@ bool CSocket::connect(string address, int port)
     // connect to server
     if ( ::connect( socket_handle, (struct sockaddr*)&host, sizeof(host) ) < 0)
     {
-        throw string("Cant connect to target!");
+        throw "SOCKET: " + string(strerror(errno));
     }
     return true;
 }
@@ -115,7 +115,7 @@ bool CSocket::listen(int queue_size)
     // the function is listening for a new incoming client and add it to the queue, maximum number of clients = queue_size
     if( ::listen( socket_handle, queue_size ) == -1 )
     {
-        throw string("Unkown error: CSocket::listen");
+        throw "SOCKET: " + string(strerror(errno));
     }
     return true;
 }
@@ -133,7 +133,7 @@ CSocket CSocket::accept()
     sock2 = ::accept( socket_handle, (struct sockaddr*)&client, &len);
     if (sock2 < 0)
     {
-        throw string("Can't accept connectioninquire");
+        throw "SOCKET: " + string(strerror(errno));
     }
     return CSocket(sock2);
 }
@@ -144,19 +144,13 @@ bool CSocket::send(string message) const
         return false;
     char *char_message = new char[message.length()];
     strncpy(char_message, message.c_str(), message.length());
-        // long transmitted_data = 0;
     long send_return = 0;
-    // send the data, if something goes wrong and some data could not be send, send the remainder until all of data are transmitted
-        // while(transmitted_data != message.length())
-        //  {
-    send_return = ::write(socket_handle, char_message, message.length()/* - transmitted_data*/);
-    // if(send_return == -1)
-    //{
-    //   delete [] char_message;
-    //   throw string("An error occured while sending the message");
-    //}
-        //  transmitted_data = transmitted_data + send_return;
-        //    }
+    send_return = ::write(socket_handle, char_message, message.length());
+    if(send_return == -1)
+    {
+        delete [] char_message;
+        throw "SOCKET: " + string(strerror(errno));
+    }
     delete [] char_message;
     return true;
 }
@@ -164,14 +158,16 @@ bool CSocket::send(string message) const
 string CSocket::recv()
 {
     if( !is_valid() )
-        throw "Socket not ready!";
+        return false;
     char char_buffer[buffer];
     long recv_size;
     recv_size = ::read(socket_handle, char_buffer, buffer);
     if(recv_size == 0)
         throw string("Client terminate connection!");
     else if(recv_size < 0)
-        throw string("An error occured while receiving the message");
+    {
+        throw "SOCKET: " + string(strerror(errno));
+    }
     char_buffer[recv_size] = '\0';
     string message = char_buffer;
     return message;
@@ -233,6 +229,5 @@ const string CSocket::getLocalIP() const
             return szIPAddress;
         }
     }
-
     return "";
 }

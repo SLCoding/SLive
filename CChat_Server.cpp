@@ -15,6 +15,9 @@
 #include "CSLiveDB.h"
 #include <time.h>
 
+/*******************************************************************************
+ * Initialise Server, initialise db-connection, starting several threads
+ ******************************************************************************/
 CChat_Server::CChat_Server()
 {
     CQueue logger(8300);
@@ -32,7 +35,7 @@ CChat_Server::CChat_Server()
         message_dispatcher_obj = this->start(reinterpret_cast<void*>(this), message_dispatcher);
         this->start(reinterpret_cast<void*>(this), accept_new_Clients);
         
-        this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "10.12.47.27", "10.12.34.198", 3306, 3306);
+        this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "10.12.43.119", "10.12.43.119", 3306, 3306);
     }
     catch(string e)
     {
@@ -43,6 +46,9 @@ CChat_Server::CChat_Server()
     }
 }
 
+/*******************************************************************************
+ * Clean up all allocated ressources and kill open threads
+ ******************************************************************************/
 CChat_Server::~CChat_Server()
 {
     list<Client_processing>::iterator iterator1;
@@ -72,6 +78,9 @@ CChat_Server::~CChat_Server()
     delete database;
 }
 
+/*******************************************************************************
+ * Waiting for an inquiry of a client and start a seperate thread
+ ******************************************************************************/
 void* accept_new_Clients(void* param)
 {
     CChat_Server *server = reinterpret_cast<CChat_Server*>(param);
@@ -87,10 +96,10 @@ void* accept_new_Clients(void* param)
 
     while(true)
     {
-        queue << "warte auf Client-Anfrage...";
+        queue << "Warte auf Client-Anfrage...";
         CSocket client_socket = sock.accept();
         client_socket.setBuffer(8192);
-        queue << "client connected";
+        queue << "Neuer Client verbunden!";
 
         Client_processing client_obj;
         client_obj.client = new CClient(++client_id, client_socket); // Create a new client
@@ -100,13 +109,17 @@ void* accept_new_Clients(void* param)
         client_obj.thread_processing = new CThread;
         client_obj.thread_processing->start((void*)&client_obj, client_processing);// start a seperate thread for processing incoming messages
 
-        queue << "Thread gestartet!";
+        //queue << "Thread gestartet!";
         server->clients.push_back(client_obj); // add the client to the list
     }
     queue << "UNEXPECTED ERROR: Server shutting down...";
     pthread_exit((void*)0);
 }
 
+/*******************************************************************************
+ * Each client is running in this thread, receive over network a command,
+ * execute it and send the answer back
+ ******************************************************************************/
 void* client_processing(void* param)
 {
     Client_processing *myself_struct = (Client_processing*)param;
@@ -123,7 +136,7 @@ void* client_processing(void* param)
     string parameter = "";
     string buffer;
 
-    client_queue.set_type(5);
+    client_queue.set_type(1);
     queue_log.set_type(3);
     while(true)
     {
@@ -546,7 +559,11 @@ void* client_messagequeue_processing(void* param)
 }
 */
 
-    // verarbeitet die liste von zu sendenden nachrichten und leitet die nachrichten in die entsprechenden sockets weiter oder an einen zielserver
+/*******************************************************************************
+ * This thread receive messages via a queue from other threads.
+ * If a client is connected local, the message will send to this client.
+ * If not the message will deliver to server_communication_outgoing.
+ ******************************************************************************/
 void* message_dispatcher(void* param)
 {
     CChat_Server *chat = reinterpret_cast<CChat_Server*>(param);
@@ -561,8 +578,8 @@ void* message_dispatcher(void* param)
     string nachricht;
 
     logger.set_type(3);
-    messages.set_type(5);
-    server2server.set_type(10);
+    messages.set_type(1);
+    server2server.set_type(1);
 
     while(true)
     {
@@ -606,7 +623,6 @@ void* message_dispatcher(void* param)
                         catch(string e)
                         {
                             logger << "Senden fehlgeschlagen...";
-                            (iterator->client->getSocket()).send("/conf_send " + conf_id + " " +  sender.get_name() + " " + nachricht + "\n");
                             break;
                         }
                     }
@@ -634,7 +650,11 @@ void* message_dispatcher(void* param)
     pthread_exit((void*)0);
 }
 
-    // persistent
+/*******************************************************************************
+ * Reveive a message from message_dispatcher and lookup the destination ip.
+ * Is a connection established use it or connect to the server and send the
+ * message.
+ ******************************************************************************/
 void* server_communication_outgoing(void* param)
 {
     CQueue log(8300);
@@ -653,7 +673,7 @@ void* server_communication_outgoing(void* param)
     bool found = false;
 
     log.set_type(3);
-    msg.set_type(10);
+    msg.set_type(1);
 
     try
     {
@@ -689,7 +709,7 @@ void* server_communication_outgoing(void* param)
                 try
                 {
                     // no ip adress found, open a new connection
-                    log << "baue verbindung zu server auf...ip_adresse:" + ip;
+                    log << "Baue eine neue Verbindung zu server " + ip + " auf...";
                     newsock.connect(ip, 8377);
                     newsock.send(conf_id + " " + recipient + " " + sender + " " + nachricht);
                 }
@@ -717,7 +737,10 @@ void* server_communication_outgoing(void* param)
     pthread_exit((void*)0);
 }
 
-    // persistent
+/*******************************************************************************
+ * A server can connect to this server via this thread. For every server
+ * a new thread is created.
+ ******************************************************************************/
 void* server_communication_incoming(void* param)
 {
     CChat_Server *chat = reinterpret_cast<CChat_Server*>(param);
@@ -733,13 +756,13 @@ void* server_communication_incoming(void* param)
 
     while(true)
     {
-        queue << "warte auf Server-Anfrage...";
+        queue << "Warte auf Server-Anfrage...";
         CSocket client_socket = sock.accept();
         //client_socket.setBuffer(8192);
 
         server incoming_server;
 
-        queue << "server connected";
+        queue << "Neuer Server verbunden!";
         CThread *thread = new CThread;
         incoming_server.thread = thread;
         incoming_server.sock = &client_socket;
@@ -750,6 +773,10 @@ void* server_communication_incoming(void* param)
     pthread_exit((void*)0);
 }
 
+/*******************************************************************************
+ * Every server runs in this thread. The thread receive a message and search
+ * in a local list for the recipient and send the message
+ ******************************************************************************/
 void* messageForClient(void* param)
 {
     server *incoming_server = reinterpret_cast<server*>(param);
@@ -829,6 +856,10 @@ void* messageForClient(void* param)
     pthread_exit((void*)0);
 }
 
+/*******************************************************************************
+ * Every 60 seconds this thread iterate through the local client list and
+ * delete all objects that not used.
+ ******************************************************************************/
 void* logout(void* param)
 {
     CChat_Server *chat = reinterpret_cast<CChat_Server*>(param);
