@@ -11,8 +11,11 @@
 #include "CDatabase_Connection.h"
 #include "CChat_Server.h"
 
+pthread_mutex_t DatabaseMutex;
+
 int main()
 {
+    pthread_mutex_init(&DatabaseMutex, NULL);
     CLogger logger;
     CQueue log(8300);
     CChat_Server *chat;
@@ -21,29 +24,11 @@ int main()
     pthread_t thread;
     pthread_create( &thread , NULL, CLogger_run, NULL);
     chat = new CChat_Server;
-    //pthread_join(thread, NULL);
-    while(true)
-        sleep(10000);
+    pthread_join(thread, NULL);
     //  logger.start(NULL, CLogger_run);
-  /*  while(true)
-    {
-        try
-        {
-            pthread_join(thread, NULL);
-        }
-        catch(string e)
-        {
-            log.set_type(1);
-            log << e;
-            log << "Starte Logger-Thread neu...";
-            log.set_type(3);
-            pthread_cancel(thread);
-            pthread_create( &thread , NULL, CLogger_run, NULL);
-        }
-    }*/
-            //logger.join(NULL);
+    //logger.join(NULL);
 
     delete chat;
-    
+    pthread_mutex_destroy(&DatabaseMutex);
     return 0;
 }

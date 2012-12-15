@@ -24,6 +24,7 @@ void* server_communication_outgoing(void* param);
 void* server_communication_incoming(void* param);
 void* messageForClient(void* param);
 void* logout(void* param);
+void* executeCommand(void* param);
 
 struct Client_processing
 {
@@ -38,6 +39,12 @@ struct server
     CThread *thread;
     CSocket *sock;
     void *chat;
+};
+
+struct Command
+{
+    Client_processing *client;
+    string message;
 };
 
 class CChat_Server : public CThread/*: public CServer*/
@@ -66,6 +73,7 @@ public:
     friend void* server_communication_incoming(void* param);
     friend void* messageForClient(void* param);
     friend void* logout(void *param);
+    friend void* executeCommand(void* param);
 };
 
 

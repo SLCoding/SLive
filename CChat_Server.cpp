@@ -35,7 +35,7 @@ CChat_Server::CChat_Server()
         message_dispatcher_obj = this->start(reinterpret_cast<void*>(this), message_dispatcher);
         this->start(reinterpret_cast<void*>(this), accept_new_Clients);
         
-        this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "10.12.43.119", "10.12.43.119", 3306, 3306);
+        this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "192.168.178.20", "192.168.178.20", 3306, 3306);
     }
     catch(string e)
     {
@@ -115,7 +115,30 @@ void* accept_new_Clients(void* param)
     queue << "UNEXPECTED ERROR: Server shutting down...";
     pthread_exit((void*)0);
 }
+/*
+void* executeCommand(void *param)
+{
+    Command *command_struct = (Command*)param;
+    Client_processing *myself_struct = command_struct->client;
+    cUser user;
+    CClient *myself = myself_struct->client;
 
+    CQueue queue_log(8300);
+    CQueue client_queue(8302);
+
+    bool logout = false;
+
+    string message = command_struct->message;
+    string command;
+    string parameter = "";
+    string buffer;
+
+    client_queue.set_type(1);
+    queue_log.set_type(3);
+    
+    pthread_exit((void*)0);
+}
+*/
 /*******************************************************************************
  * Each client is running in this thread, receive over network a command,
  * execute it and send the answer back
@@ -125,6 +148,7 @@ void* client_processing(void* param)
     Client_processing *myself_struct = (Client_processing*)param;
     cUser user;
     CClient *myself = myself_struct->client;
+    CThread *thread = new CThread();
 
     CQueue queue_log(8300);
     CQueue client_queue(8302);
@@ -138,6 +162,9 @@ void* client_processing(void* param)
 
     client_queue.set_type(1);
     queue_log.set_type(3);
+    Command command_struct;
+    //command_struct->client = new Client_processing;
+    command_struct.client = myself_struct;
     while(true)
     {
         try
@@ -145,13 +172,16 @@ void* client_processing(void* param)
             while(!logout)
             {
                 myself->getSocket() >> message;
-                do
-                {
+               
                     //queue_log << "MESSAGE: " + message;
                     // parsed einen ganzen befehlssatz
-                    if(message.length() < 2)
-                        continue;
-                        
+                if(message.length() < 2)
+                    continue;
+                    
+                //command_struct.message = message;
+                //thread->start(reinterpret_cast<void*>(&command_struct), executeCommand);
+                do
+                {
                     buffer = message.substr((message).find_first_of("/"), message.find_first_of("\n"));
                     std::istringstream ss(buffer);
                     // filtert den eigentlichen befehl
@@ -163,14 +193,15 @@ void* client_processing(void* param)
 
                     std::istringstream s(parameter);
 
-                    if(parameter.substr(0, 1) == "/") 
+                    if(parameter.substr(0, 1) == "/")
                         parameter = "";
 
                     queue_log.set_type(3);
-                    //queue_log << "BEFEHL: " + command;
+                    //  queue_log << "BEFEHL: " + command;
                     //queue_log << "PARAM: " + parameter;
                     //queue_log << "ISTRINGSTREAM: " + s.str();
                     // execute parsed message
+
                     if(command == "/usr_logout")
                     {
                         if(user.get_status() != OFFLINE)
@@ -198,6 +229,8 @@ void* client_processing(void* param)
                     }
                     if(command == "/usr_login")
                     {
+                        //if(user.get_status() != ONLINE)
+                        //{
                         string username, pw;
                         s >> username >> pw;
                         queue_log << "LOGIN";
@@ -220,13 +253,27 @@ void* client_processing(void* param)
                         {
                             queue_log << "Loginversuch fehlgeschlagen...";
                             //if(e == "wrong username or password")
-
-                            myself->getSocket() << "/usr_login 0 0\n";
+                            try
+                            {
+                                myself->getSocket() << "/usr_login 0 0\n";
+                            }
+                            catch(string e)
+                            {
+                                queue_log << e;
+                            }
                         }
                         catch(...)
                         {
-                            myself->getSocket() << "/usr_login 0 0\n";
+                            try
+                            {
+                                myself->getSocket() << "/usr_login 0 0\n";
+                            }
+                            catch(string e)
+                            {
+                                queue_log << e;
+                            }
                         }
+                        // }
                     }
                     if(command == "/usr_register")
                     {
@@ -237,17 +284,24 @@ void* client_processing(void* param)
                         queue_log << "User-Registrierung";
                         queue_log << "Username " + username << "Passwort " + pw << "Email " + email;
 
-                        name_available = myself_struct->db->checkUsername(username);
-                        if(!name_available)
+                        try
                         {
-                            queue_log << "Registrierung fehlgeschlagen...Username in use!";
-                            myself->getSocket() << "/usr_register name_already_in_use\n";
+                            name_available = myself_struct->db->checkUsername(username);
+                            if(!name_available)
+                            {
+                                queue_log << "Registrierung fehlgeschlagen...Username in use!";
+                                myself->getSocket() << "/usr_register name_already_in_use\n";
+                            }
+                            else
+                            {
+                                queue_log << "Registrierung erfolgreich!";
+                                user = myself_struct->db->create_User(username, pw, email);
+                                myself->getSocket() << "/usr_register 1\n";
+                            }
                         }
-                        else
+                        catch(string e)
                         {
-                            queue_log << "Registrierung erfolgreich!";
-                            user = myself_struct->db->create_User(username, pw, email);
-                            myself->getSocket() << "/usr_register 1\n";
+                            queue_log << e;
                         }
                     }
                     if(command == "/bdy_search")
@@ -280,7 +334,14 @@ void* client_processing(void* param)
                             s >> conf_id >> user_id;
                             answer += " " + conf_id + " " + user_id + " " + myself_struct->db->get_User(atoi(user_id.c_str())).get_name() + "\n";
                             //queue_log << answer;
-                            myself->getSocket() << answer;
+                            try
+                            {
+                                myself->getSocket() << answer;
+                            }
+                            catch(string e)
+                            {
+                                queue_log << e;
+                            }
                         }
                     }
                     if(command == "/bdy_add")
@@ -292,15 +353,22 @@ void* client_processing(void* param)
                             string userid;
                             s >> userid;
                             bodyadd = user.add_bdy( atoi( userid.c_str() ) );
-                            if(bodyadd)
+                            try
                             {
-                                queue_log << "hinzufuegen erfolgreich!";
-                                myself->getSocket() << "/bdy_add 1\n";
+                                if(bodyadd)
+                                {
+                                    queue_log << "hinzufuegen erfolgreich!";
+                                    myself->getSocket() << "/bdy_add 1\n";
+                                }
+                                else
+                                {
+                                    queue_log << "hinzufuegen fehlgeschlagen...";
+                                    myself->getSocket() << "/bdy_add 0\n";
+                                }
                             }
-                            else
+                            catch(string e)
                             {
-                                queue_log << "hinzufuegen fehlgeschlagen...";
-                                myself->getSocket() << "/bdy_add 0\n";
+                                queue_log << e;
                             }
                         }
                     }
@@ -313,15 +381,22 @@ void* client_processing(void* param)
                             string userid;
                             s >> userid;
                             bodyadd = user.del_bdy( atoi( userid.c_str() ) );
-                            if(bodyadd)
+                            try
                             {
-                                queue_log << "entfernen erfolgreich";
-                                myself->getSocket() << "/bdy_remove 1\n";
+                                if(bodyadd)
+                                {
+                                    queue_log << "entfernen erfolgreich";
+                                    myself->getSocket() << "/bdy_remove 1\n";
+                                }
+                                else
+                                {
+                                    queue_log << "entfernen fehlgeschlagen!";
+                                    myself->getSocket() << "/bdy_remove 0\n";
+                                }
                             }
-                            else
+                            catch(string e)
                             {
-                                queue_log << "entfernen fehlgeschlagen!";
-                                myself->getSocket() << "/bdy_remove 0\n";
+                                queue_log << e;
                             }
                         }
                     }
@@ -340,7 +415,14 @@ void* client_processing(void* param)
                             }
                             answer << "\n";
                             //queue_log << answer.str();
-                            myself->getSocket() << answer.str();
+                            try
+                            {
+                                myself->getSocket() << answer.str();
+                            }
+                            catch(string e)
+                            {
+                                queue_log << e;
+                            }
                         }
                     }
                     if(command == "/bdy_get_status")
@@ -354,7 +436,14 @@ void* client_processing(void* param)
                             user_status status = temp.get_status();
                             buffer << command << " " << userid << " " << status << "\n";
                             //queue_log << buffer.str();
-                            myself->getSocket() << buffer.str();
+                            try
+                            {
+                                myself->getSocket() << buffer.str();
+                            }
+                            catch(string e)
+                            {
+                                queue_log << e;
+                            }
                         }
                     }
                     if(command == "/conf_create")
@@ -365,18 +454,25 @@ void* client_processing(void* param)
                             string user;
                             stringstream userliste;
                             userliste << command << " ";
-                            while(s)
+                            try
                             {
-                                s >> user;
-                                if(user != "")
+                                while(s)
                                 {
-                                    userliste << user;
-                                    userlist.push_back(myself_struct->db->get_User(atoi(user.c_str())));
+                                    s >> user;
+                                    if(user != "")
+                                    {
+                                        userliste << user;
+                                        userlist.push_back(myself_struct->db->get_User(atoi(user.c_str())));
+                                    }
+                                    user = "";
                                 }
-                                user = "";
+                                queue_log << userliste.str();
+                                myself_struct->db->create_conf(userlist);
                             }
-                            queue_log << userliste.str();
-                            myself_struct->db->create_conf(userlist);
+                            catch(string e)
+                            {
+                                queue_log << e;
+                            }
                         }
                     }
                     if(command == "/conf_send")
@@ -387,17 +483,17 @@ void* client_processing(void* param)
                             string nachricht;
                             string buffer_message;
                             s >> conf_id;
-                            cout << "/conf_send...." << endl;
+                            //cout << "/conf_send...." << endl;
                             while(s.good())
                             {
                                 s >> buffer_message;
                                 nachricht += buffer_message + " ";
                                 buffer_message = "";
                             }
-                            
+
                             cConference temp = myself_struct->db->get_Conf(conf_id);
                             stringstream ausgabe;
-                            ausgabe << "Client " << myself->getID() << " sendet " << nachricht;
+                            //ausgabe << "Client " << myself->getID() << " sendet " << nachricht;
                             //queue_log << ausgabe.str();
                             cout << ausgabe.str() << endl;
                             stringstream log;
@@ -456,7 +552,14 @@ void* client_processing(void* param)
                             }
                             answer << "\n";
                             //queue_log << answer.str();
-                            myself->getSocket() << answer.str();
+                            try
+                            {
+                                myself->getSocket() << answer.str();
+                            }
+                            catch(string e)
+                            {
+                                queue_log << e;
+                            }
                         }
                     }
                     if(command == "/conf_get_user")
@@ -477,32 +580,37 @@ void* client_processing(void* param)
                             }
                             answer << "\n";
                             //queue_log << answer.str();
-                            myself->getSocket() << answer.str();
+                            try
+                            {
+                                myself->getSocket() << answer.str();
+                            }
+                            catch(string e)
+                            {
+                                queue_log << e;
+                            }
                         }
                     }
                     if(command == "/conf_getProtocol")
                     {
                         if(user.get_status() != OFFLINE)
                         {
-
+                            
                         }
                     }
                     if(command == "/srv_serverdown")
                     {
                         if(user.get_status() != OFFLINE)
                         {
-
+                            
                         }
                     }
                     if(command == "/srv_getList")
                     {
                         if(user.get_status() != OFFLINE)
                         {
-
+                            
                         }
                     }
-                    command = "";
-                    parameter = "";
                 }
                 while(message.length() > 0);
             }
@@ -521,7 +629,7 @@ void* client_processing(void* param)
                 myself->setLoginStatus(false);
                 pthread_exit((void*)0);
             }
-            if(e == "An error occured while receiving the message")
+            else
             {
                 queue_log << "restart endlosschleife...";
                 continue;
@@ -568,7 +676,7 @@ void* message_dispatcher(void* param)
 {
     CChat_Server *chat = reinterpret_cast<CChat_Server*>(param);
 
-    
+
     CQueue logger(8300);
     CQueue messages(8302);
     CQueue server2server(8303);
@@ -585,7 +693,7 @@ void* message_dispatcher(void* param)
     {
         messages >> message;
         //logger << "MESSAGEDISPATCHER: " + message;
-        cout << "MESSAGEDISPATCHER: " + message << endl;
+        //cout << "MESSAGEDISPATCHER: " + message << endl;
         std::istringstream s(message);
         string id_sender;
         string conf_id;
@@ -611,7 +719,7 @@ void* message_dispatcher(void* param)
                 if(sender.get_server() == recipient.get_server()) //user ist lokal angemeldet
                 {
                     //logger << "User " + iterator->client->getID() + " ist lokal angemeldet!";
-                    cout << "User " << iterator->client->getID() << " ist lokal angemeldet!" << endl;
+                    //cout << "User " << iterator->client->getID() << " ist lokal angemeldet!" << endl;
                     if( iterator->client->getID() == atoi(id_recipient.c_str()))
                     {
                         logger << "Sende Nachricht an " + id_recipient + " von sender " + id_sender + " " + nachricht;
