@@ -115,30 +115,7 @@ void* accept_new_Clients(void* param)
     queue << "UNEXPECTED ERROR: Server shutting down...";
     pthread_exit((void*)0);
 }
-/*
-void* executeCommand(void *param)
-{
-    Command *command_struct = (Command*)param;
-    Client_processing *myself_struct = command_struct->client;
-    cUser user;
-    CClient *myself = myself_struct->client;
 
-    CQueue queue_log(8300);
-    CQueue client_queue(8302);
-
-    bool logout = false;
-
-    string message = command_struct->message;
-    string command;
-    string parameter = "";
-    string buffer;
-
-    client_queue.set_type(1);
-    queue_log.set_type(3);
-    
-    pthread_exit((void*)0);
-}
-*/
 /*******************************************************************************
  * Each client is running in this thread, receive over network a command,
  * execute it and send the answer back
@@ -148,7 +125,6 @@ void* client_processing(void* param)
     Client_processing *myself_struct = (Client_processing*)param;
     cUser user;
     CClient *myself = myself_struct->client;
-    CThread *thread = new CThread();
 
     CQueue queue_log(8300);
     CQueue client_queue(8302);
@@ -159,11 +135,11 @@ void* client_processing(void* param)
     string command;
     string parameter = "";
     string buffer;
-
+    stringstream sonderzeichen;
+    
     client_queue.set_type(1);
     queue_log.set_type(3);
     Command command_struct;
-    //command_struct->client = new Client_processing;
     command_struct.client = myself_struct;
     while(true)
     {
@@ -173,13 +149,9 @@ void* client_processing(void* param)
             {
                 myself->getSocket() >> message;
                
-                    //queue_log << "MESSAGE: " + message;
-                    // parsed einen ganzen befehlssatz
                 if(message.length() < 2)
                     continue;
-                    
-                //command_struct.message = message;
-                //thread->start(reinterpret_cast<void*>(&command_struct), executeCommand);
+                
                 do
                 {
                     buffer = message.substr((message).find_first_of("/"), message.find_first_of("\n"));
@@ -197,7 +169,7 @@ void* client_processing(void* param)
                         parameter = "";
 
                     queue_log.set_type(3);
-                    //  queue_log << "BEFEHL: " + command;
+                    //queue_log << "BEFEHL: " + command;
                     //queue_log << "PARAM: " + parameter;
                     //queue_log << "ISTRINGSTREAM: " + s.str();
                     // execute parsed message
@@ -229,51 +201,51 @@ void* client_processing(void* param)
                     }
                     if(command == "/usr_login")
                     {
-                        //if(user.get_status() != ONLINE)
-                        //{
-                        string username, pw;
-                        s >> username >> pw;
-                        queue_log << "LOGIN";
-                        queue_log << "Username " + username;
-                        queue_log << "pw " + pw;
-                        try
+                        if(user.get_status() != ONLINE)
                         {
-                            user = myself_struct->db->login(username, pw, (myself->getSocket()).getLocalIP() );
-
-                            queue_log << "User " + username + " eingeloggt";
-                            myself->setID((int)user.get_id());
-
-                            //myself_struct->thread_messagequeue = new CThread; // create a new thread object for the new client
-                            //myself_struct->thread_messagequeue->start((void*)myself, client_messagequeue_processing);// start a seperate thread for listening on the msg
-                            stringstream buffer;
-                            buffer << "/usr_login 1 " << myself->getID() << "\n";
-                            myself->getSocket() << buffer.str();
-                        }
-                        catch(string e)
-                        {
-                            queue_log << "Loginversuch fehlgeschlagen...";
-                            //if(e == "wrong username or password")
+                            string username, pw;
+                            s >> username >> pw;
+                            queue_log << "LOGIN";
+                            queue_log << "Username " + username;
+                            queue_log << "pw " + pw;
                             try
                             {
-                                myself->getSocket() << "/usr_login 0 0\n";
+                                user = myself_struct->db->login(username, pw, (myself->getSocket()).getLocalIP() );
+
+                                queue_log << "User " + username + " eingeloggt";
+                                myself->setID((int)user.get_id());
+
+                                //myself_struct->thread_messagequeue = new CThread; // create a new thread object for the new client
+                                //myself_struct->thread_messagequeue->start((void*)myself, client_messagequeue_processing);// start a seperate thread for listening on the msg
+                                stringstream buffer;
+                                buffer << "/usr_login 1 " << myself->getID() << "\n";
+                                myself->getSocket() << buffer.str();
                             }
                             catch(string e)
                             {
-                                queue_log << e;
+                                queue_log << "Loginversuch fehlgeschlagen...";
+                                //if(e == "wrong username or password")
+                                try
+                                {
+                                    myself->getSocket() << "/usr_login 0 0\n";
+                                }
+                                catch(string e)
+                                {
+                                    queue_log << e;
+                                }
+                            }
+                            catch(...)
+                            {
+                                try
+                                {
+                                    myself->getSocket() << "/usr_login 0 0\n";
+                                }
+                                catch(string e)
+                                {
+                                    queue_log << e;
+                                }
                             }
                         }
-                        catch(...)
-                        {
-                            try
-                            {
-                                myself->getSocket() << "/usr_login 0 0\n";
-                            }
-                            catch(string e)
-                            {
-                                queue_log << e;
-                            }
-                        }
-                        // }
                     }
                     if(command == "/usr_register")
                     {
@@ -482,6 +454,7 @@ void* client_processing(void* param)
                             string conf_id;
                             string nachricht;
                             string buffer_message;
+
                             s >> conf_id;
                             //cout << "/conf_send...." << endl;
                             while(s.good())
@@ -635,6 +608,13 @@ void* client_processing(void* param)
                 continue;
             }
         }
+        catch(std::exception e)
+        {
+            queue_log.set_type(1);
+            queue_log << e.what();
+            queue_log.set_type(3);
+            continue;
+        }
     }
     pthread_exit((void*)0);
 }
@@ -730,7 +710,7 @@ void* message_dispatcher(void* param)
                         }
                         catch(string e)
                         {
-                            logger << "Senden fehlgeschlagen...";
+                            logger << e;
                             break;
                         }
                     }
