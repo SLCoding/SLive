@@ -365,11 +365,9 @@ unsigned long CDatabase_Connection::real_escape_string(string &to, const string 
 	try
 	{
 		char* zu = new char[to.length()];
-        //char *zu;
-		//strncpy(zu, to.c_str(), to.length() );
 		result = mysql_real_escape_string(&my, zu, from.c_str(), length);
         to = zu;
-		//delete [] zu;
+		delete [] zu;
 	}
 	catch(...)
 	{
