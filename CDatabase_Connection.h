@@ -86,7 +86,7 @@ public:
 
     void debug(string debug); 				// Führt ein DBUG_PUSH mit dem angegebenen String durch
     int dump_debug_info();                  // Lässt den Server Debugginginformationen in das Log schreiben, benötigt Superrechte; Rückgabewert == 0 => OK!
-    unsigned long real_escape_string( string to, const string from, unsigned long length); 		// Versieht Sonderzeichen in einem String, der in einer SQL-Anweisung benutzt
+    unsigned long real_escape_string( string &to, const string from, unsigned long length); 		// Versieht Sonderzeichen in einem String, der in einer SQL-Anweisung benutzt
         // werden soll, mit Escape-Symbolen
     unsigned int field_count(); 				// Liefert die Anzahl der Ergebnisspalten der letzten Anweisung
     void free_result();                         // Gibt den von einer Ergebnismenge belegten Speicher frei

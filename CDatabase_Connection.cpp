@@ -238,11 +238,9 @@ bool CDatabase_Connection::query(string sql_query, unsigned long size)
 	}
 	try
 	{
-        
-        //cout << "ausgabe: " << this->my.net.last_error << endl;
-        mysql_real_query(&my, sql_query.c_str(), strlen(sql_query.c_str()));
+        mysql_real_query(&my, sql_query.c_str(), sql_query.length());
 
-        mysql_res = mysql_store_result(&my);
+        this->mysql_res = mysql_store_result(&my);
 
 	}
 	catch(...)
@@ -361,17 +359,17 @@ int CDatabase_Connection::dump_debug_info()
 	return mysql_dump_debug_info(&my);
 }
 
-unsigned long CDatabase_Connection::real_escape_string(string to, const string from, unsigned long length)
+unsigned long CDatabase_Connection::real_escape_string(string &to, const string from, unsigned long length)
 {
 	unsigned long result = 0;
 	try
 	{
 		char* zu = new char[to.length()];
-
-		strncpy(zu, to.c_str(), strlen(to.c_str()) );
+        //char *zu;
+		//strncpy(zu, to.c_str(), to.length() );
 		result = mysql_real_escape_string(&my, zu, from.c_str(), length);
-
-		delete [] zu;
+        to = zu;
+		//delete [] zu;
 	}
 	catch(...)
 	{

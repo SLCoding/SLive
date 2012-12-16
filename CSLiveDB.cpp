@@ -64,7 +64,6 @@ string cUser::get_email()
 }
 string cUser::get_server()
 {
-    
     stringstream query;
     query<<"SELECT server FROM user WHERE user_id = "<<this->id<<";";
     CDatabase_Connection db;
@@ -347,12 +346,28 @@ bool cUser::set_id(long id)
 }
 bool cUser::set_name(string name)
 {
-
-    
     stringstream query;
-    
-    query<<"UPDATE user SET name = '" << name << "' WHERE user_id = " << this->id << ";";
+    string secure_param;
     CDatabase_Connection db;
+    try
+    {
+        db.real_escape_string(secure_param, name, name.length()); // every specialcharacter is escaped
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+        query<<"UPDATE user SET name = '" << secure_param << "' WHERE user_id = " << this->id << ";";
+    }
+    catch(dbError err1)
+    {
+        cout<<"Unhandled Exception on mysql_real_escape_string"<<endl;
+        cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
+        query<<"UPDATE user SET email = '" << name << "' WHERE user_id = " << this->id << ";";
+    }
+    
     try 
     {
         db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
@@ -398,10 +413,28 @@ bool cUser::set_name(string name)
 bool cUser::set_email(string email)
 {
     stringstream query;
-    
-    query<<"UPDATE user SET email = '" << email << "' WHERE user_id = " << this->id << ";";
+    string secure_param;
     CDatabase_Connection db;
-    try 
+    try
+    {
+        db.real_escape_string(secure_param, email, email.length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+        query<<"UPDATE user SET email = '" << secure_param << "' WHERE user_id = " << this->id << ";";
+    }
+    catch(dbError err1)
+    {
+        cout<<"Unhandled Exception on mysql_real_escape_string"<<endl;
+        cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
+        query<<"UPDATE user SET email = '" << email << "' WHERE user_id = " << this->id << ";";
+    }
+
+    try
     {
         db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
         db.connect();
@@ -445,13 +478,28 @@ bool cUser::set_email(string email)
 }
 bool cUser::set_server(string server)
 {
-
-    
     stringstream query;
-    
-    query<<"UPDATE user SET server = '" << server << "' WHERE user_id = " << this->id << ";";
-
+    string secure_param;
     CDatabase_Connection db;
+    try
+    {
+        db.real_escape_string(secure_param, server, server.length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+        query<<"UPDATE user SET server = '" << secure_param << "' WHERE user_id = " << this->id << ";";
+    }
+    catch(dbError err1)
+    {
+        cout<<"Unhandled Exception on mysql_real_escape_string"<<endl;
+        cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
+        query<<"UPDATE user SET server = '" << server << "' WHERE user_id = " << this->id << ";";
+    }
+    
     try 
     {
         db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
@@ -564,9 +612,27 @@ bool cUser::logout()
 bool cUser::add_conf(string conf_id)
 {
     stringstream query;
-    
-    query<<"INSERT INTO conf_user(conf_id, user_id) VALUES('" << conf_id << "', " << this->id << ");";
+    string secure_param;
     CDatabase_Connection db;
+    try
+    {
+        db.real_escape_string(secure_param, conf_id, conf_id.length()); // every specialcharacter is escaped
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+        query<<"INSERT INTO conf_user(conf_id, user_id) VALUES('" << secure_param << "', " << this->id << ");";
+    }
+    catch(dbError err1)
+    {
+        cout<<"Unhandled Exception on mysql_real_escape_string"<<endl;
+        cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
+        query<<"INSERT INTO conf_user(conf_id, user_id) VALUES('" << conf_id << "', " << this->id << ");";
+    }
+    
     try 
     {
         db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
@@ -671,11 +737,29 @@ bool cUser::add_bdy(cUser bdy)
 
 
 bool cUser::del_conf(string conf_id)
-{        
+{
     stringstream query;
-    
-    query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< conf_id <<"'* AND user_id = "<< this->id <<";";
+    string secure_param;
     CDatabase_Connection db;
+    try
+    {
+        db.real_escape_string(secure_param, conf_id, conf_id.length()); // every specialcharacter is escaped
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+        query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< secure_param <<"'* AND user_id = "<< this->id <<";";
+    }
+    catch(dbError err1)
+    {
+        cout<<"Unhandled Exception on mysql_real_escape_string"<<endl;
+        cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
+        query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< conf_id <<"'* AND user_id = "<< this->id <<";";
+    }
+
     try 
     {
         db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
@@ -942,10 +1026,28 @@ string cConference::get_id()
 list<cUser> cConference::get_usrList()
 {
     stringstream query;
-    
-    query<<"SELECT * FROM conf_user WHERE conf_id LIKE '"<<this->id<<"';";
+    string secure_param;
     CDatabase_Connection db;
-    try 
+    try
+    {
+        db.real_escape_string(secure_param, this->id, this->id.length()); // every specialcharacter is escaped
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+        query<<"SELECT * FROM conf_user WHERE conf_id LIKE '"<<secure_param<<"';";
+    }
+    catch(dbError err1)
+    {
+        cout<<"Unhandled Exception on mysql_real_escape_string"<<endl;
+        cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
+        query<<"SELECT * FROM conf_user WHERE conf_id LIKE '"<<this->id<<"';";
+    }
+
+    try
     {
         db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
         db.connect();
@@ -1003,9 +1105,36 @@ list<cUser> cConference::get_usrList()
 bool cConference::set_id(string id)
 {
     stringstream query;
-    
-    query<<"UPDATE conf_user SET conf_id = '" << id << "' WHERE conf_id LIKE '" << this->id << "';";
+    string secure_param;
+    string secure_param2;
     CDatabase_Connection db;
+    try
+    {
+        db.real_escape_string(secure_param, id, id.length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+        db.real_escape_string(secure_param2, this->id, this->id.length());
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+        query<<"UPDATE conf_user SET conf_id = '" << secure_param << "' WHERE conf_id LIKE '" << secure_param2 << "';";
+    }
+    catch(dbError err1)
+    {
+        cout<<"Unhandled Exception on mysql_real_escape_string"<<endl;
+        cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
+        query<<"UPDATE conf_user SET conf_id = '" << id << "' WHERE conf_id LIKE '" << this->id << "';";
+    }
+
     try 
     {
         db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
@@ -1109,9 +1238,27 @@ bool cConference::add_usr(cUser usr)
 bool cConference::del_usr(long usr_id)
 {
     stringstream query;
-    
-    query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< this->id <<"'* AND user_id = "<< usr_id <<";";
+    string secure_param;
     CDatabase_Connection db;
+    try
+    {
+        db.real_escape_string(secure_param, this->id, this->id.length()); // every specialcharacter is escaped
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+        query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< secure_param <<"'* AND user_id = "<< usr_id <<";";
+    }
+    catch(dbError err1)
+    {
+        cout<<"Unhandled Exception on mysql_real_escape_string"<<endl;
+        cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
+        query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< this->id <<"'* AND user_id = "<< usr_id <<";";
+    }
+
     try 
     {
         db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
@@ -1163,9 +1310,26 @@ bool cConference::del_usr(cUser usr)
 bool cConference::del_conf()
 {
     stringstream query;
-    
-    query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< this->id <<"';";
+    string secure_param;
     CDatabase_Connection db;
+    try
+    {
+        db.real_escape_string(secure_param, this->id, this->id.length()); // every specialcharacter is escaped
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+        query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< secure_param <<"';";    }
+    catch(dbError err1)
+    {
+        cout<<"Unhandled Exception on mysql_real_escape_string"<<endl;
+        cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
+        query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< this->id <<"';";
+    }
+    
     try 
     {
         db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
@@ -1296,7 +1460,27 @@ cConference CSLiveDB::create_conf(string name)
     map<string, string> result = db.fetch_assoc();
     
     query.str("");
-    query<<"INSERT INTO conference (conf_id, name) VALUES('"<<result["id"]<<"', '"<< name <<"');";
+
+    string secure_param;
+    try
+    {
+        db.real_escape_string(secure_param, name, name.length()); // every specialcharacter is escaped
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+        query<<"INSERT INTO conference (conf_id, name) VALUES('"<<result["id"]<<"', '"<< secure_param <<"');";
+    }
+    catch(dbError err1)
+    {
+        cout<<"Unhandled Exception on mysql_real_escape_string"<<endl;
+        cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
+        query<<"INSERT INTO conference (conf_id, name) VALUES('"<<result["id"]<<"', '"<< name <<"');";
+    }
+
     try 
     {
         db = CDatabase_Connection(this->user, this->password, this->DB, this->Host, this->port);
@@ -1344,7 +1528,7 @@ cConference CSLiveDB::create_conf(list<cUser> usr_list, string name)
     CDatabase_Connection db(this->user, this->password, this->DB, this->Host, this->port);
     db.connect();
     
-    cConference conf = this->create_conf("");
+    cConference conf = this->create_conf(name);
     
     list<cUser>::iterator it;
     
@@ -1378,10 +1562,28 @@ cConference CSLiveDB::create_conf(string name, list<cUser> usr_list)
 */
 cConference CSLiveDB::get_Conf(string id)
 {
+    string secure_param;
     stringstream query;
-    
-    query<<"SELECT * FROM conf_user WHERE conf_id LIKE '" << id <<"';";
     CDatabase_Connection db;
+    try
+    {
+        db.real_escape_string(secure_param, id, id.length()); // every specialcharacter is escaped
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+        query<<"SELECT * FROM conf_user WHERE conf_id LIKE '" << secure_param <<"';";
+    }
+    catch(dbError err1)
+    {
+        cout<<"Unhandled Exception on mysql_real_escape_string"<<endl;
+        cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
+        query<<"SELECT * FROM conf_user WHERE conf_id LIKE '" << id <<"';";
+    }
+
     try 
     {
         db = CDatabase_Connection(this->user, this->password, this->DB, this->Host, this->port);
@@ -1429,11 +1631,29 @@ cConference CSLiveDB::get_Conf(string id)
 
 
 bool CSLiveDB::checkUsername(string name)
-{    
+{
+    string secure_param;
     stringstream query;
-    
-    query<<"SELECT * FROM user WHERE name LIKE '" << name <<"';";
     CDatabase_Connection db;
+    try
+    {
+        db.real_escape_string(secure_param, name, name.length()); // every specialcharacter is escaped
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+        query<<"SELECT * FROM user WHERE name LIKE '" << secure_param <<"';";
+    }
+    catch(dbError err1)
+    {
+        cout<<"Unhandled Exception on mysql_real_escape_string"<<endl;
+        cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
+        query<<"SELECT * FROM user WHERE name LIKE '" << name <<"';";
+    }
+    
     try 
     {
         db = CDatabase_Connection(this->user, this->password, this->DB, this->Host, this->port);
@@ -1485,11 +1705,31 @@ bool CSLiveDB::checkUsername(string name)
 
 cUser CSLiveDB::create_User(string name, string pw)
 {
+    string backup = name;
+    string secure_param;
+    stringstream query;
+    CDatabase_Connection db;
+    try
+    {
+        db.real_escape_string(secure_param, name, name.length()); // every specialcharacter is escaped
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+    }
+    catch(dbError err1)
+    {
+        cout<<"Unhandled Exception on mysql_real_escape_string"<<endl;
+        cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
+        name = backup;
+    }
+    
     if(this->checkUsername(name))
     {
-        stringstream query;
         query<<"INSERT INTO user(name, pwhash, email) VALUES ('"<< name << "', '"<< md5(pw) << "', '');";
-        CDatabase_Connection db;
         try 
         {
             db = CDatabase_Connection(this->user, this->password, this->DB, this->Host, this->port);
@@ -1599,9 +1839,28 @@ cUser CSLiveDB::get_User(long id)
 }
 cUser CSLiveDB::get_User(string name)
 {
+    string secure_param;
     stringstream query;
-    query << "SELECT * FROM user WHERE name LIKE '" << name << "';";
     CDatabase_Connection db;
+    try
+    {
+        db.real_escape_string(secure_param, name, name.length()); // every specialcharacter is escaped
+        if(db.errnum() != 0)
+        {
+            dbError err;
+            err.errnum = db.errnum();
+            err.errstr = db.error();
+            throw err;
+        }
+        query << "SELECT * FROM user WHERE name LIKE '" << secure_param << "';";
+    }
+    catch(dbError err1)
+    {
+        cout<<"Unhandled Exception on mysql_real_escape_string"<<endl;
+        cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
+        query << "SELECT * FROM user WHERE name LIKE '" << name << "';";
+    }
+
     try 
     {
         db = CDatabase_Connection(this->user, this->password, this->DB, this->Host, this->port);
