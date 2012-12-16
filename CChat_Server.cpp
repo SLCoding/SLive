@@ -44,6 +44,13 @@ CChat_Server::CChat_Server()
         logger.destroy();
         this->~CChat_Server();
     }
+    catch(std::exception e)
+    {
+        logger << e.what();
+        logger << "Server shutdown...";
+        logger.destroy();
+        this->~CChat_Server();
+    }
 }
 
 /*******************************************************************************
@@ -51,31 +58,38 @@ CChat_Server::CChat_Server()
  ******************************************************************************/
 CChat_Server::~CChat_Server()
 {
-    list<Client_processing>::iterator iterator1;
-    for (iterator1 = clients.begin(); iterator1 != clients.end(); ++iterator1)
+    try
     {
-        delete iterator1->client;
-        delete iterator1->db;
-        delete iterator1->thread_processing;
-        clients.erase(iterator1);
-    }
+        list<Client_processing>::iterator iterator1;
+        for (iterator1 = clients.begin(); iterator1 != clients.end(); ++iterator1)
+        {
+            delete iterator1->client;
+            delete iterator1->db;
+            delete iterator1->thread_processing;
+            clients.erase(iterator1);
+        }
 
-    list<server>::iterator iterator2;
-    for (iterator2 = server_list.begin(); iterator2 != server_list.end(); ++iterator2)
+        list<server>::iterator iterator2;
+        for (iterator2 = server_list.begin(); iterator2 != server_list.end(); ++iterator2)
+        {
+            delete iterator2->sock;
+            delete iterator2->thread;
+            server_list.erase(iterator2);
+        }
+
+        thread_server_communication_incoming->cancel();
+        thread_server_communication_outgoing->cancel();
+        this->cancel();
+        delete message_dispatcher_obj;
+        delete thread_server_communication_incoming;
+        delete thread_server_communication_outgoing;
+        delete thread_logout;
+        delete database;
+    }
+    catch(std::exception e)
     {
-        delete iterator2->sock;
-        delete iterator2->thread;
-        server_list.erase(iterator2);
+        cout << "FATAL ERROR: Destructor crashed...wayne, the programm stops anyway ;-)";
     }
-
-    thread_server_communication_incoming->cancel();
-    thread_server_communication_outgoing->cancel();
-    this->cancel();
-    delete message_dispatcher_obj;
-    delete thread_server_communication_incoming;
-    delete thread_server_communication_outgoing;
-    delete thread_logout;
-    delete database;
 }
 
 /*******************************************************************************
@@ -93,7 +107,7 @@ void* accept_new_Clients(void* param)
 
     sock.bind(8376);
     sock.listen();
-
+    
     while(true)
     {
         queue << "Warte auf Client-Anfrage...";
@@ -112,7 +126,6 @@ void* accept_new_Clients(void* param)
         //queue << "Thread gestartet!";
         server->clients.push_back(client_obj); // add the client to the list
     }
-    queue << "UNEXPECTED ERROR: Server shutting down...";
     pthread_exit((void*)0);
 }
 
@@ -139,8 +152,7 @@ void* client_processing(void* param)
     
     client_queue.set_type(1);
     queue_log.set_type(3);
-    Command command_struct;
-    command_struct.client = myself_struct;
+    
     while(true)
     {
         try
