@@ -633,7 +633,7 @@ void* client_processing(void* param)
         {
             queue_log.set_type(2);
             queue_log << e;
-            if(e == "Connection reset by peer")
+            if(e == "Client terminate connection!")
             {
                 myself->getSocket().closeSocket();
                 //CQueue queue(8301);
