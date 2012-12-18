@@ -1909,22 +1909,40 @@ cUser CSLiveDB::get_User(string name)
 
 cUser CSLiveDB::login(string name, string pw, string server)
 {
-    return this->login(this->get_User(name).get_id(), pw, server);
+    cUser usr = this->get_User(name);
+    if(usr.get_status() != OFFLINE)
+    {
+        throw "Already logged in!";
+    }
+    else
+    {
+        return this->login(this->get_User(name).get_id(), pw, server);        
+    }
+
 }
 
 cUser CSLiveDB::login(long id, string pw, string server)
 {
     cUser usr = this->get_User(id);
-    if(usr.pwhash == md5(pw))
+    if(usr.get_status() != OFFLINE)
     {
-        usr.set_server(server);
-        usr.set_status(ONLINE);
+        throw "Already logged in!";
     }
-    else {
-        throw string("wrong username or password");
+    else
+    {
+        if(usr.pwhash == md5(pw))
+        {
+            usr.set_server(server);
+            usr.set_status(ONLINE);
+        }
+        else
+        {
+            throw string("wrong username or password");
+        }
+        
+        return usr;
+
     }
-    
-    return usr;
 }
 
 
