@@ -1924,12 +1924,12 @@ cUser CSLiveDB::login(string name, string pw, string server)
 cUser CSLiveDB::login(long id, string pw, string server)
 {
     cUser usr = this->get_User(id);
-    if(usr.get_status() != OFFLINE)
-    {
-        throw "Already logged in!";
-    }
-    else
-    {
+    // if(usr.get_status() != OFFLINE)
+    //{
+    //   throw "Already logged in!";
+    //}
+    //else
+    //{
         if(usr.pwhash == md5(pw))
         {
             usr.set_server(server);
@@ -1942,7 +1942,7 @@ cUser CSLiveDB::login(long id, string pw, string server)
         
         return usr;
 
-    }
+    //    }
 }
 
 
