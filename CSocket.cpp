@@ -162,9 +162,7 @@ string CSocket::recv()
     char char_buffer[buffer];
     long recv_size;
     recv_size = ::read(socket_handle, char_buffer, buffer);
-    if(recv_size == 0)
-        throw string("Client terminate connection!");
-    else if(recv_size < 0)
+    if(recv_size <= 0)
     {
         throw "SOCKET: " + string(strerror(errno));
     }

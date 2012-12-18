@@ -11,13 +11,10 @@
 #include "CDatabase_Connection.h"
 #include "CChat_Server.h"
 
-pthread_mutex_t DatabaseMutex;
-
 int main()
 {
     try
     {
-        pthread_mutex_init(&DatabaseMutex, NULL);
         CLogger logger;
         CQueue log(8300);
         CChat_Server *chat;
@@ -31,11 +28,16 @@ int main()
         //logger.join(NULL);
 
         delete chat;
-        pthread_mutex_destroy(&DatabaseMutex);
     }
     catch(exception e)
     {
         cout << "ERROR: " << e.what() << endl;
+        return -1;
+    }
+    catch(...)
+    {
+        cout << "ERROR: main()";
+        return -1;
     }
     return 0;
 }
