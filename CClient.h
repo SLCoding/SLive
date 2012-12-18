@@ -20,6 +20,7 @@ private:
     CSocket sock;
     int id;
     bool login;
+    bool logout;
     
 protected:
     
@@ -31,7 +32,10 @@ public:
     CSocket getSocket();
     int getID();
     bool getLoginStatus() { return login; }
-    void setLoginStatus(bool login) { this->login = login; }
+    void setLoginStatus(bool login) { this->login = logout; }
+
+    bool getLogoutStatus() { return logout; }
+    void setLogoutStatus(bool logout) { this->logout = logout; }
 };
 
 #endif /* defined(__SLive__CClient__) */

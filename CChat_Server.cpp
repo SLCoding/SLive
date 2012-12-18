@@ -30,12 +30,12 @@ CChat_Server::CChat_Server()
 
         this->thread_server_communication_incoming->start(reinterpret_cast<void*>(this), server_communication_incoming);
         this->thread_server_communication_outgoing->start(NULL, server_communication_outgoing);
-        //this->thread_logout->start(reinterpret_cast<void*>(this), logout);
+        // this->thread_logout->start(reinterpret_cast<void*>(this), logout);
 
         message_dispatcher_obj = this->start(reinterpret_cast<void*>(this), message_dispatcher);
         this->start(reinterpret_cast<void*>(this), accept_new_Clients);
         
-        this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "192.168.178.20", "192.168.178.20", 3306, 3306);
+        this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "127.0.0.1", "127.0.0.1", 3306, 3306);
     }
     catch(string e)
     {
@@ -163,6 +163,9 @@ void* client_processing(void* param)
                
                 if(message.length() < 2)
                     continue;
+
+                if(message.length() > 1024)
+                    continue;
                 
                 do
                 {
@@ -184,7 +187,7 @@ void* client_processing(void* param)
                     //queue_log << "BEFEHL: " + command;
                     //queue_log << "PARAM: " + parameter;
                     //queue_log << "ISTRINGSTREAM: " + s.str();
-                    // execute parsed message
+                    //execute parsed message
 
                     if(command == "/usr_logout")
                     {
@@ -204,7 +207,7 @@ void* client_processing(void* param)
                                 //queue.set_type(myself->getID());
                                 //queue << "ENDE!!!";
                                 myself->setLoginStatus(false);
-
+                                myself->setLogoutStatus(true);
                                 //user->set_server("");
 
                                 pthread_exit((void*)0);
@@ -612,6 +615,7 @@ void* client_processing(void* param)
                 //queue << "ENDE!!!";
                 user.logout();
                 myself->setLoginStatus(false);
+                myself->setLogoutStatus(true);
                 pthread_exit((void*)0);
             }
             else
@@ -714,7 +718,7 @@ void* message_dispatcher(void* param)
                     //cout << "User " << iterator->client->getID() << " ist lokal angemeldet!" << endl;
                     if( iterator->client->getID() == atoi(id_recipient.c_str()))
                     {
-                        logger << "Sende Nachricht an " + id_recipient + " von sender " + id_sender + " " + nachricht;
+                        //logger << "Sende Nachricht an " + id_recipient + " von sender " + id_sender + " " + nachricht;
                         try
                         {
                             (iterator->client->getSocket()).send("/conf_send " + conf_id + " " +  sender.get_name() + " " + nachricht + "\n");
@@ -967,24 +971,35 @@ void* logout(void* param)
     stringstream buffer;
     log.set_type(3);
     list<Client_processing>::iterator iterator;
-    sleep(60*10); // sleep for 10 Minuten
+    sleep(60*1); // sleep for 10 Minuten
     while(true)
     {
-        log << "Clean up client-list...";
-        for (iterator = chat->clients.begin(); iterator != chat->clients.end(); ++iterator)
+        try
         {
-            //if( iterator->db->get_User(iterator->client->getID()).get_server() == "")   // client ist nicht irgendwo angemeldet
-            if( (iterator->db->get_User(iterator->client->getID()).get_status() == OFFLINE ))
+            log << "Clean up client-list...";
+            for (iterator = chat->clients.begin(); iterator != chat->clients.end(); ++iterator)
             {
-                buffer << "Client " << iterator->client->getID() << " hat sich ausgeloggt";
-                log << buffer.str();
-                chat->clients.erase(iterator);
-                break;
+                //if( iterator->db->get_User(iterator->client->getID()).get_server() == "")   // client ist nicht irgendwo angemeldet
+                if( iterator->client->getLogoutStatus() == true)
+                {
+                    buffer << "Client " << iterator->client->getID() << " hat sich ausgeloggt";
+                    log << buffer.str();
+                    chat->clients.erase(iterator);
+                    buffer.str("");
+                    break;
+                }
+                sleep(1); // zur last und netzwerkreduzierung warte nach jedem client eine sekunde
+                buffer.clear();
             }
-            sleep(1); // zur last und netzwerkreduzierung warte nach jedem client eine sekunde
-            buffer.clear();
         }
-        sleep(60*10); // sleep for 10 Minuten
+        catch(exception e)
+        {
+            log.set_type(2);
+            log << e.what();
+            log.set_type(3);
+            continue;
+        }
+        sleep(60*1); // sleep for 10 Minuten
     }
     pthread_exit((void*)0);
 }

@@ -25,18 +25,30 @@ void* CLogger_run(void *param)
     
     while(true)
     {
-        t_msg message;
-        msg_queue >> message;
-        
-        switch(message.type)
+        try
         {
-            case 3: cout<<"INFO: "; break;
-            case 2: cout<<"WARNING: "; break;
-            case 1: cout<<"ERROR: "; break;
-        
+            t_msg message;
+            msg_queue >> message;
+
+            switch(message.type)
+            {
+                case 3: cout<<"INFO: "; break;
+                case 2: cout<<"WARNING: "; break;
+                case 1: cout<<"ERROR: "; break;
+
+            }
+            cout<<"\""<<message.text<<"\""<<endl;
         }
-        cout<<"\""<<message.text<<"\""<<endl;
-        
+        catch(exception e)
+        {
+            cout << "ERROR: " << e.what();
+            continue;
+        }
+        catch(...)
+        {
+            cout << "ERROR im LOGGER..." << endl;
+            continue;
+        }
     }
     
 }
