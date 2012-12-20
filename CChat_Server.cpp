@@ -24,18 +24,18 @@ CChat_Server::CChat_Server()
     logger.set_type(2);
     try
     {
-        this->thread_server_communication_incoming = new CThread;
+        //this->thread_server_communication_incoming = new CThread;
         this->thread_server_communication_outgoing = new CThread;
-        this->thread_logout = new CThread;
+        //this->thread_logout = new CThread;
 
-        this->thread_server_communication_incoming->start(reinterpret_cast<void*>(this), server_communication_incoming);
+        //this->thread_server_communication_incoming->start(reinterpret_cast<void*>(this), server_communication_incoming);
         this->thread_server_communication_outgoing->start(NULL, server_communication_outgoing);
         // this->thread_logout->start(reinterpret_cast<void*>(this), logout);
 
         message_dispatcher_obj = this->start(reinterpret_cast<void*>(this), message_dispatcher);
         this->start(reinterpret_cast<void*>(this), accept_new_Clients);
         
-        this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "10.12.34.198", "10.12.43.119", 3306, 3306);
+        this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "127.0.0.1", "127.0.0.1", 3306, 3306);
     }
     catch(string e)
     {
@@ -77,13 +77,13 @@ CChat_Server::~CChat_Server()
             server_list.erase(iterator2);
         }
 
-        thread_server_communication_incoming->cancel();
+        //thread_server_communication_incoming->cancel();
         thread_server_communication_outgoing->cancel();
         this->cancel();
         delete message_dispatcher_obj;
-        delete thread_server_communication_incoming;
+        // delete thread_server_communication_incoming;
         delete thread_server_communication_outgoing;
-        delete thread_logout;
+        //delete thread_logout;
         delete database;
     }
     catch(std::exception e)
@@ -137,6 +137,7 @@ void* client_processing(void* param)
 {
     Client_processing *myself_struct = (Client_processing*)param;
     cUser user;
+    user.set_id(0);
     CClient *myself = myself_struct->client;
 
     CQueue queue_log(8300);
@@ -160,6 +161,7 @@ void* client_processing(void* param)
             while(!logout)
             {
                 myself->getSocket() >> message;
+                cout << message;
                
                 if(message.length() < 2)
                     continue;
@@ -234,8 +236,8 @@ void* client_processing(void* param)
                     }
                     if(command == "/usr_login")
                     {
-                        if(user.get_status() != ONLINE)
-                        {
+                        //if(user.get_status() != ONLINE)
+                        //{
                             string username, pw;
                             s >> username >> pw;
                             queue_log << "LOGIN";
@@ -278,7 +280,7 @@ void* client_processing(void* param)
                                     queue_log << e;
                                 }
                             }
-                        }
+                        // }
                     }
                     if(command == "/usr_register")
                     {
@@ -844,8 +846,8 @@ void* server_communication_outgoing(void* param)
                 {
                     // no ip adress found, open a new connection
                     log << "Baue eine neue Verbindung zu server " + ip + " auf...";
-                    newsock.connect(ip, 8377);
-                    newsock.send(conf_id + " " + recipient + " " + sender + " " + nachricht);
+                    newsock.connect(ip, 8376);
+                    newsock.send("/server_send" + conf_id + " " + recipient + " " + sender + " " + nachricht);
                 }
                 catch(string e)
                 {
@@ -875,6 +877,7 @@ void* server_communication_outgoing(void* param)
  * A server can connect to this server via this thread. For every server
  * a new thread is created.
  ******************************************************************************/
+
 void* server_communication_incoming(void* param)
 {
     CChat_Server *chat = reinterpret_cast<CChat_Server*>(param);
@@ -911,6 +914,7 @@ void* server_communication_incoming(void* param)
  * Every server runs in this thread. The thread receive a message and search
  * in a local list for the recipient and send the message
  ******************************************************************************/
+
 void* messageForClient(void* param)
 {
     server *incoming_server = reinterpret_cast<server*>(param);

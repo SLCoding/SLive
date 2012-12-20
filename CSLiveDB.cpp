@@ -171,8 +171,6 @@ list<cConference> cUser::get_confList()
 }
 list<cUser> cUser::get_bdyList()
 {
-    
-    
     stringstream query;
     query<<"SELECT * FROM buddy WHERE user_id = "<<this->get_id()<<";";
     
@@ -239,14 +237,20 @@ list<cUser> cUser::get_bdyList()
 
 user_status cUser::get_status()
 {
-        
+    if(this->id == 0)
+        return OFFLINE;
     stringstream query;
     query<<"SELECT status FROM user WHERE user_id = "<<this->id<<";";
     
     CDatabase_Connection db;
     try 
     {
-        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        db.setDB(this->db.DB);
+        db.setHost(this->db.Host);
+        db.setPassword(this->db.password);
+        db.setPort(this->db.port);
+        db.setUsername(this->db.user);
+        //db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
         db.connect();
         db.query(query.str(), query.str().length());
         if(db.errnum() != 0)
@@ -262,7 +266,12 @@ user_status cUser::get_status()
     {
         try
         {
-            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            // db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.setDB(this->db.DB);
+            db.setHost(this->db.Host2);
+            db.setPassword(this->db.password);
+            db.setPort(this->db.port2);
+            db.setUsername(this->db.user);
             db.connect();
             db.query(query.str(), query.str().length());
             if(db.errnum() != 0)
@@ -481,6 +490,11 @@ bool cUser::set_server(string server)
     stringstream query;
     string secure_param;
     CDatabase_Connection db;
+    db.setDB(this->db.DB);
+    db.setHost(this->db.Host);
+    db.setPassword(this->db.password);
+    db.setPort(this->db.port);
+    db.setUsername(this->db.user);
     try
     {
         db.real_escape_string(secure_param, server, server.length());
@@ -502,7 +516,7 @@ bool cUser::set_server(string server)
     
     try 
     {
-        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        // db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
         db.connect();
         db.query(query.str(), query.str().length());
         if(db.errnum() != 0)
@@ -518,7 +532,12 @@ bool cUser::set_server(string server)
     {
         try
         {
-            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.setDB(this->db.DB);
+            db.setHost(this->db.Host2);
+            db.setPassword(this->db.password);
+            db.setPort(this->db.port2);
+            db.setUsername(this->db.user);
+            // db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
             db.connect();
             db.query(query.str(), query.str().length());
             if(db.errnum() != 0)
@@ -550,9 +569,14 @@ bool cUser::set_status(user_status status)
     
     query<<"UPDATE user SET status = '" << (int)status << "' WHERE user_id = " << this->id << ";";
     CDatabase_Connection db;
+    db.setDB(this->db.DB);
+    db.setHost(this->db.Host);
+    db.setPassword(this->db.password);
+    db.setPort(this->db.port);
+    db.setUsername(this->db.user);
     try 
     {
-        db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
+        // db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
         db.connect();
         db.query(query.str(), query.str().length());
         if(db.errnum() != 0)
@@ -568,7 +592,12 @@ bool cUser::set_status(user_status status)
     {
         try
         {
-            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.setDB(this->db.DB);
+            db.setHost(this->db.Host2);
+            db.setPassword(this->db.password);
+            db.setPort(this->db.port2);
+            db.setUsername(this->db.user);
+            // db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
             db.connect();
             db.query(query.str(), query.str().length());
             if(db.errnum() != 0)
@@ -1842,6 +1871,11 @@ cUser CSLiveDB::get_User(string name)
     string secure_param;
     stringstream query;
     CDatabase_Connection db;
+    db.setDB(this->DB);
+    db.setHost(this->Host);
+    db.setPassword(this->password);
+    db.setPort(this->port);
+    db.setUsername(this->user);
     try
     {
         db.real_escape_string(secure_param, name, name.length()); // every specialcharacter is escaped
@@ -1863,7 +1897,7 @@ cUser CSLiveDB::get_User(string name)
 
     try 
     {
-        db = CDatabase_Connection(this->user, this->password, this->DB, this->Host, this->port);
+        //db = CDatabase_Connection(this->user, this->password, this->DB, this->Host, this->port);
         db.connect();
         db.query(query.str(), query.str().length());
         if(db.errnum() != 0)
@@ -1879,7 +1913,13 @@ cUser CSLiveDB::get_User(string name)
     {
         try
         {
-            db = CDatabase_Connection(this->user, this->password, this->DB, this->Host2, this->port2);
+            //db.close();
+            //db = CDatabase_Connection(this->user, this->password, this->DB, this->Host2, this->port2);
+            db.setDB(this->DB);
+            db.setHost(this->Host2);
+            db.setPassword(this->password);
+            db.setPort(this->port2);
+            db.setUsername(this->user);
             db.connect();
             db.query(query.str(), query.str().length());
             if(db.errnum() != 0)
@@ -1910,14 +1950,14 @@ cUser CSLiveDB::get_User(string name)
 cUser CSLiveDB::login(string name, string pw, string server)
 {
     cUser usr = this->get_User(name);
-    if(usr.get_status() != OFFLINE)
-    {
-        throw "Already logged in!";
-    }
-    else
-    {
+    //if(usr.get_status() != OFFLINE)
+    //{
+    //   throw "Already logged in!";
+    //}
+    //else
+    // {
         return this->login(this->get_User(name).get_id(), pw, server);        
-    }
+    //}
 
 }
 

@@ -13,7 +13,7 @@ CDatabase_Connection::CDatabase_Connection()
 {
 	try
 	{
-		mysql_init(&my);
+        mysql_init(&my);
 		LoadDefaults();
 		this->connected = false;
 		this->initialised = false;
