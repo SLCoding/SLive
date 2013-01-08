@@ -237,8 +237,6 @@ list<cUser> cUser::get_bdyList()
 
 user_status cUser::get_status()
 {
-    if(this->id == 0)
-        return OFFLINE;
     stringstream query;
     query<<"SELECT status FROM user WHERE user_id = "<<this->id<<";";
     

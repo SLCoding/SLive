@@ -24,11 +24,11 @@ CChat_Server::CChat_Server()
     logger.set_type(2);
     try
     {
-        //this->thread_server_communication_incoming = new CThread;
+        this->thread_server_communication_incoming = new CThread;
         this->thread_server_communication_outgoing = new CThread;
         //this->thread_logout = new CThread;
 
-        //this->thread_server_communication_incoming->start(reinterpret_cast<void*>(this), server_communication_incoming);
+        this->thread_server_communication_incoming->start(reinterpret_cast<void*>(this), server_communication_incoming);
         this->thread_server_communication_outgoing->start(NULL, server_communication_outgoing);
         // this->thread_logout->start(reinterpret_cast<void*>(this), logout);
 
@@ -135,9 +135,9 @@ void* accept_new_Clients(void* param)
  ******************************************************************************/
 void* client_processing(void* param)
 {
+    bool login = false;
     Client_processing *myself_struct = (Client_processing*)param;
     cUser user;
-    user.set_id(0);
     CClient *myself = myself_struct->client;
 
     CQueue queue_log(8300);
@@ -196,7 +196,7 @@ void* client_processing(void* param)
 
                     if(command == "/usr_logout")
                     {
-                        if(user.get_status() != OFFLINE)
+                        if(login)
                         {
                             if(parameter == "true")
                             {
@@ -232,12 +232,12 @@ void* client_processing(void* param)
                                     queue_log << "Error beim ausloggen...";
                                 }
                             }
-                        }
+                         }
                     }
                     if(command == "/usr_login")
                     {
-                        //if(user.get_status() != ONLINE)
-                        //{
+                        if(!login)
+                        {
                             string username, pw;
                             s >> username >> pw;
                             queue_log << "LOGIN";
@@ -255,6 +255,7 @@ void* client_processing(void* param)
                                 stringstream buffer;
                                 buffer << "/usr_login 1 " << myself->getID() << "\n";
                                 myself->getSocket() << buffer.str();
+                                login = true;
                             }
                             catch(string e)
                             {
@@ -280,7 +281,7 @@ void* client_processing(void* param)
                                     queue_log << e;
                                 }
                             }
-                        // }
+                        }
                     }
                     if(command == "/usr_register")
                     {
@@ -313,7 +314,7 @@ void* client_processing(void* param)
                     }
                     if(command == "/bdy_info")
                     {
-                        if(user.get_status() != OFFLINE)
+                        if(login)
                         {
                             try
                             {
@@ -331,7 +332,7 @@ void* client_processing(void* param)
                     }
                     if(command == "/conf_bdy_info")
                     {
-                        if(user.get_status() != OFFLINE)
+                        if(login)
                         {
                             string conf_id;
                             string user_id;
@@ -352,7 +353,7 @@ void* client_processing(void* param)
                     }
                     if(command == "/bdy_add")
                     {
-                        if(user.get_status() != OFFLINE)
+                        if(login)
                         {
                             queue_log << "bdy_add";
                             bool bodyadd = false;
@@ -382,7 +383,7 @@ void* client_processing(void* param)
                     }
                     if(command == "/bdy_remove")
                     {
-                        if(user.get_status() != OFFLINE)
+                        if(login)
                         {
                             queue_log << "bdy_remove";
                             bool bodyadd = false;
@@ -410,7 +411,7 @@ void* client_processing(void* param)
                     }
                     if(command == "/bdy_list")
                     {
-                        if(user.get_status() != OFFLINE)
+                        if(login)
                         {
                             try
                             {
@@ -436,7 +437,7 @@ void* client_processing(void* param)
                     }
                     if(command == "/bdy_get_status")
                     {
-                        if(user.get_status() != OFFLINE)
+                        if(login)
                         {
                             string userid;
                             stringstream buffer;
@@ -458,7 +459,7 @@ void* client_processing(void* param)
                     }
                     if(command == "/conf_create")
                     {
-                        if(user.get_status() != OFFLINE)
+                        if(login)
                         {
                             list <cUser> userlist;
                             string user;
@@ -487,7 +488,7 @@ void* client_processing(void* param)
                     }
                     if(command == "/conf_send")
                     {
-                        if(user.get_status() != OFFLINE)
+                        if(login)
                         {
                             string conf_id;
                             string nachricht;
@@ -541,7 +542,7 @@ void* client_processing(void* param)
                     }
                     if(command == "/conf_add")
                     {
-                        if(user.get_status() != OFFLINE)
+                        if(login)
                         {
                             try
                             {
@@ -559,7 +560,7 @@ void* client_processing(void* param)
                     }
                     if(command == "/conf_remove")
                     {
-                        if(user.get_status() != OFFLINE)
+                        if(login)
                         {
                             try
                             {
@@ -577,7 +578,7 @@ void* client_processing(void* param)
                     }
                     if(command == "/conf_list")
                     {
-                        if(user.get_status() != OFFLINE)
+                        if(login)
                         {
                             try
                             {
@@ -602,7 +603,7 @@ void* client_processing(void* param)
                     }
                     if(command == "/conf_get_user")
                     {
-                        if(user.get_status() != OFFLINE)
+                        if(login)
                         {
                             string conf_id;
                             stringstream answer;
@@ -846,8 +847,8 @@ void* server_communication_outgoing(void* param)
                 {
                     // no ip adress found, open a new connection
                     log << "Baue eine neue Verbindung zu server " + ip + " auf...";
-                    newsock.connect(ip, 8376);
-                    newsock.send("/server_send" + conf_id + " " + recipient + " " + sender + " " + nachricht);
+                    newsock.connect(ip, 8377);
+                    newsock.send(conf_id + " " + recipient + " " + sender + " " + nachricht);
                 }
                 catch(string e)
                 {
@@ -895,7 +896,7 @@ void* server_communication_incoming(void* param)
     {
         queue << "Warte auf Server-Anfrage...";
         CSocket client_socket = sock.accept();
-        //client_socket.setBuffer(8192);
+        client_socket.setBuffer(8192);
 
         server incoming_server;
 
@@ -951,7 +952,6 @@ void* messageForClient(void* param)
                 message = "";
             }
             
-
             cUser sender = chat->database->get_User(atoi(id_sender.c_str())); // hole daten für sender aus datenbank
 
             list<Client_processing>::iterator iterator;
