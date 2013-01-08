@@ -29,24 +29,24 @@ cUser::cUser(CSLiveDB db, long id, string name, string pwhash, string email)
     this->email = email;
 }
 /*
-
-cUser::cUser(CSLiveDB db, long id, string name, string pwhash, string email, list<cConference> conf_list, list<cUser> bdy_list)
-{
-    this->db = db;
-    this->db.dbconn.connect();
-    this->id = id;
-    this->name = name;
-    this->pwhash = pwhash;
-    this->email = email;
-    //this->conf_list = conf_list;
-    //this->bdy_list = bdy_list;
-}
-*/
+ 
+ cUser::cUser(CSLiveDB db, long id, string name, string pwhash, string email, list<cConference> conf_list, list<cUser> bdy_list)
+ {
+ this->db = db;
+ this->db.dbconn.connect();
+ this->id = id;
+ this->name = name;
+ this->pwhash = pwhash;
+ this->email = email;
+ //this->conf_list = conf_list;
+ //this->bdy_list = bdy_list;
+ }
+ */
 
 cUser::~cUser()
 {
     //this->db.dbconn.close();
-       
+    
 }
 
 
@@ -83,36 +83,36 @@ string cUser::get_server()
     
     catch (dbError err1)
     {
-            try
+        try
+        {
+            db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
+            db.connect();
+            db.query(query.str(), query.str().length());
+            if(db.errnum() != 0)
             {
-                db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host2, this->db.port2);
-                db.connect();
-                db.query(query.str(), query.str().length());
-                if(db.errnum() != 0)
-                {
-                    dbError err;
-                    err.errnum = db.errnum();
-                    err.errstr = db.error();
-                    throw err;
-                }
+                dbError err;
+                err.errnum = db.errnum();
+                err.errstr = db.error();
+                throw err;
             }
-            catch (dbError err2)
-            {
-                cout<<"Unhandled DB Exception on Both Databases"<<endl;
-                cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
-                cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
-            }
-         
-    }
+        }
+        catch (dbError err2)
+        {
+            cout<<"Unhandled DB Exception on Both Databases"<<endl;
+            cout<<"DB1: "<<err1.errnum<<" - "<<err1.errstr<<endl;
+            cout<<"DB2: "<<err2.errnum<<" - "<<err2.errstr<<endl;                
+        }
         
+    }
     
     
-
+    
+    
     
     map<string, string> result = db.fetch_assoc();
     
     db.close();
-
+    
     return result["server"].c_str();
 }
 list<cConference> cUser::get_confList()
@@ -212,18 +212,18 @@ list<cUser> cUser::get_bdyList()
         }
         
     }
-
+    
     /*if(db.dbconn.errnum() != 0)
-        throw db.dbconn.error();
-    */
+     throw db.dbconn.error();
+     */
     list<cUser> bdy_list;
     /*
-    for(int i = 0; i < this->db.dbconn.affected_rows(); i++)
-    {
-        map<string, string> result = this->db.dbconn.fetch_assoc();
-        bdy_list.push_front(this->db.get_User(atoi((result["bdy_id"]).c_str())));
-    }
-*/
+     for(int i = 0; i < this->db.dbconn.affected_rows(); i++)
+     {
+     map<string, string> result = this->db.dbconn.fetch_assoc();
+     bdy_list.push_front(this->db.get_User(atoi((result["bdy_id"]).c_str())));
+     }
+     */
     for(int i = 0; i < db.affected_rows(); i++)
     {
         map<string, string> result = db.fetch_assoc();
@@ -288,7 +288,7 @@ user_status cUser::get_status()
         }
         
     }
-
+    
     
     map<string, string> result = db.fetch_assoc();
     db.close();
@@ -302,7 +302,7 @@ user_status cUser::get_status()
 
 bool cUser::set_id(long id)
 {
-   
+    
     stringstream query;
     query<<"UPDATE user SET user_id = " << id << " WHERE user_id = " << this->id << ";";
     
@@ -346,7 +346,7 @@ bool cUser::set_id(long id)
         }
         
     }
-
+    
     db.close();
     this->id = id;
     return true;
@@ -440,7 +440,7 @@ bool cUser::set_email(string email)
         cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
         query<<"UPDATE user SET email = '" << email << "' WHERE user_id = " << this->id << ";";
     }
-
+    
     try
     {
         db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
@@ -786,7 +786,7 @@ bool cUser::del_conf(string conf_id)
         cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
         query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< conf_id <<"'* AND user_id = "<< this->id <<";";
     }
-
+    
     try 
     {
         db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
@@ -839,7 +839,7 @@ bool cUser::del_bdy(long bdy_id)
     stringstream query;
     
     query<<"DELETE FROM buddy WHERE user_id = "<< this->id <<"' AND bdy_id = "<< bdy_id <<";";
-
+    
     CDatabase_Connection db;
     try 
     {
@@ -878,7 +878,7 @@ bool cUser::del_bdy(long bdy_id)
         }
         
     }
-
+    
     
     db.close();
     return true;
@@ -1053,11 +1053,11 @@ string cConference::get_id()
 list<cUser> cConference::get_usrList()
 {
     stringstream query;
-    string secure_param;
+    //string secure_param;
     CDatabase_Connection db;
     try
     {
-        db.real_escape_string(secure_param, this->id, this->id.length()); // every specialcharacter is escaped
+        //db.real_escape_string(secure_param, this->id, this->id.length()); // every specialcharacter is escaped
         if(db.errnum() != 0)
         {
             dbError err;
@@ -1065,7 +1065,7 @@ list<cUser> cConference::get_usrList()
             err.errstr = db.error();
             throw err;
         }
-        query<<"SELECT * FROM conf_user WHERE conf_id LIKE '"<<secure_param<<"';";
+        query<<"SELECT * FROM conf_user WHERE conf_id LIKE '"<<this->id<<"';";
     }
     catch(dbError err1)
     {
@@ -1073,7 +1073,7 @@ list<cUser> cConference::get_usrList()
         cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
         query<<"SELECT * FROM conf_user WHERE conf_id LIKE '"<<this->id<<"';";
     }
-
+    
     try
     {
         db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
@@ -1113,11 +1113,11 @@ list<cUser> cConference::get_usrList()
     }
     list<cUser> usr_list;
     /*
-    for(int i = 0; i < this->db.dbconn.affected_rows(); i++)
-    {
-        map<string, string> result = this->db.dbconn.fetch_assoc();
-        usr_list.push_front(this->db.get_User(atoi(result["user_id"].c_str())));
-    }*/
+     for(int i = 0; i < this->db.dbconn.affected_rows(); i++)
+     {
+     map<string, string> result = this->db.dbconn.fetch_assoc();
+     usr_list.push_front(this->db.get_User(atoi(result["user_id"].c_str())));
+     }*/
     
     for(int i = 0; i < db.affected_rows(); i++)
     {
@@ -1128,7 +1128,7 @@ list<cUser> cConference::get_usrList()
     
     return usr_list;
 }
-  
+
 bool cConference::set_id(string id)
 {
     stringstream query;
@@ -1161,7 +1161,7 @@ bool cConference::set_id(string id)
         cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
         query<<"UPDATE conf_user SET conf_id = '" << id << "' WHERE conf_id LIKE '" << this->id << "';";
     }
-
+    
     try 
     {
         db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
@@ -1202,14 +1202,14 @@ bool cConference::set_id(string id)
     db.close();
     this->id = id;
     return true;
-
+    
 }
 /*bool cConference::set_usrList(list<cUser>)
-{
-    
-}*/
-    
-    
+ {
+ 
+ }*/
+
+
 bool cConference::add_usr(long usr_id)
 {
     stringstream query;
@@ -1261,7 +1261,7 @@ bool cConference::add_usr(cUser usr)
 {
     return this->add_usr(usr.get_id());
 }
-    
+
 bool cConference::del_usr(long usr_id)
 {
     stringstream query;
@@ -1285,7 +1285,7 @@ bool cConference::del_usr(long usr_id)
         cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
         query<<"DELETE FROM conf_user WHERE conf_id LIKE '"<< this->id <<"'* AND user_id = "<< usr_id <<";";
     }
-
+    
     try 
     {
         db = CDatabase_Connection(this->db.user, this->db.password, this->db.DB, this->db.Host, this->db.port);
@@ -1327,13 +1327,13 @@ bool cConference::del_usr(long usr_id)
     db.close();
     
     return true;
-
+    
 }
 bool cConference::del_usr(cUser usr)
 {
     return this->del_usr(usr.get_id());
 }
-  
+
 bool cConference::del_conf()
 {
     stringstream query;
@@ -1397,7 +1397,7 @@ bool cConference::del_conf()
     db.close();
     return true;
 }
-    
+
 
 
 
@@ -1411,10 +1411,10 @@ CSLiveDB::CSLiveDB()
 CSLiveDB::CSLiveDB(string user, string password, string DB, string Host, string Host2, int port, int port2)
 {
     /*
-    this->dbconn = CDatabase_Connection(user, password, DB, Host, port);
-    dbconn.connect();
-    if(dbconn.errnum() != 0)
-        throw dbconn.error();*/
+     this->dbconn = CDatabase_Connection(user, password, DB, Host, port);
+     dbconn.connect();
+     if(dbconn.errnum() != 0)
+     throw dbconn.error();*/
     
     this->user = user;
     this->password = password;
@@ -1436,10 +1436,10 @@ CSLiveDB::~CSLiveDB()
 
 
 /*cConference CSLiveDB::create_conf()
-{
-    
-    return cConference(*this);
-}*/
+ {
+ 
+ return cConference(*this);
+ }*/
 cConference CSLiveDB::create_conf(string name)
 {
     stringstream query;
@@ -1483,11 +1483,11 @@ cConference CSLiveDB::create_conf(string name)
         }
         
     }
-    db.close();
-    map<string, string> result = db.fetch_assoc();
     
+    map<string, string> result = db.fetch_assoc();
+    cout<<"Generated UUID: "<<result["id"]<<endl;
     query.str("");
-
+    
     string secure_param;
     try
     {
@@ -1507,7 +1507,7 @@ cConference CSLiveDB::create_conf(string name)
         cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
         query<<"INSERT INTO conference (conf_id, name) VALUES('"<<result["id"]<<"', '"<< name <<"');";
     }
-
+    
     try 
     {
         db = CDatabase_Connection(this->user, this->password, this->DB, this->Host, this->port);
@@ -1545,7 +1545,7 @@ cConference CSLiveDB::create_conf(string name)
         }
         
     }
-
+    
     db.close();
     return this->get_Conf(result["id"]);
     
@@ -1568,33 +1568,33 @@ cConference CSLiveDB::create_conf(list<cUser> usr_list, string name)
     return conf;
 }
 /*
-cConference CSLiveDB::create_conf(string name, list<cUser> usr_list)
-{
-    cConference conf = cConference(*this);
-    conf.set_id(id);
-    
-    for(list<cUser>::iterator i = usr_list.begin(); i != usr_list.end(); i++)
-    {
-        stringstream query;
-        
-        query<<"INSERT INTO conf_user(conf_id, user_id) VALUES('"<<id<<"', "<<i->get_id()<<");";
-        this->dbconn.query(query.str(), query.str().length());
-        
-        
-    }
-    
-    
-    return conf;
-}
-*/
+ cConference CSLiveDB::create_conf(string name, list<cUser> usr_list)
+ {
+ cConference conf = cConference(*this);
+ conf.set_id(id);
+ 
+ for(list<cUser>::iterator i = usr_list.begin(); i != usr_list.end(); i++)
+ {
+ stringstream query;
+ 
+ query<<"INSERT INTO conf_user(conf_id, user_id) VALUES('"<<id<<"', "<<i->get_id()<<");";
+ this->dbconn.query(query.str(), query.str().length());
+ 
+ 
+ }
+ 
+ 
+ return conf;
+ }
+ */
 cConference CSLiveDB::get_Conf(string id)
 {
-    string secure_param;
+    //string secure_param;
     stringstream query;
     CDatabase_Connection db;
     try
     {
-        db.real_escape_string(secure_param, id, id.length()); // every specialcharacter is escaped
+        //db.real_escape_string(secure_param, id, id.length()); // every specialcharacter is escaped
         if(db.errnum() != 0)
         {
             dbError err;
@@ -1602,7 +1602,7 @@ cConference CSLiveDB::get_Conf(string id)
             err.errstr = db.error();
             throw err;
         }
-        query<<"SELECT * FROM conf_user WHERE conf_id LIKE '" << secure_param <<"';";
+        query<<"SELECT * FROM conf_user WHERE conf_id LIKE '" << id <<"';";
     }
     catch(dbError err1)
     {
@@ -1610,7 +1610,7 @@ cConference CSLiveDB::get_Conf(string id)
         cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
         query<<"SELECT * FROM conf_user WHERE conf_id LIKE '" << id <<"';";
     }
-
+    
     try 
     {
         db = CDatabase_Connection(this->user, this->password, this->DB, this->Host, this->port);
@@ -1648,7 +1648,7 @@ cConference CSLiveDB::get_Conf(string id)
         }
         
     }
-
+    
     cConference conf = cConference(*this, id);
     
     db.close();
@@ -1892,7 +1892,7 @@ cUser CSLiveDB::get_User(string name)
         cout<<"--> "<<err1.errnum<<" - "<<err1.errstr<<endl;
         query << "SELECT * FROM user WHERE name LIKE '" << name << "';";
     }
-
+    
     try 
     {
         //db = CDatabase_Connection(this->user, this->password, this->DB, this->Host, this->port);
@@ -1936,7 +1936,7 @@ cUser CSLiveDB::get_User(string name)
         }
         
     }
-
+    
     map<string, string> result = db.fetch_assoc();
     
     cUser usr = cUser(*this, atoi(result["user_id"].c_str()), result["name"] , result["pwhash"], result["email"]);
@@ -1954,9 +1954,9 @@ cUser CSLiveDB::login(string name, string pw, string server)
     //}
     //else
     // {
-        return this->login(this->get_User(name).get_id(), pw, server);        
+    return this->login(this->get_User(name).get_id(), pw, server);        
     //}
-
+    
 }
 
 cUser CSLiveDB::login(long id, string pw, string server)
@@ -1968,18 +1968,18 @@ cUser CSLiveDB::login(long id, string pw, string server)
     //}
     //else
     //{
-        if(usr.pwhash == md5(pw))
-        {
-            usr.set_server(server);
-            usr.set_status(ONLINE);
-        }
-        else
-        {
-            throw string("wrong username or password");
-        }
-        
-        return usr;
-
+    if(usr.pwhash == md5(pw))
+    {
+        usr.set_server(server);
+        usr.set_status(ONLINE);
+    }
+    else
+    {
+        throw string("wrong username or password");
+    }
+    
+    return usr;
+    
     //    }
 }
 
