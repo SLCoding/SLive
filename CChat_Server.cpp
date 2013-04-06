@@ -15,6 +15,7 @@
 #include "CSLiveDB.h"
 #include <time.h>
 
+
 /*******************************************************************************
  * Initialise Server, initialise db-connection, starting several threads
  ******************************************************************************/
@@ -24,6 +25,7 @@ CChat_Server::CChat_Server()
     logger.set_type(2);
     try
     {
+#if 1
         this->thread_server_communication_incoming = new CThread;
         this->thread_server_communication_outgoing = new CThread;
         //this->thread_logout = new CThread;
@@ -36,6 +38,7 @@ CChat_Server::CChat_Server()
         this->start(reinterpret_cast<void*>(this), accept_new_Clients);
         
         this->database = new CSLiveDB("SLive2", "SLive2", "SLive2", "10.12.42.126", "10.12.34.198", 3306, 3306);
+#endif
     }
     catch(string e)
     {
@@ -846,6 +849,7 @@ void* server_communication_outgoing(void* param)
                 try
                 {
                     // no ip adress found, open a new connection
+                    
                     log << "Baue eine neue Verbindung zu server " + ip + " auf...";
                     newsock.connect(ip, 8377);
                     newsock.send(conf_id + " " + recipient + " " + sender + " " + nachricht);
